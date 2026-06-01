@@ -1,5 +1,9 @@
 using UnityEngine;
 
+// ==========================================
+// 인터페이스 관련 코드 모음
+// ==========================================
+
 // 상호작용 인터페이스
 public interface IInteractive
 {
@@ -7,15 +11,24 @@ public interface IInteractive
 }
 
 // 열고 닫기 가능한 인터페이스 [상호작용 인터페이스 상속]
-public interface IOpenable : IInteractive
+public interface IOpenable
 {
     bool IsOpen { get; }
     void Open();
     void Close();
 }
 
+// 획득 가능한 인터페이스 [상호작용 인터페이스 상속]
+public interface ICollectible
+{
+    bool IsAcquired { get; }
+
+    void Collect();
+    void OnAcquire();
+}
+
 // 잠긴 인터페이스 [상호작용 인터페이스 상속] (열쇠 등으로 열어야 함)
-public interface IPickable : IInteractive
+public interface IPickable
 {
     bool IsLocked { get; }
 
@@ -24,18 +37,16 @@ public interface IPickable : IInteractive
 }
 
 // 파괴 가능한 인터페이스 [상호작용 인터페이스 상속]
-public interface IDestructible : IInteractive
+public interface IDestructible
 {
     void DestroyObject();
 }
 
 // 드래그 가능한 인터페이스 [상호작용 인터페이스 상속]
-public interface IDraggable : IInteractive
+public interface IDraggable
 {
     Vector2 OriginPosition { get; }
-    bool IsAcquired { get; }
-
-    void OnAcquire();
+    
     void OnDragStart();
     void OnDrag(Vector2 currentMousePosition);
     void OnDragEnd();
