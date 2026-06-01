@@ -15,7 +15,6 @@ public class UIInventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     private Image _iconImage;
     private Vector3 _originPos;
     private Vector3 _originScale;
-    private RectTransform _dragPlane;
 
     // 빈자리를 지켜줄 투명한 더미 객체
     private GameObject _placeholder;
@@ -65,8 +64,6 @@ public class UIInventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         _placeholder.transform.SetSiblingIndex(transform.GetSiblingIndex());
 
         transform.SetParent(transform.root); // 캔버스 최상단으로 이동
-
-        _dragPlane = transform.parent as RectTransform;
         
         _iconImage.raycastTarget = false;     // 마우스 클릭 방해 해제
     }
@@ -74,15 +71,7 @@ public class UIInventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     // 드래그 도중 마우스 위치로 아이템 이동
     public virtual void OnDrag(PointerEventData eventData)
     {
-        // 매번 캐스팅할 필요 없이, 저장해둔 dragPlane을 바로 사용!
-        if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
-            _dragPlane,                       // 캐싱된 변수 사용
-            eventData.position,
-            eventData.pressEventCamera,
-            out Vector3 worldPoint))
-        {
-            transform.position = eventData.position; // 마우스 위치로 이동
-        }
+        transform.position = eventData.position; // 마우스 위치로 이동
     }
 
     // 드래그 끝났을 때 플레이스홀더 제거 및 아이템 위치 결정
