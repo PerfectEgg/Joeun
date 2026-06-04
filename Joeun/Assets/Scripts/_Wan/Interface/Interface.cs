@@ -13,6 +13,7 @@ public interface IInteractive
 // 열고 닫기 가능한 인터페이스
 public interface IOpenable
 {
+    bool IsLocked { get; }
     bool IsOpen { get; }
     void Open();
     void Close();
