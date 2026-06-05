@@ -16,4 +16,4 @@ MonoBehaviour:
   itemName: "\uC548\uB4DC\uB85C\uC774\uD2B8 \uBD80\uD488 \uCE90\uBE44\uB137 \uC5F4\uC1E0"
   description: "\uC548\uB4DC\uB85C\uC774\uD2B8 \uBD80\uD488 \uCE90\uBE44\uB137\uB97C
     \uC7A0\uAE08 \uD574\uC81C\uD558\uAE30 \uC704\uD55C \uC5F4\uC1E0"
-  itemIcon: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  itemIcon: {fileID: 7482667652216324306, guid: 55fd5dcd6b57df7488c0b927aaab412e, type: 3}

@@ -21,4 +21,12 @@ public class GameEvent
     // 퍼즐을 클리어했을 때 (전달값: 클리어한 퍼즐 ID)
     public static Action<string> EOnPuzzleSolved;
     #endregion
+
+    #region 📹 CCTV 관련 이벤트
+    // 특정 오브젝트로 뷰를 확대했을 때
+    public static Action<int> EOnCCTVZoomInView;
+
+    // 특정 오브젝트 확대 뷰를 벗어났을 때
+    public static Action EOnCCTVZoomOutView;
+    #endregion
 }

@@ -14,6 +14,7 @@ public interface IInteractive
 public interface IOpenable
 {
     bool IsLocked { get; }
+    bool IsRecyclable { get; }
     bool IsOpen { get; }
     void Open();
     void Close();

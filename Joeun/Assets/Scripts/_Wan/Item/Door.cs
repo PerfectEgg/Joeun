@@ -7,13 +7,17 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
 {
     // 초기 잠금 여부에 따라 열린 문인지 잠긴 문인지 결정
     [SerializeField] private bool _isLocked = true; // 초기값은 잠긴 상태
+    [SerializeField] private bool _isRecyclable = true; // 문은 재활용 가능하도록 설정
 
     public bool IsLocked { get; private set; } = true;
+    public bool IsRecyclable { get; private set; } = true;
     public bool IsOpen { get; private set; } = false;
+
 
     private void Start()
     {
         IsLocked = _isLocked;
+        IsRecyclable = _isRecyclable;
     }
 
     #region 외부 장치 연동
@@ -23,6 +27,18 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
         if (!IsLocked) return;
         
         IsLocked = false;
+
+        if (IsRecyclable)
+        {
+            DevLog.Log("문이 다시 잠길 수 있도록 설정되었습니다.");
+        }
+        else
+        {
+            IsOpen = true; // 문이 열린 상태로 고정
+            gameObject.SetActive(false); // 문이 완전히 사라지도록 처리 (재활용 불가능)
+            DevLog.Log("문이 완전히 잠금 해제되었습니다. 다시 잠기지 않습니다.");
+        }
+
         DevLog.Log("문의 잠금이 해제되는 소리가 들린다!");
     }
     #endregion
