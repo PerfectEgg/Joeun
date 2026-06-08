@@ -13,8 +13,15 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
     public bool IsRecyclable { get; private set; } = true;
     public bool IsOpen { get; private set; } = false;
 
+    [Header("Z 레이어 설정")]
+    [SerializeField] private int _setZLayer = 1;
 
-    private void Start()
+    void Awake()
+    {
+        transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - _setZLayer);
+    }
+
+    void Start()
     {
         IsLocked = _isLocked;
         IsRecyclable = _isRecyclable;

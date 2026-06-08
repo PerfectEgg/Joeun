@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ea50909682acb47479335d2f03db9f73, type: 3}
-  m_Name: Screwdriver
+  m_Name: Sawtooth
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemID: Screwdriver
-  itemName: "\uC2A4\uD06C\uB958 \uB4DC\uB77C\uC774\uBC84"
-  description: "\uBB34\uC5B8\uAC00\uB97C \uB3CC\uB9AC\uAE30 \uC704\uD55C \uC2A4\uD06C\uB958
-    \uB4DC\uB77C\uC774\uBC84"
-  itemIcon: {fileID: -9095717837082945937, guid: d909119cbc542c24f9d175a6f686c78c, type: 3}
+  itemID: Sawtooth
+  itemName: "\uD1B1\uB2C8\uBC14\uD034"
+  description: "\uAE30\uACC4 \uC7A5\uCE58\uB97C \uC791\uB3D9 \uC2DC\uD0A4\uAE30 \uC704\uD55C
+    \uD1B1\uB2C8\uBC14\uD034"
+  itemIcon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}

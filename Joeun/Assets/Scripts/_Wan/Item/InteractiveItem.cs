@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 // ==========================================
 // 상호작용 가능한 아이템 추상 클래스
@@ -9,11 +10,15 @@ public abstract class InteractiveItem : MonoBehaviour, IInteractive, ICollectibl
     [Header("아이템 원본 데이터")]
     public ItemData _itemData; // ScriptableObject 연결용
 
+    [Header("특수 획득 이벤트")]
+    [Tooltip("아이템을 주울 때 시행할 상호작용을 연결하세요.")]
+    public UnityEvent OnItemCollected;
+
     public bool IsAcquired { get; protected set; }
 
     protected SpriteRenderer _spriteRenderer;
     protected int _originSortingOrder;
-    protected Vector3 _originScale;
+    protected Vector3 _originScale;    
 
     protected virtual void Awake()
     {
@@ -40,6 +45,7 @@ public abstract class InteractiveItem : MonoBehaviour, IInteractive, ICollectibl
 
         // 1. 이벤트 버스에 "나 획득됐어!" 하고 데이터 방송
         GameEvent.EOnItemCollected?.Invoke(_itemData);
+        OnItemCollected?.Invoke(); // 아이템 자체에 연결된 이벤트도 실행 (예: 효과음, 이펙트 등)
         
         // 2. 월드에서 내 자신을 숨김 (파괴하지 않음)
         gameObject.SetActive(false);
