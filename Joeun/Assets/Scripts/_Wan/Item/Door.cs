@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 // ==========================================
 // 문 클래스
@@ -15,6 +16,9 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
 
     [Header("Z 레이어 설정")]
     [SerializeField] private int _setZLayer = 1;
+
+    [Header("잠금 해제 이벤트")]
+    public UnityEvent OnUnlockSuccess; 
 
     void Awake()
     {
@@ -34,6 +38,8 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
         if (!IsLocked) return;
         
         IsLocked = false;
+
+        OnUnlockSuccess?.Invoke();
 
         if (IsRecyclable)
         {

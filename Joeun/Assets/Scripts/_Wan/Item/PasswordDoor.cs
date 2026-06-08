@@ -18,8 +18,8 @@ public class PasswordDoor : MonoBehaviour, IPickable, IInteractive
     [Header("Z 레이어 설정")]
     [SerializeField] private int _setZLayer = 1;
 
-    [Header("상호작용 성공 이벤트")]
-    public UnityEvent OnInteractive; 
+    [Header("잠금 해제 이벤트")]
+    public UnityEvent OnUnlockSuccess; 
 
     public bool IsLocked { get; private set; } = true;
 
@@ -66,7 +66,7 @@ public class PasswordDoor : MonoBehaviour, IPickable, IInteractive
                 _passwordInputField.interactable = false;
             }
 
-            OnInteractive?.Invoke(); // 애니메이션, 사운드 등 실행
+            OnUnlockSuccess?.Invoke(); // 애니메이션, 사운드 등 실행
             return true; // 성공 리턴 (아이템 소모 또는 로직 종료)
         }
 
