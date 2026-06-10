@@ -1,118 +1,114 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 // ==========================================
 // 스테이지 로드 매니저 클래스
-// 설명: 각 스테이지 별로 로드를 관리하는 매니저 클래스입니다.
+// 설명: 각 스테이지를 Additive 방식으로 로드를 관리하는 매니저 클래스입니다.
 // ==========================================
 public class StageLoadManager : MonoBehaviour
 {
-    // 마우스 위에 올려질 오브젝트
-    private IHoverable _currentHoveredObject;
-    // 드래그 중인 오브젝트
-    private IDraggable _currentDraggedObject;
+    [Header("스테이지 리스트 설정")]
+    [Tooltip("여기에 플레이할 스테이지 씬 이름들을 순서대로 적어주세요.")]
+    [SerializeField] private List<string> _stageList = new List<string>();
 
-    // 메인 카메라 참조 캐싱
-    private Camera _mainCamera;
+    [Header("디버그/상태 (확인용)")]
+    [SerializeField] private int _currentStageIndex = 0; // 현재 플레이 중인 스테이지의 리스트 번호
 
-    private void Awake()
+    private string _currentLoadedStage = "";
+    private bool _isTransitioning = false;
+
+    private void OnEnable()
     {
-        // 시작할 때 한 번만 메인 카메라를 찾아 저장 (성능 최적화)
-        _mainCamera = Camera.main; 
+        // 싱글톤 대신 이벤트 리스너를 등록하여 신호를 대기합니다.
+        GameEvent.EStageClear += HandleStageLoadRequest;
     }
 
-    private void Update()
+    private void OnDisable()
     {
-        // 1. UI 클릭 방지 (CCTV 화면, 인벤토리 등 UI를 클릭 중일 땐 월드 상호작용 무시)
-        if (EventSystem.current.IsPointerOverGameObject()) return;
-
-        HandleHover();
-        HandleInput();
+        GameEvent.EStageClear -= HandleStageLoadRequest;
     }
 
-    private void HandleHover()
+    private void Start()
     {
-        // 1. 마우스의 화면 좌표를 게임 월드 좌표로 변환
-        Vector2 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
-
-        // 2. 마우스 위치에 있는 콜라이더 감지 (isTrigger 체크된 콜라이더도 정상 감지함)
-        Collider2D hit = Physics2D.OverlapPoint(mousePos);
-
-        IHoverable newHoveredObject = null;
-
-        // 마우스 위치에 뭔가 있다면 IHoverable 인터페이스가 있는지 확인
-        if (hit != null)
+        // 리스트가 비어있지 않다면, 0번 인덱스의 스테이지를 로드하며 게임 시작
+        if (_stageList.Count > 0)
         {
-            hit.TryGetComponent(out newHoveredObject);
+            _currentStageIndex = 0;
+            StartCoroutine(LoadStageRoutine(_stageList[_currentStageIndex]));
         }
-
-        // 3. 트리거 Enter / Exit 판별 로직
-        // 프레임마다 이전 객체와 지금 마우스 아래에 있는 객체가 다를 때만 실행
-        if (_currentHoveredObject != newHoveredObject)
+        else
         {
-            // 마우스가 기존 객체에서 빠져나왔다면
-            if (_currentHoveredObject != null)
-            {
-                _currentHoveredObject.OnHoverExit();
-            }
-
-            // 마우스가 새로운 객체 위로 올라갔다면
-            if (newHoveredObject != null)
-            {
-                newHoveredObject.OnHoverEnter();
-            }
-
-            // 현재 상태 업데이트
-            _currentHoveredObject = newHoveredObject;
+            DevLog.LogWarning("스테이지 리스트가 비어있습니다! 인스펙터를 확인하세요.");
         }
     }
 
-    private void HandleInput()
+    // ★ 핵심: 이제 이름을 몰라도 알아서 '다음' 스테이지로 넘어갑니다.
+    public void HandleStageLoadRequest()
     {
-        // 마우스 클릭 (상호작용 및 드래그 시작)
-        if (Input.GetMouseButtonDown(0))
+        if (_isTransitioning) return;
+
+        // 리스트의 마지막 스테이지인지 검사
+        if (_currentStageIndex + 1 < _stageList.Count)
         {
-            Vector2 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            _currentStageIndex++; // 다음 번호로 이동
+            string nextStageName = _stageList[_currentStageIndex];
+            StartCoroutine(TransitionRoutine(nextStageName));
+        }
+        else
+        {
+            // 준비된 스테이지를 모두 클리어했을 때의 엔딩 처리
+            DevLog.Log("모든 스테이지를 클리어했습니다! 엔딩 씬으로 이동하거나 UI를 띄웁니다.");
+            // 예: SceneManager.LoadScene("Scene_Ending");
+        }
+    }
 
-            Collider2D hit = Physics2D.OverlapPoint(mousePos);
+    // 씬 교체 연출 및 연산을 처리하는 핵심 코루틴
+    private IEnumerator TransitionRoutine(string nextStageName)
+    {
+        _isTransitioning = true;
 
-            if (hit != null)
+        // 1. 화면 페이드 아웃 (암전 처리)
+        // UIManager.Instance.FadeOut(1.0f);
+        yield return new WaitForSeconds(1.0f); // 페이드 아웃 애니메이션 시간 대기
+
+        // 2. 기존 스테이지 씬 언로드 (메모리 해제)
+        if (!string.IsNullOrEmpty(_currentLoadedStage))
+        {
+            AsyncOperation unloadOp = SceneManager.UnloadSceneAsync(_currentLoadedStage);
+            while (!unloadOp.isDone)
             {
-                bool isCollectedOrDestroyed = false;
-
-                // 1. 일반 상호작용 먼저 실행 (문 열기, 아이템 획득 등)
-                if (hit.TryGetComponent(out IInteractive interactive))
-                {
-                    interactive.Interact();
-                    
-                    // 상호작용의 결과로 오브젝트가 비활성화(획득) 되었는지 체크
-                    if (!hit.gameObject.activeSelf)
-                    {
-                        isCollectedOrDestroyed = true;
-                    }
-                }
-
-                // 2. 오브젝트가 획득되어 사라지지 않았을 때만 드래그 시작
-                if (!isCollectedOrDestroyed && hit.TryGetComponent(out IDraggable draggable))
-                {
-                    _currentDraggedObject = draggable;
-                    _currentDraggedObject.OnDragStart();
-                }
+                yield return null; // 언로드가 끝날 때까지 대기
             }
+            DevLog.Log($"[Core] {_currentLoadedStage} 언로드 완료 및 메모리 회수");
         }
-        // 마우스 누르고 있는 중 (드래그)
-        else if (Input.GetMouseButton(0) && _currentDraggedObject != null)
+
+        // 3. 새 스테이지 씬 로드
+        yield return StartCoroutine(LoadStageRoutine(nextStageName));
+
+        // 4. 화면 페이드 인 (새 화면 보여주기)
+        // UIManager.Instance.FadeIn(1.0f);
+
+        _isTransitioning = false;
+    }
+
+    // 순수하게 씬을 부르고 활성화하는 서브 코루틴
+    private IEnumerator LoadStageRoutine(string stageName)
+    {
+        // ★ 핵심: LoadSceneMode.Additive로 설정하여 기존 Core 씬을 유지한 채 겹쳐서 켭니다.
+        AsyncOperation loadOp = SceneManager.LoadSceneAsync(stageName, LoadSceneMode.Additive);
+        
+        while (!loadOp.isDone)
         {
-            _currentDraggedObject.OnDrag(_mainCamera.ScreenToWorldPoint(Input.mousePosition));
+            yield return null; // 로딩이 끝날 때까지 대기
         }
-        // 마우스 뗌 (드래그 종료)
-        else if (Input.GetMouseButtonUp(0))
-        {
-            if (_currentDraggedObject != null)
-            {
-                _currentDraggedObject.OnDragEnd();
-                _currentDraggedObject = null;
-            }
-        }
+
+        _currentLoadedStage = stageName;
+        DevLog.Log($"[Core] {stageName} Additive 로드 완료");
+
+        // 로드된 스테이지 씬을 'Active Scene'으로 설정 (새로 생성되는 오브젝트들이 이 씬으로 들어가도록 설정)
+        Scene newlyLoadedScene = SceneManager.GetSceneByName(stageName);
+        SceneManager.SetActiveScene(newlyLoadedScene);
     }
 }

@@ -29,4 +29,8 @@ public class GameEvent
     // 특정 오브젝트 확대 뷰를 벗어났을 때
     public static Action EOnCCTVZoomOutView;
     #endregion
+
+    #region 🎬 스테이지 및 씬 전환 관련 이벤트
+    public static Action EStageClear;   // 스테이지 클리어 시 (전달값 없음)
+    #endregion
 }

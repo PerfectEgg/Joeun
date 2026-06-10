@@ -1665,11 +1665,10 @@ Transform:
   m_GameObject: {fileID: 216832775}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.5, z: 0}
-  m_LocalScale: {x: 6, y: 8.5, z: 1}
+  m_LocalPosition: {x: 0.5, y: -0.5, z: 0}
+  m_LocalScale: {x: 5, y: 8.5, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 801931717}
+  m_Children: []
   m_Father: {fileID: 455186717}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &216832777
@@ -3876,6 +3875,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 216832776}
+  - {fileID: 801931717}
   m_Father: {fileID: 431636994}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -5562,6 +5562,7 @@ GameObject:
   - component: {fileID: 722421582}
   - component: {fileID: 722421581}
   - component: {fileID: 722421580}
+  - component: {fileID: 722421583}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -5652,6 +5653,18 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 2
   m_TargetDisplay: 0
+--- !u!114 &722421583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 722421578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbad04d41f9e7054c976e9606186caab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CanvasCameraAssigner
 --- !u!1 &738319839
 GameObject:
   m_ObjectHideFlags: 0
@@ -6307,14 +6320,14 @@ RectTransform:
   m_GameObject: {fileID: 801931716}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.14, z: 1}
+  m_LocalScale: {x: 1.2, y: 1.19, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 216832776}
+  m_Father: {fileID: 455186717}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 0.75, y: 0}
+  m_AnchoredPosition: {x: 11, y: -0.5}
   m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &801931718
@@ -8838,6 +8851,7 @@ GameObject:
   - component: {fileID: 1241704630}
   - component: {fileID: 1241704629}
   - component: {fileID: 1241704628}
+  - component: {fileID: 1241704631}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -8929,6 +8943,18 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 2
   m_TargetDisplay: 0
+--- !u!114 &1241704631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1241704626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbad04d41f9e7054c976e9606186caab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CanvasCameraAssigner
 --- !u!1 &1245870922
 GameObject:
   m_ObjectHideFlags: 0
