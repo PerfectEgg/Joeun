@@ -60,7 +60,7 @@ public class PuzzleManager : MonoBehaviour
     {
         if (parts == null || parts.Count < 2)
         {
-            Debug.LogWarning("[PuzzleManager] 파츠가 2개 미만입니다. 검증 불가.");
+            DevLog.LogWarning("[PuzzleManager] 파츠가 2개 미만입니다. 검증 불가.");
             return;
         }
 
@@ -101,6 +101,17 @@ public class PuzzleManager : MonoBehaviour
             isSolved = true;
             onPuzzleSolved?.Invoke();
         }
+    }
+
+    // ── 회전 (UI 버튼 OnClick에 연결) ───────────────────────────────
+
+    /// <summary>현재 마우스가 올라간(Active) 파츠를 90도 회전합니다.</summary>
+    public void RotateActivePart()
+    {
+        if (PuzzlePart.Active != null)
+            PuzzlePart.Active.Rotate90();
+        else
+            DevLog.Log("[PuzzleManager] 회전할 파츠가 선택되지 않았습니다. (파츠 위에 마우스를 올리세요)");
     }
 
     // ── 헬퍼 ────────────────────────────────────────────────────────
