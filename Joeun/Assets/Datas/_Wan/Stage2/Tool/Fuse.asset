@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ea50909682acb47479335d2f03db9f73, type: 3}
-  m_Name: Discharged Battery
+  m_Name: Fuse
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemID: Discharged_Battery
-  itemName: "\uBC29\uC804\uB41C \uBC30\uD130\uB9AC"
-  description: "\uC5D0\uB108\uC9C0\uAC00 \uBD80\uC871\uD558\uC5EC \uBC29\uC804\uB41C
-    \uBC30\uD130\uB9AC"
-  itemIcon: {fileID: 7482667652216324306, guid: 55fd5dcd6b57df7488c0b927aaab412e, type: 3}
+  itemID: Fuse
+  itemName: "\uD4E8\uC988"
+  description: "\uACFC\uBD80\uD558\uB97C \uBC29\uC9C0\uD558\uAE30 \uC704\uD55C \uC548\uC804
+    \uC7A5\uCE58 "
+  itemIcon: {fileID: 7482667652216324306, guid: 0d7243144ec65c84c9a4c18f31b958e6, type: 3}

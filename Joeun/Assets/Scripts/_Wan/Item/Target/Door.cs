@@ -20,6 +20,9 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
     [Header("잠금 해제 이벤트")]
     public UnityEvent OnUnlockSuccess; 
 
+    [Header("상호작용 이벤트")]
+    public UnityEvent OnInteractive; // 문이 열릴 때 실행할 이벤트 (예: 애니메이션, 사운드 등)
+
     void Awake()
     {
         transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - _setZLayer);
@@ -82,7 +85,7 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
 
         /// TODO.현재 열고 닫는 이미지가 없기 때문에 임시로 비활성화 차후 스프라이트로 교체 예정
         gameObject.SetActive(false);
-        ///
+        OnInteractive?.Invoke(); // 문이 열릴 때 실행할 이벤트 호출
 
         DevLog.Log("끼이익- 문이 열립니다.");
         

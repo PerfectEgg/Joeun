@@ -1689,6 +1689,9 @@ MonoBehaviour:
   OnUnlockSuccess:
     m_PersistentCalls:
       m_Calls: []
+  OnInteractive:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!61 &216832778
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6342,7 +6345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6323d6d8f632060409779eb8c89f7d15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeyReader
-  _requiredKeyID: Card_Key
+  _requiredKeyID: Card_Key3
   _targetDoor: {fileID: 216832777}
   _setZLayer: 1
 --- !u!222 &801931719
@@ -9936,6 +9939,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  OnInteractive:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!61 &1451746676
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -11568,6 +11574,9 @@ MonoBehaviour:
   _isRecyclable: 1
   _setZLayer: 1
   OnUnlockSuccess:
+    m_PersistentCalls:
+      m_Calls: []
+  OnInteractive:
     m_PersistentCalls:
       m_Calls: []
 --- !u!222 &1601017195
@@ -14223,6 +14232,9 @@ MonoBehaviour:
   _isRecyclable: 1
   _setZLayer: 2
   OnUnlockSuccess:
+    m_PersistentCalls:
+      m_Calls: []
+  OnInteractive:
     m_PersistentCalls:
       m_Calls: []
 --- !u!212 &2118186942
