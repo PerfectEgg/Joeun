@@ -4,14 +4,15 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
-/// 퍼즐 전체를 관리합니다.
+/// 연결 퍼즐 전체를 관리합니다.
 ///  - 연결 이벤트를 수신하고 A→B→C→D 순서 체인 검증
 ///  - 완료 여부를 Log 출력 & UnityEvent로 외부에 노출
+/// 회전은 PuzzleModeManager(Q 토글) + 클릭으로 처리하므로 여기엔 회전 코드가 없습니다.
 /// </summary>
-public class PuzzleManager : MonoBehaviour
+public class ConnectPuzzleManager : MonoBehaviour
 {
     // ── 싱글톤 ──────────────────────────────────────────────────────
-    public static PuzzleManager Instance { get; private set; }
+    public static ConnectPuzzleManager Instance { get; private set; }
 
     void Awake()
     {
@@ -33,19 +34,19 @@ public class PuzzleManager : MonoBehaviour
 
     // ── 외부 호출 API ───────────────────────────────────────────────
 
-    /// <summary>파츠가 드래그되어 연결이 끊길 때 PuzzlePart가 호출</summary>
+    /// <summary>파츠가 드래그/회전되어 연결이 끊길 때 PuzzlePart가 호출</summary>
     public void NotifyPartMoved()
     {
         if (!isSolved) return;
         isSolved = false;
-        DevLog.Log("[PuzzleManager] 파츠 이동 감지 — 퍼즐 초기화");
+        Debug.Log("[ConnectPuzzle] 파츠 이동 감지 — 퍼즐 초기화");
         onPuzzleReset?.Invoke();
     }
 
     /// <summary>연결이 발생할 때 PuzzlePart가 호출</summary>
     public void NotifyConnected(PuzzlePart movedPart, ConnectorPoint myPt, ConnectorPoint target)
     {
-        DevLog.Log($"[PuzzleManager] 연결: {movedPart.partId}({myPt.side}) ↔ " +
+        Debug.Log($"[ConnectPuzzle] 연결: {movedPart.partId}({myPt.side}) ↔ " +
                   $"{target.ownerPart.partId}({target.side})");
         ValidateChain();
     }
@@ -60,7 +61,7 @@ public class PuzzleManager : MonoBehaviour
     {
         if (parts == null || parts.Count < 2)
         {
-            DevLog.LogWarning("[PuzzleManager] 파츠가 2개 미만입니다. 검증 불가.");
+            Debug.LogWarning("[ConnectPuzzle] 파츠가 2개 미만입니다. 검증 불가.");
             return;
         }
 
@@ -69,7 +70,7 @@ public class PuzzleManager : MonoBehaviour
 
         bool chainOk = true;
         var  report  = new System.Text.StringBuilder();
-        report.AppendLine("[PuzzleManager] ── 체인 검증 결과 ──");
+        report.AppendLine("[ConnectPuzzle] ── 체인 검증 결과 ──");
 
         for (int i = 0; i < ordered.Count - 1; i++)
         {
@@ -101,17 +102,6 @@ public class PuzzleManager : MonoBehaviour
             isSolved = true;
             onPuzzleSolved?.Invoke();
         }
-    }
-
-    // ── 회전 (UI 버튼 OnClick에 연결) ───────────────────────────────
-
-    /// <summary>현재 마우스가 올라간(Active) 파츠를 90도 회전합니다.</summary>
-    public void RotateActivePart()
-    {
-        if (PuzzlePart.Active != null)
-            PuzzlePart.Active.Rotate90();
-        else
-            DevLog.Log("[PuzzleManager] 회전할 파츠가 선택되지 않았습니다. (파츠 위에 마우스를 올리세요)");
     }
 
     // ── 헬퍼 ────────────────────────────────────────────────────────

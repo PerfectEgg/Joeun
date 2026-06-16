@@ -4,13 +4,13 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// 드래그 + 90도 회전이 가능한 퍼즐 파츠입니다.
-/// 마우스를 올린 파츠가 'Active'가 되며, Q키 또는 UI버튼으로 회전합니다.
+/// 드래그 + 회전이 가능한 연결 퍼즐 파츠입니다.
+/// 회전은 PuzzleModeManager가 Rotate 모드일 때 '클릭'으로 발동합니다.
+/// (드래그는 모드와 무관하게 항상 가능 — 클릭과 드래그는 자동 구분됨)
 /// </summary>
 [RequireComponent(typeof(RectTransform))]
 public class PuzzlePart : MonoBehaviour,
-    IBeginDragHandler, IDragHandler, IEndDragHandler,
-    IPointerEnterHandler, IPointerExitHandler
+    IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     [Header("파츠 정보")]
     public string partId;          // "A", "B", "C", "D"
@@ -18,13 +18,9 @@ public class PuzzlePart : MonoBehaviour,
 
     [Header("스냅 / 회전")]
     public float snapAnimDuration   = 0.12f;
-    public float rotateAnimDuration = 0.12f;   // 회전 애니메이션 시간
-    public KeyCode rotateKey        = KeyCode.Q;
+    public float rotateAnimDuration = 0.12f;
 
     [HideInInspector] public List<ConnectorPoint> connectors = new();
-
-    /// <summary>현재 마우스가 올라가 있거나 드래그 중인 파츠 (Q 회전 대상)</summary>
-    public static PuzzlePart Active { get; private set; }
 
     // ── 내부 상태 ──────────────────────────────────────────────────
     RectTransform   rt;
@@ -42,27 +38,21 @@ public class PuzzlePart : MonoBehaviour,
         connectors.AddRange(GetComponentsInChildren<ConnectorPoint>());
     }
 
-    void Update()
+    // ── 클릭 → 회전 (Rotate 모드일 때만) ────────────────────────────
+    public void OnPointerClick(PointerEventData ev)
     {
-        // Q키로 현재 Active 파츠 회전
-        if (Active == this && Input.GetKeyDown(rotateKey))
+        // 드래그 동작 후에는 클릭으로 간주되지 않으므로 안전
+        if (PuzzleModeManager.Instance != null && PuzzleModeManager.Instance.IsRotate)
             Rotate90();
     }
 
-    // ── 호버 (Active 지정) ──────────────────────────────────────────
-    public void OnPointerEnter(PointerEventData ev) { Active = this; }
-    public void OnPointerExit(PointerEventData ev)  { if (Active == this) Active = null; }
-
     // ── 회전 ────────────────────────────────────────────────────────
-
-    /// <summary>이 파츠를 90도 회전합니다. (Q키, UI버튼 등에서 호출)</summary>
     public void Rotate90()
     {
-        // 회전하면 기존 연결은 해제 (다시 맞춰 끼우는 가믹)
-        foreach (var cp in connectors) cp.Unlink();
-        PuzzleManager.Instance?.NotifyPartMoved();
+        foreach (var cp in connectors) cp.Unlink();   // 회전 시 기존 연결 해제
+        ConnectPuzzleManager.Instance?.NotifyPartMoved();
 
-        float targetZ = rt.eulerAngles.z - 90f;   // 시계방향 90도
+        float targetZ = rt.eulerAngles.z - 90f;        // 시계방향 90도
         if (rotateCoroutine != null) StopCoroutine(rotateCoroutine);
         rotateCoroutine = StartCoroutine(SmoothRotate(targetZ));
     }
@@ -70,33 +60,29 @@ public class PuzzlePart : MonoBehaviour,
     IEnumerator SmoothRotate(float targetZ)
     {
         float startZ = rt.eulerAngles.z;
-        // 최단 경로로 보간
         float delta  = Mathf.DeltaAngle(startZ, targetZ);
         float t = 0f;
         while (t < rotateAnimDuration)
         {
             t += Time.deltaTime;
-            float z = startZ + delta * (t / rotateAnimDuration);
-            rt.localEulerAngles = new Vector3(0f, 0f, z);
+            rt.localEulerAngles = new Vector3(0f, 0f, startZ + delta * (t / rotateAnimDuration));
             yield return null;
         }
         rt.localEulerAngles = new Vector3(0f, 0f, Mathf.Round(targetZ / 90f) * 90f);
     }
 
     // ── 드래그 ──────────────────────────────────────────────────────
-
     public void OnBeginDrag(PointerEventData ev)
     {
-        Active = this;
         foreach (var cp in connectors) cp.Unlink();
-        PuzzleManager.Instance?.NotifyPartMoved();
+        ConnectPuzzleManager.Instance?.NotifyPartMoved();
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             rt.parent as RectTransform, ev.position, ev.pressEventCamera, out Vector2 localPos);
 
         dragOffset = rt.anchoredPosition - localPos;
         isDragging = true;
-        transform.SetAsLastSibling();
+        // transform.SetAsLastSibling();
     }
 
     public void OnDrag(PointerEventData ev)
@@ -116,7 +102,6 @@ public class PuzzlePart : MonoBehaviour,
     }
 
     // ── 스냅 처리 ───────────────────────────────────────────────────
-
     void UpdateSnapPreview()
     {
         var (myPt, target, _) = FindBestSnap();
@@ -152,7 +137,7 @@ public class PuzzlePart : MonoBehaviour,
         Vector2 newAnchored = rt.anchoredPosition + delta / rootCanvas.scaleFactor;
 
         myPt.LinkTo(target);
-        PuzzleManager.Instance?.NotifyConnected(this, myPt, target);
+        ConnectPuzzleManager.Instance?.NotifyConnected(this, myPt, target);
 
         if (snapCoroutine != null) StopCoroutine(snapCoroutine);
         snapCoroutine = StartCoroutine(SmoothMove(newAnchored));
@@ -169,7 +154,7 @@ public class PuzzlePart : MonoBehaviour,
             if (myPt.IsLinked) continue;
             foreach (var other in allPoints)
             {
-                if (!myPt.CanConnectTo(other)) continue;   // 마주 봄 + 미연결 검사 포함
+                if (!myPt.CanConnectTo(other)) continue;
                 float dist = Vector2.Distance(myPt.WorldPosition(), other.WorldPosition());
                 if (dist < myPt.snapRadius && dist < bestDist)
                 {
