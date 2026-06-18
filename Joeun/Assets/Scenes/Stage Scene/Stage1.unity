@@ -344,7 +344,6 @@ MonoBehaviour:
   OnInteractive:
     m_PersistentCalls:
       m_Calls: []
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!61 &216832778
 BoxCollider2D:
@@ -885,10 +884,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6323d6d8f632060409779eb8c89f7d15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeyReader
-  _requiredKeyID: Card_Key3
+  _requiredKeyID: Card_Key1
   _targetDoor: {fileID: 216832777}
   _setZLayer: 1
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!222 &801931719
 CanvasRenderer:
@@ -1102,7 +1100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e51d85657135fb44cabac5cb53a437af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeyItem
-  _itemData: {fileID: 11400000, guid: 7ffdd24245a7def479c7584f3d9f14f8, type: 2}
+  _itemData: {fileID: 11400000, guid: bf0de8852a6079045aac0920715c8ab3, type: 2}
   OnItemCollected:
     m_PersistentCalls:
       m_Calls: []

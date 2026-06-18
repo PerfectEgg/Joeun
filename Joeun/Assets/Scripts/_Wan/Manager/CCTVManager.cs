@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 // ==========================================
 // CCTV 매니저 클래스
@@ -14,13 +15,8 @@ public class CCTVManager : MonoBehaviour
     public GameObject[] zoomViews;
 
     [Header("UI 버튼 연결")]
-    [Tooltip("왼쪽 이동 화살표 버튼 오브젝트를 연결하세요.")]
     [SerializeField] private GameObject leftArrowButton;
-
-    [Tooltip("오른쪽 이동 화살표 버튼 오브젝트를 연결하세요.")]
     [SerializeField] private GameObject rightArrowButton;
-
-    [Tooltip("뒤로가기 화살표 버튼 오브젝트를 연결하세요.")]
     [SerializeField] private GameObject backArrowButton;
 
     // 현재 보고 있는 화면의 인덱스
@@ -29,6 +25,9 @@ public class CCTVManager : MonoBehaviour
     private int currentZoomIndex = 0;
     // 확대 뷰에 진입했는지 여부 (뒤로가기 버튼 활성화 조건으로 사용)
     private bool isZoomed = false;
+
+    // ★ 핵심: 플레이어의 확대 뷰 진입 기록을 담아둘 스택 (LIFO 구조)
+    private Stack<int> _zoomHistory = new Stack<int>();
 
     private void OnEnable()
     {
@@ -51,6 +50,10 @@ public class CCTVManager : MonoBehaviour
         // 확대 뷰로 들어가기 직전, 현재 방 번호를 안전하게 저장
         isZoomed = true;
         currentZoomIndex = targetZoomIndex;
+
+        // ★ 새로운 뷰에 들어갈 때마다 스택에 현재 인덱스를 쌓아둡니다.
+        _zoomHistory.Push(targetZoomIndex);
+
         UpdateViews();
         DevLog.Log($"[CCTV] 확대 뷰 진입: {zoomViews[currentZoomIndex].name}");
     }
@@ -58,7 +61,26 @@ public class CCTVManager : MonoBehaviour
     // 2. 확대 뷰 이탈(뒤로가기) 이벤트 처리
     private void HandleZoomOut()
     {
-        isZoomed = false; // 상태만 끄면 알아서 원래 방으로 돌아갑니다.
+        // 방어 코드: 스택에 기록이 남아있을 때만 빼냄
+        if (_zoomHistory.Count > 0)
+        {
+            _zoomHistory.Pop(); // 현재 보고 있는 맨 위 기록(화면)을 버림
+        }
+
+        // 뺀 후에도 스택에 기록이 남아있다면? (더블 줌 상태에서 한 번 뒤로 간 경우)
+        if (_zoomHistory.Count > 0)
+        {
+            currentZoomIndex = _zoomHistory.Peek(); // 이전 뎁스의 화면 인덱스를 슬쩍 확인해서 적용
+            isZoomed = true;
+            DevLog.Log($"[CCTV] 이전 확대 뷰로 복귀: {zoomViews[currentZoomIndex].name}");
+        }
+        else
+        {
+            // 스택이 완전히 비었다면? 일반 방으로 복귀
+            isZoomed = false;
+            DevLog.Log($"[CCTV] 일반 방으로 복귀: {roomViews[currentRoomIndex].name}");
+        }
+        
         UpdateViews();
         DevLog.Log($"[CCTV] 일반 방으로 복귀: {roomViews[currentRoomIndex].name}");
     }
@@ -67,6 +89,8 @@ public class CCTVManager : MonoBehaviour
     private void Start()
     {
         isZoomed = false;
+
+        _zoomHistory.Clear();
 
         // 시작할 때 첫 번째 화면만 켜고 나머지는 모두 끕니다.
         UpdateViews();

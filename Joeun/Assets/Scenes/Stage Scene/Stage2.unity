@@ -5983,7 +5983,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6323d6d8f632060409779eb8c89f7d15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeyReader
-  _requiredKeyID: Card_Key
+  _requiredKeyID: Card_Key2
   _targetDoor: {fileID: 216832777}
   _setZLayer: 1
   _conditionCount: 0
