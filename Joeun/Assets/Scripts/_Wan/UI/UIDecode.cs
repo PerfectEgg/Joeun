@@ -1,17 +1,18 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using Unity.VisualScripting;
 
 // ==========================================
-// 인벤토리 UI 아이템 클래스
-// 설명: 인벤토리에 표시되는 각 아이템의 UI를 관리합니다.
+// 디코드 UI 클래스
+// 설명: 인벤토리에 표시되는 각 디코드의 UI를 관리합니다.
 // ==========================================
 public class UIDecode : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public Vector2 OriginPosition { get; private set; }
     private Transform _originalParent;
 
-    public ItemData _myItemData;
+    public DecodeData _myDecodeData;
     private Image _iconImage;
     private Vector3 _originPos;
     private Vector3 _originScale;
@@ -26,43 +27,37 @@ public class UIDecode : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         _originScale = transform.localScale;
     }
 
-    public void Setup(ItemData data)
+    public void Setup(DecodeData data)
     {
         // ★ 방어 코드: Awake가 안 돌았을 경우를 대비해 직접 컴포넌트를 가져옴
         if (_iconImage == null)
         {
             _iconImage = GetComponent<Image>();
         }
+        if (data == null) return;
 
-        _myItemData = data;
-        _iconImage.sprite = data.itemIcon; // 에디터에서 넣은 이미지로 변경
+        _myDecodeData = data;
+        _iconImage.sprite = data.decodeIcon; // 에디터에서 넣은 이미지로 변경
 
         // 아이템이 들어오면 이미지와 상호작용을 켭니다.
         _iconImage.enabled = true;
         _iconImage.raycastTarget = true;
     }
 
-    // 아이템을 지울 때(사용하거나 정렬할 때) 호출
     public void Clear()
     {
-        // ★ 방어 코드: Awake가 안 돌았을 경우를 대비해 직접 컴포넌트를 가져옴
-        if (_iconImage == null)
-        {
-            _iconImage = GetComponent<Image>();
-        }
+        if (_iconImage == null) _iconImage = GetComponent<Image>();
 
-        _myItemData = null;
+        _myDecodeData = null;
         _iconImage.sprite = null;
-        
-        // 데이터가 없으면 투명하게 만들고 마우스 클릭을 무시합니다.
-        _iconImage.enabled = false;
+        _iconImage.color = new Color(1, 1, 1, 0); // 빈칸 투명 처리
         _iconImage.raycastTarget = false;
     }
     
     #region IInteractive 구현
     public virtual void Interact()
     {
-        if (_myItemData == null) return;
+        if (_myDecodeData == null) return;
         // 기본 상호작용 로직 (예: 아이템 설명 텍스트 출력 등)
     }
     #endregion
@@ -71,7 +66,7 @@ public class UIDecode : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     // 드래그 시작 시 빈칸인 플레이스홀더 생성 및 원래 위치 저장
     public virtual void OnBeginDrag(PointerEventData eventData)
     {
-        if (_myItemData == null) return; // 빈 칸이면 드래그 방지
+        if (_myDecodeData == null) return; // 빈 칸이면 드래그 방지
 
         // 원래 위치 저장
         OriginPosition = transform.position;
@@ -101,7 +96,7 @@ public class UIDecode : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     // 드래그 도중 마우스 위치로 아이템 이동
     public virtual void OnDrag(PointerEventData eventData)
     {
-        if (_myItemData == null) return; // 빈 칸이면 드래그 방지
+        if (_myDecodeData == null) return; // 빈 칸이면 드래그 방지
 
         transform.position = eventData.position; // 마우스 위치로 이동
     }
@@ -109,10 +104,10 @@ public class UIDecode : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     // 드래그 끝났을 때 플레이스홀더 제거 및 아이템 위치 결정
     public virtual void OnEndDrag(PointerEventData eventData)
     {
-        if (_myItemData == null) return; // 빈 칸이면 드래그 방지
+        if (_myDecodeData == null) return; // 빈 칸이면 드래그 방지
         _iconImage.raycastTarget = true;
 
-        // 고정된 8칸 중 하나이므로 무조건 제자리(플레이스홀더 위치)로 돌아갑니다.
+        // 고정된 12칸 중 하나이므로 무조건 제자리(플레이스홀더 위치)로 돌아갑니다.
         transform.position = _originPos;
         transform.SetParent(_originalParent);
         transform.SetSiblingIndex(_placeholder.transform.GetSiblingIndex());
@@ -121,14 +116,11 @@ public class UIDecode : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Collider2D hit = Physics2D.OverlapPoint(worldPoint);
         
-        if (hit != null && hit.TryGetComponent(out IPickable target))
+        if (hit != null && hit.TryGetComponent(out IDecodable target))
         {
-            if (target.TryUnlock(_myItemData.itemID))
+            if (target.TryDecoding(_myDecodeData.decodeLetter))
             {
                 DevLog.Log("아이템 사용 성공!");
-
-                GameEvent.EOnItemUsed?.Invoke(_myItemData); // 아이템 사용 이벤트 방송
-                return;
             }
         }
     }
@@ -137,13 +129,13 @@ public class UIDecode : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     #region IPointerHandler 구현
     public virtual void OnPointerEnter(PointerEventData eventData)
     {
-        if (_myItemData == null) return; // 빈 칸이면 드래그 방지
-        transform.localScale = transform.localScale * 1.2f;
+        if (_myDecodeData == null) return; // 빈 칸이면 드래그 방지
+        transform.localScale = transform.localScale * 1.1f;
     }
 
     public virtual void OnPointerExit(PointerEventData eventData)
     {
-        if (_myItemData == null) return; // 빈 칸이면 드래그 방지
+        if (_myDecodeData == null) return; // 빈 칸이면 드래그 방지
         transform.localScale = _originScale;
     }
     #endregion

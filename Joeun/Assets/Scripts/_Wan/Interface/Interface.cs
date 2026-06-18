@@ -29,6 +29,13 @@ public interface ICollectible
     void OnAcquire();
 }
 
+// 해석 가능한 인터페이스
+public interface IDecodable
+{
+    // 특정 문자를 넘겨 해석 시도
+    bool TryDecoding(char keyWord);
+}
+
 // 잠긴 인터페이스 (열쇠 등으로 열어야 함)
 public interface IPickable
 {

@@ -20,6 +20,9 @@ public class GameEvent
     
     // 퍼즐을 클리어했을 때 (전달값: 클리어한 퍼즐 ID)
     public static Action<string> EOnPuzzleSolved;
+
+    // 디코드 해금 했을 때
+    public static Action EOnDecodeOpened;
     #endregion
 
     #region 📹 CCTV 관련 이벤트

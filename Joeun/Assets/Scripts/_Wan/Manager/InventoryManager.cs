@@ -2,7 +2,6 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-
 // ==========================================
 // 인벤토리 매니저 클래스
 // 설명: 플레이어의 인벤토리를 관리합니다.
