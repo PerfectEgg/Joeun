@@ -14,7 +14,7 @@ public abstract class InteractiveItem : MonoBehaviour, IInteractive, ICollectibl
     [Tooltip("아이템을 주울 때 시행할 상호작용을 연결하세요.")]
     public UnityEvent OnItemCollected;
 
-    public bool IsAcquired { get; protected set; }
+    public bool IsAcquired { get; set; }
 
     protected SpriteRenderer _spriteRenderer;
     protected int _originSortingOrder;
@@ -33,7 +33,8 @@ public abstract class InteractiveItem : MonoBehaviour, IInteractive, ICollectibl
     #region IInteractive 구현
     public virtual void Interact()
     {
-        // 기본 상호작용 로직 (예: 아이템 설명 텍스트 출력 등)
+        // 아이템 클릭 시 수집
+        Collect();
     }
     #endregion
 

@@ -4,16 +4,18 @@ using UnityEngine.Events;
 // ==========================================
 // 문 클래스
 // ==========================================
-public class Door : MonoBehaviour, IInteractive, IOpenable
+public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
 {
     // 초기 잠금 여부에 따라 열린 문인지 잠긴 문인지 결정
     [SerializeField] private bool _isLocked = true; // 초기값은 잠긴 상태
     [SerializeField] private bool _isRecyclable = true; // 문은 재활용 가능하도록 설정
+    [SerializeField] private bool _isExitDoor = false; // 탈출구 설정
 
-    public bool IsLocked { get; private set; } = true;
+    public bool IsLocked { get; set; } = true;
     public bool IsRecyclable { get; private set; } = true;
-    public bool IsOpen { get; private set; } = false;
-
+    public bool IsExitDoor { get; private set; } = false;
+    public bool IsOpen { get; set; } = false;
+    
     [Header("Z 레이어 설정")]
     [SerializeField] private int _setZLayer = 1;
 
@@ -22,6 +24,12 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
 
     [Header("상호작용 이벤트")]
     public UnityEvent OnInteractive; // 문이 열릴 때 실행할 이벤트 (예: 애니메이션, 사운드 등)
+
+    [Header("조건 설정")]
+    [Tooltip("잠금 해제 조건이 필요한지 여부 (예: 선행 오브젝트 처리)")]
+    [SerializeField] private int _conditionCount = 0;
+
+    public bool IsConditionRequired { get; set; } = false; // 실제 조건이 충족되었는지 내부적으로 추적하는 변수
 
     void Awake()
     {
@@ -32,7 +40,21 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
     {
         IsLocked = _isLocked;
         IsRecyclable = _isRecyclable;
+        IsExitDoor = _isExitDoor;
     }
+
+    #region IConditionRequirable 구현
+    // 외부의 다른 스위치나 퍼즐이 풀렸을 때 UnityEvent를 통해 호출될 함수입니다.
+    public void ResolveCondition()
+    {
+        _conditionCount--;
+        if (_conditionCount <= 0)
+        {
+            IsConditionRequired = false;
+            DevLog.Log($"{gameObject.name}의 선행 조건이 달성되었습니다! 이제 아이템을 사용할 수 있습니다.");
+        }
+    }
+    #endregion
 
     #region 외부 장치 연동
     // 외부의 장치(KeyReader 등)가 잠금을 풀어줄 때 호출하는 함수
@@ -43,6 +65,9 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
         IsLocked = false;
 
         OnUnlockSuccess?.Invoke();
+
+        // ★ SaveManager가 감지하도록 이벤트 발동
+        GameEvent.EOnLockOpened?.Invoke(gameObject.name);
 
         if (IsRecyclable)
         {
@@ -62,7 +87,14 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
     #region IInteractive 구현
     public void Interact()
     {
-        // 1. 문이 잠겨있을 때 클릭하면
+        // 1. 선행 조건 검사
+        if (_conditionCount > 0)
+        {
+            DevLog.Log("선행 조건이 존재합니다.");
+            return;
+        }
+
+        // 2. 문이 잠겨있을 때 클릭하면
         if (IsLocked)
         {
             DevLog.Log("문이 굳게 잠겨 있다. 열쇠구멍이 보인다.");
@@ -70,7 +102,14 @@ public class Door : MonoBehaviour, IInteractive, IOpenable
             return;
         }
 
-        // 2. 문이 잠겨있지 않을 때 클릭하면 상태에 따라 열거나 닫음
+        if(IsExitDoor)
+        {
+            GameEvent.EStageClear?.Invoke();
+
+            return;
+        }
+
+        // 3. 문이 잠겨있지 않을 때 클릭하면 상태에 따라 열거나 닫음
         if (IsOpen) Close();
         else Open();
     }

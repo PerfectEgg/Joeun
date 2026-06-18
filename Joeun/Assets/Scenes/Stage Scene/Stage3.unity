@@ -781,8 +781,6 @@ GameObject:
   m_Component:
   - component: {fileID: 120278184}
   - component: {fileID: 120278187}
-  - component: {fileID: 120278186}
-  - component: {fileID: 120278185}
   m_Layer: 0
   m_Name: Bench
   m_TagString: Untagged
@@ -809,65 +807,6 @@ Transform:
   - {fileID: 722421579}
   m_Father: {fileID: 683688993}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &120278185
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 120278183}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd2da1835f2282146abd1bd014240d55, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
-  zoomViewIndex: 2
---- !u!61 &120278186
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 120278183}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
 --- !u!212 &120278187
 SpriteRenderer:
   serializedVersion: 2
@@ -1440,6 +1379,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 3
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!61 &209303128
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1534,6 +1475,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Door
   _isLocked: 1
   _isRecyclable: 1
+  _isExitDoor: 1
   _setZLayer: 1
   OnUnlockSuccess:
     m_PersistentCalls:
@@ -1541,6 +1483,8 @@ MonoBehaviour:
   OnInteractive:
     m_PersistentCalls:
       m_Calls: []
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!61 &216832778
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2624,6 +2568,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 4
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!61 &303315317
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3407,6 +3353,8 @@ MonoBehaviour:
   _requiredKeyID: Iron_Cabinet_Key
   _targetDoor: {fileID: 1601017194}
   _setZLayer: 1
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!222 &413826765
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3462,7 +3410,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
+  m_SortingOrder: 4
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 0.2754717, g: 0.2754717, b: 0.2754717, a: 1}
@@ -4248,6 +4196,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 1
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!61 &608573476
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -4718,6 +4668,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 2
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!1 &636373463
 GameObject:
   m_ObjectHideFlags: 0
@@ -5685,6 +5637,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 2
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!1 &801484229
 GameObject:
   m_ObjectHideFlags: 0
@@ -5872,6 +5826,8 @@ MonoBehaviour:
   _requiredKeyID: Card_Key3
   _targetDoor: {fileID: 216832777}
   _setZLayer: 1
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!222 &801931719
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7010,6 +6966,8 @@ MonoBehaviour:
   _requiredKeyID: Hand_Model
   _targetDoor: {fileID: 1451746675}
   _setZLayer: 1
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!222 &1056071362
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7795,6 +7753,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 2
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!1 &1231476657
 GameObject:
   m_ObjectHideFlags: 0
@@ -8363,7 +8323,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1256247961
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8601,6 +8561,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 0
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!61 &1303979379
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -9156,6 +9118,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Door
   _isLocked: 1
   _isRecyclable: 0
+  _isExitDoor: 0
   _setZLayer: 1
   OnUnlockSuccess:
     m_PersistentCalls:
@@ -9175,6 +9138,8 @@ MonoBehaviour:
   OnInteractive:
     m_PersistentCalls:
       m_Calls: []
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!61 &1451746676
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -10513,6 +10478,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 2
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!1 &1584236069
 GameObject:
   m_ObjectHideFlags: 0
@@ -10712,6 +10679,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Door
   _isLocked: 1
   _isRecyclable: 1
+  _isExitDoor: 0
   _setZLayer: 1
   OnUnlockSuccess:
     m_PersistentCalls:
@@ -10719,6 +10687,8 @@ MonoBehaviour:
   OnInteractive:
     m_PersistentCalls:
       m_Calls: []
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!222 &1601017195
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -10774,7 +10744,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 0.5396226, g: 0.5396226, b: 0.5396226, a: 1}
@@ -11187,8 +11157,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1872450068}
   - component: {fileID: 1872450071}
-  - component: {fileID: 1872450070}
-  - component: {fileID: 1872450069}
   m_Layer: 0
   m_Name: Container Belt Sash
   m_TagString: Untagged
@@ -11211,65 +11179,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 683688993}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1872450069
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1872450067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd2da1835f2282146abd1bd014240d55, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
-  zoomViewIndex: 2
---- !u!61 &1872450070
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1872450067}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
 --- !u!212 &1872450071
 SpriteRenderer:
   serializedVersion: 2
@@ -11983,6 +11892,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 5
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!61 &2013540081
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -12263,8 +12174,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2043535728}
   - component: {fileID: 2043535731}
-  - component: {fileID: 2043535730}
-  - component: {fileID: 2043535729}
   m_Layer: 0
   m_Name: Container Belt
   m_TagString: Untagged
@@ -12288,65 +12197,6 @@ Transform:
   - {fileID: 1558325063}
   m_Father: {fileID: 683688993}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2043535729
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2043535727}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd2da1835f2282146abd1bd014240d55, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
-  zoomViewIndex: 2
---- !u!61 &2043535730
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2043535727}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
 --- !u!212 &2043535731
 SpriteRenderer:
   serializedVersion: 2
@@ -13066,6 +12916,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Door
   _isLocked: 0
   _isRecyclable: 1
+  _isExitDoor: 0
   _setZLayer: 2
   OnUnlockSuccess:
     m_PersistentCalls:
@@ -13073,6 +12924,8 @@ MonoBehaviour:
   OnInteractive:
     m_PersistentCalls:
       m_Calls: []
+  _isConditionRequired: 0
+  _conditionCount: 0
 --- !u!212 &2118186942
 SpriteRenderer:
   serializedVersion: 2

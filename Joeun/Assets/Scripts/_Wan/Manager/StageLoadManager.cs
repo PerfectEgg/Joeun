@@ -32,10 +32,26 @@ public class StageLoadManager : MonoBehaviour
 
     private void Start()
     {
-        // 리스트가 비어있지 않다면, 0번 인덱스의 스테이지를 로드하며 게임 시작
         if (_stageList.Count > 0)
         {
-            _currentStageIndex = 0;
+            // ★ [연동 1] 로드 시점 동기화
+            // SaveManager에 기존 저장 데이터(이어하기 등)가 있다면 해당 인덱스부터 시작합니다.
+            if (SaveManager.Instance != null && SaveManager.Instance.HasSaveData())
+            {
+                _currentStageIndex = SaveManager.Instance.CurrentStageIndex;
+                
+                // 저장된 인덱스가 리스트 범위를 벗어나지 않도록 안전장치 안전장치 추가
+                if (_currentStageIndex >= _stageList.Count)
+                {
+                    _currentStageIndex = _stageList.Count - 1;
+                }
+            }
+            else
+            {
+                // 저장 데이터가 없으면 처음(0번)부터 시작
+                _currentStageIndex = 0;
+            }
+
             StartCoroutine(LoadStageRoutine(_stageList[_currentStageIndex]));
         }
         else
@@ -54,6 +70,14 @@ public class StageLoadManager : MonoBehaviour
         {
             _currentStageIndex++; // 다음 번호로 이동
             string nextStageName = _stageList[_currentStageIndex];
+            
+            // ★ [연동 2] 저장 시점 동기화
+            // 씬이 실제로 바뀌기 전에 SaveManager의 메모리 데이터를 최신 인덱스로 갱신합니다.
+            if (SaveManager.Instance != null)
+            {
+                SaveManager.Instance.CurrentStageIndex = _currentStageIndex;
+            }
+
             StartCoroutine(TransitionRoutine(nextStageName));
         }
         else
@@ -72,6 +96,11 @@ public class StageLoadManager : MonoBehaviour
         // 1. 화면 페이드 아웃 (암전 처리)
         // UIManager.Instance.FadeOut(1.0f);
         yield return new WaitForSeconds(1.0f); // 페이드 아웃 애니메이션 시간 대기
+
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.StageClear(); 
+        }
 
         // 2. 기존 스테이지 씬 언로드 (메모리 해제)
         if (!string.IsNullOrEmpty(_currentLoadedStage))
@@ -99,10 +128,7 @@ public class StageLoadManager : MonoBehaviour
         // ★ 핵심: LoadSceneMode.Additive로 설정하여 기존 Core 씬을 유지한 채 겹쳐서 켭니다.
         AsyncOperation loadOp = SceneManager.LoadSceneAsync(stageName, LoadSceneMode.Additive);
         
-        while (!loadOp.isDone)
-        {
-            yield return null; // 로딩이 끝날 때까지 대기
-        }
+        while (!loadOp.isDone) yield return null; // 로딩이 끝날 때까지 대기
 
         _currentLoadedStage = stageName;
         DevLog.Log($"[Core] {stageName} Additive 로드 완료");

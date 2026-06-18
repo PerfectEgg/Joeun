@@ -68,3 +68,9 @@ public interface IHoverable
     void OnHoverEnter();
     void OnHoverExit();
 }
+
+// 조건 필요 인터페이스
+public interface IConditionRequirable
+{
+    void ResolveCondition();
+}
