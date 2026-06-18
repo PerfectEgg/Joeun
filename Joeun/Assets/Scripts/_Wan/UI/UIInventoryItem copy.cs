@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 // 인벤토리 UI 아이템 클래스
 // 설명: 인벤토리에 표시되는 각 아이템의 UI를 관리합니다.
 // ==========================================
-public class UIDecodeItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
+public class UIDecode : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public Vector2 OriginPosition { get; private set; }
     private Transform _originalParent;
