@@ -413,7 +413,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ManualInventorySlotManager
   uiItemPrefab: {fileID: 6204422867027944585, guid: 0ebddd468abe6cc4993849e922e3f29f, type: 3}
-  slotPadding: {x: 10, y: 10}
   slots:
   - {fileID: 840188524}
   - {fileID: 2108661595}

@@ -11,7 +11,6 @@ public class UIAlphaRaycast : MonoBehaviour
     [SerializeField, Range(0.001f, 1f)]
     float alphaThreshold = 0.1f;
 
-    [SerializeField]
     bool forceRaycastTarget = true;
 
     Image targetImage;

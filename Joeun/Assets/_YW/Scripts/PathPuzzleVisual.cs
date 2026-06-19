@@ -5,31 +5,35 @@ using UnityEngine.UI;
 
 public class PathPuzzleVisual : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] private PathPuzzleManager manager;
-    [SerializeField] private bool hideUnusedTraceSlots = true;
-    [SerializeField] private bool useSlotAsNodeBackground = true;
-    [SerializeField] private bool includeGoalSlotInTrace = true;
-    [SerializeField] private bool autoAddSlotHighlights = true;
-    [SerializeField] private bool fitNodesToSlots = true;
-    [SerializeField] private bool autoLayoutTraceSlots = true;
-    [SerializeField] private float nodeFillPadding = 0f;
-    [SerializeField] private bool autoBindManagerEvents;
-    [SerializeField] private Color successColor = new Color(0.35f, 0.95f, 0.55f);
-    [SerializeField] private Color failColor = new Color(0.95f, 0.2f, 0.18f);
-    [SerializeField] private float successDelay = 1.5f;
-    [SerializeField] private float failFlashInterval = 0.12f;
-    [SerializeField] private int failFlashCount = 2;
     [SerializeField] private Graphic failGlowTarget;
-    [SerializeField] private Vector2 failGlowDistance = new Vector2(10f, -10f);
-    [SerializeField] private float failGlowHoldTime = 0.4f;
     [SerializeField] private RectTransform failShakeTarget;
-    [SerializeField] private float failShakeDuration = 0.14f;
-    [SerializeField] private float failShakeStrength = 5f;
-    [SerializeField] private bool resetVisualsOnFail = true;
+
+    [Header("Object Toggles")]
     [SerializeField] private GameObject[] showOnOpen;
     [SerializeField] private GameObject[] hideOnOpen;
     [SerializeField] private GameObject[] showOnSuccess;
     [SerializeField] private GameObject[] hideOnSuccess;
+
+    private bool hideUnusedTraceSlots = true;
+    private bool useSlotAsNodeBackground = true;
+    private bool includeGoalSlotInTrace = true;
+    private bool autoAddSlotHighlights = true;
+    private bool fitNodesToSlots = true;
+    private bool autoLayoutTraceSlots = true;
+    private float nodeFillPadding = 0f;
+    private bool autoBindManagerEvents = false;
+    private Color successColor = new Color(0.35f, 0.95f, 0.55f);
+    private Color failColor = new Color(0.95f, 0.2f, 0.18f);
+    private float successDelay = 1.5f;
+    private float failFlashInterval = 0.12f;
+    private int failFlashCount = 2;
+    private Vector2 failGlowDistance = new Vector2(10f, -10f);
+    private float failGlowHoldTime = 0.4f;
+    private float failShakeDuration = 0.14f;
+    private float failShakeStrength = 5f;
+    private bool resetVisualsOnFail = true;
 
     private Coroutine visualTraceRoutine;
     private Coroutine feedbackRoutine;

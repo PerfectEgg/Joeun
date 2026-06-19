@@ -9,14 +9,11 @@ public class SkillModeDebugControls : MonoBehaviour
     [SerializeField] bool enableInEditor = true;
     [SerializeField] bool enableInDevelopmentBuild = true;
 
-    [Header("Grant + Select")]
-    [SerializeField] KeyCode rotateKey = KeyCode.F1;
-    [SerializeField] KeyCode assembleKey = KeyCode.F2;
-    [SerializeField] KeyCode decodeKey = KeyCode.F3;
-
-    [Header("Utility")]
-    [SerializeField] KeyCode clearModeKey = KeyCode.F4;
-    [SerializeField] KeyCode clearGrantsKey = KeyCode.F5;
+    KeyCode rotateKey = KeyCode.F1;
+    KeyCode assembleKey = KeyCode.F2;
+    KeyCode decodeKey = KeyCode.F3;
+    KeyCode clearModeKey = KeyCode.F4;
+    KeyCode clearGrantsKey = KeyCode.F5;
 
     void Update()
     {

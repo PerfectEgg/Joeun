@@ -13,31 +13,22 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
     [Tooltip("비워두면 이 오브젝트의 RectTransform 크기를 사용합니다.")]
     [SerializeField] private RectTransform highlightRect;
 
-    [Header("Colors")]
-    [SerializeField] private Color rotateColor = new Color(1f, 0.95f, 0.12f, 1f);
-    [SerializeField] private Color assembleColor = new Color(0f, 1f, 1f, 1f);
-    [SerializeField] private Color decodeColor = new Color(1f, 0.12f, 0.82f, 1f);
-
-    [Header("Frame")]
-    [SerializeField] private float borderThickness = 4f;
-    [SerializeField] private float hoverBorderThickness = 5f;
-    [SerializeField] private float borderAlpha = 0.9f;
-    [SerializeField] private float hoverBorderAlpha = 1f;
-
-    [Header("Outer Glow")]
-    [SerializeField] private float outerGlowSize = 10f;
-    [SerializeField] private float hoverOuterGlowSize = 15f;
-    [SerializeField] private float outerGlowAlpha = 0.34f;
-    [SerializeField] private float hoverOuterGlowAlpha = 0.52f;
-    [SerializeField] private int outerGlowSteps = 5;
-
-    [Header("Sprite Tint")]
-    [SerializeField] private float spriteIdleTint = 0.04f;
-    [SerializeField] private float spriteHoverTint = 0.1f;
-
-    [Header("Transition")]
-    [SerializeField] private float fadeInDuration = 0.08f;
-    [SerializeField] private float fadeOutDuration = 0.08f;
+    private Color rotateColor = new Color(1f, 0.95f, 0.12f, 1f);
+    private Color assembleColor = new Color(0f, 1f, 1f, 1f);
+    private Color decodeColor = new Color(1f, 0.12f, 0.82f, 1f);
+    private float borderThickness = 4f;
+    private float hoverBorderThickness = 5f;
+    private float borderAlpha = 0.9f;
+    private float hoverBorderAlpha = 1f;
+    private float outerGlowSize = 10f;
+    private float hoverOuterGlowSize = 15f;
+    private float outerGlowAlpha = 0.34f;
+    private float hoverOuterGlowAlpha = 0.52f;
+    private int outerGlowSteps = 5;
+    private float spriteIdleTint = 0.18f;
+    private float spriteHoverTint = 0.35f;
+    private float fadeInDuration = 0.08f;
+    private float fadeOutDuration = 0.08f;
 
     private const string FrameObjectName = "__SkillHighlightFrame";
     private const string OldGlowObjectName = "__SkillHighlightGlow";

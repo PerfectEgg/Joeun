@@ -9,17 +9,18 @@ public class ManualInventorySlotManager : MonoBehaviour
     [Serializable]
     private class FixedItemSlot
     {
-        public ItemData itemData;
-        public RectTransform slot;
+        public ItemData itemData = null;
+        public RectTransform slot = null;
     }
 
     [Header("Item UI")]
     [SerializeField] private GameObject uiItemPrefab;
-    [SerializeField] private Vector2 slotPadding = new Vector2(10f, 10f);
 
     [Header("Manual Slots")]
     [SerializeField] private List<RectTransform> slots = new List<RectTransform>();
     [SerializeField] private List<FixedItemSlot> fixedItemSlots = new List<FixedItemSlot>();
+
+    private Vector2 slotPadding = new Vector2(10f, 10f);
 
     private readonly List<ItemData> inventoryList = new List<ItemData>();
     private readonly Dictionary<ItemData, GameObject> itemViews = new Dictionary<ItemData, GameObject>();

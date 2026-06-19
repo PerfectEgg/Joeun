@@ -28,9 +28,9 @@ public class ConnectJointVisualSwapGroup : MonoBehaviour
         [NonSerialized] public Coroutine fadeRoutine;
     }
 
-    [SerializeField] bool initializeOnEnable = true;
-    [SerializeField, Min(0f)] float connectedVisualDelay = 0.12f;
-    [SerializeField, Min(0f)] float connectedFadeDuration = 0.12f;
+    bool initializeOnEnable = true;
+    float connectedVisualDelay = 0.12f;
+    float connectedFadeDuration = 0.24f;
     [SerializeField] JointSwap[] swaps;
 
     void OnEnable()

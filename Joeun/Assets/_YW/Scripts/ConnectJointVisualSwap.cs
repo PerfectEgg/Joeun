@@ -9,15 +9,14 @@ public class ConnectJointVisualSwap : MonoBehaviour
     [Header("Connection")]
     [SerializeField] ConnectorPoint connector;
     [SerializeField] ConnectorPoint expectedLinkedTo;
-    [SerializeField] bool requireExpectedLinkedTo = true;
+    bool requireExpectedLinkedTo = true;
 
     [Header("Visuals")]
     [SerializeField] GameObject[] showWhenDisconnected;
     [SerializeField] GameObject[] showWhenConnected;
     [SerializeField] GameObject[] showWhenWrongConnected;
 
-    [Header("Options")]
-    [SerializeField] bool initializeOnEnable = true;
+    bool initializeOnEnable = true;
 
     enum VisualState
     {

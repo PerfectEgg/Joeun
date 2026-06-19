@@ -10,19 +10,16 @@ public class SkillSpriteGlowTarget : MonoBehaviour, IPointerEnterHandler, IPoint
     [SerializeField] private bool highlightOnAssemble = true;
     [SerializeField] private bool highlightOnDecode;
 
-    [Header("Colors")]
-    [SerializeField] private Color rotateColor = new Color(1f, 0.95f, 0.12f, 1f);
-    [SerializeField] private Color assembleColor = new Color(0f, 1f, 1f, 1f);
-    [SerializeField] private Color decodeColor = new Color(1f, 0.12f, 0.82f, 1f);
-
-    [Header("Back Image Glow")]
-    [SerializeField] private float activationDelay = 0.22f;
-    [SerializeField] private float idleAlpha = 0.36f;
-    [SerializeField] private float hoverAlpha = 0.62f;
-    [SerializeField] private float idleScale = 1.05f;
-    [SerializeField] private float hoverScale = 1.1f;
-    [SerializeField] private float fadeDuration = 0.08f;
-    [SerializeField] private bool keepBehindTarget = true;
+    private Color rotateColor = new Color(1f, 0.95f, 0.12f, 1f);
+    private Color assembleColor = new Color(0f, 1f, 1f, 1f);
+    private Color decodeColor = new Color(1f, 0.12f, 0.82f, 1f);
+    private float activationDelay = 0.22f;
+    private float idleAlpha = 0.42f;
+    private float hoverAlpha = 0.62f;
+    private float idleScale = 1.035f;
+    private float hoverScale = 1.055f;
+    private float fadeDuration = 0.08f;
+    private bool keepBehindTarget = true;
 
     private const string GlowName = "__SkillSpriteGlow";
 
