@@ -23,6 +23,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     const float FailShakeStrength = 0.035f;
     const int WarningFlashCount = 3;
     const float WarningFlashInterval = 0.09f;
+    static readonly Color WarningHighlightColor = new Color(1f, 0.08f, 0.04f, 1f);
 
     [Header("State")]
     [FormerlySerializedAs("driveReady")]
@@ -48,10 +49,26 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     [SerializeField] Vector3 windowDownLocalOffset = new Vector3(0f, -1f, 0f);
     [Min(0.01f)]
     [SerializeField] float windowMoveDuration = 0.35f;
+
+    [Header("Jam Feedback")]
+    [FormerlySerializedAs("failedWindowMoveAmount")]
     [Range(0f, 1f)]
-    [SerializeField] float failedWindowMoveAmount = 0.18f;
+    [SerializeField] float jamWindowMoveAmount = 0.12f;
     [Min(0f)]
-    [SerializeField] float failedWindowHoldDuration = 0.12f;
+    [FormerlySerializedAs("failedWindowHoldDuration")]
+    [SerializeField] float jamWindowHoldDuration = 0.08f;
+    [Min(0.01f)]
+    [SerializeField] float jamWindowMoveDuration = 0.18f;
+    [Min(1)]
+    [SerializeField] int jamBeltFrameSteps = 3;
+    [Min(0.01f)]
+    [SerializeField] float jamBeltFrameInterval = 0.07f;
+    [Min(1)]
+    [SerializeField] int jamWarningFlashCount = 3;
+    [Min(0.01f)]
+    [SerializeField] float jamWarningFlashInterval = 0.09f;
+    [Range(0f, 1f)]
+    [SerializeField] float jamWarningOverlayAlpha = 0.38f;
 
     [Header("Feedback")]
     [SerializeField] Transform shakeTarget;
@@ -80,6 +97,8 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     [SerializeField, HideInInspector] UnityEvent onBlockingItemFeedback;
     [SerializeField, HideInInspector] UnityEvent onRunStarted;
     [SerializeField, HideInInspector] UnityEvent onRunFinished;
+    [SerializeField, HideInInspector] string blockingItemId = "Skin_Flake";
+    [SerializeField, HideInInspector] bool syncBlockingItemFromChildItem = true;
 
     Coroutine activeRoutine;
     Vector3 windowClosedLocalPosition;
@@ -103,9 +122,20 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     {
         CacheInitialPositions();
         CacheWindowScale();
+        SyncBlockingItemStateFromChildItem();
 
         if (windowVisualMode != WindowVisualMode.MoveOnly)
             SetWindowVisualAmount(0f);
+    }
+
+    void OnEnable()
+    {
+        GameEvent.EOnItemCollected += HandleItemCollected;
+    }
+
+    void OnDisable()
+    {
+        GameEvent.EOnItemCollected -= HandleItemCollected;
     }
 
     public void Interact()
@@ -185,6 +215,33 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         SetBlockingItemPresent(isJammed);
     }
 
+    void HandleItemCollected(ItemData itemData)
+    {
+        if (itemData == null || itemData.itemID != blockingItemId)
+            return;
+
+        ClearBlockingItem();
+    }
+
+    void SyncBlockingItemStateFromChildItem()
+    {
+        if (!syncBlockingItemFromChildItem || string.IsNullOrEmpty(blockingItemId))
+            return;
+
+        ToolItem[] childItems = GetComponentsInChildren<ToolItem>(true);
+        foreach (ToolItem item in childItems)
+        {
+            if (item == null || item._itemData == null)
+                continue;
+
+            if (item._itemData.itemID == blockingItemId && item.gameObject.activeInHierarchy)
+            {
+                blockingItemPresent = true;
+                return;
+            }
+        }
+    }
+
     IEnumerator SawPuzzleMissingRoutine()
     {
         SetBusy(true);
@@ -194,7 +251,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         yield return Shake(driveFeedbackShakeTarget != null
             ? driveFeedbackShakeTarget
             : shakeTarget != null ? shakeTarget : transform);
-        yield return Flash(missingDriveWarning, null);
+        yield return Flash(missingDriveWarning, null, WarningHighlightColor, WarningHighlightColor);
 
         SetBusy(false);
         activeRoutine = null;
@@ -204,13 +261,31 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     {
         SetBusy(true);
 
-        yield return MoveWindow(failedWindowMoveAmount);
         onBlockingItemFeedback?.Invoke();
-        yield return AnimateBeltFrames(FailedBeltSteps);
-        yield return Shake(shakeTarget != null ? shakeTarget : transform);
-        yield return Flash(jamWarning, jamTargetHighlight);
-        yield return new WaitForSeconds(Mathf.Max(0f, failedWindowHoldDuration));
-        yield return MoveWindow(0f);
+        Sprite originalBeltSprite = beltRenderer != null ? beltRenderer.sprite : null;
+
+        Coroutine windowDownRoutine = StartCoroutine(MoveWindow(
+            jamWindowMoveAmount,
+            jamWindowMoveDuration));
+        Coroutine beltRoutine = StartCoroutine(JamBeltBlinkRoutine(originalBeltSprite));
+        Coroutine shakeRoutine = StartCoroutine(Shake(shakeTarget != null ? shakeTarget : transform));
+        Coroutine flashRoutine = StartCoroutine(Flash(
+            jamWarning,
+            jamTargetHighlight,
+            JamOverlayColor(),
+            WarningHighlightColor,
+            jamWarningFlashCount,
+            jamWarningFlashInterval));
+
+        yield return windowDownRoutine;
+        yield return beltRoutine;
+        yield return shakeRoutine;
+        yield return flashRoutine;
+
+        if (jamWindowHoldDuration > 0f)
+            yield return new WaitForSeconds(jamWindowHoldDuration);
+
+        yield return MoveWindow(0f, jamWindowMoveDuration);
 
         SetBusy(false);
         activeRoutine = null;
@@ -232,6 +307,11 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
 
     IEnumerator MoveWindow(float targetAmount)
     {
+        yield return MoveWindow(targetAmount, windowMoveDuration);
+    }
+
+    IEnumerator MoveWindow(float targetAmount, float moveDuration)
+    {
         if (safetyWindow == null)
             yield break;
 
@@ -241,7 +321,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         Vector3 target = windowClosedLocalPosition + windowDownLocalOffset * targetAmount;
         float elapsed = 0f;
 
-        float duration = Mathf.Max(0.01f, windowMoveDuration);
+        float duration = Mathf.Max(0.01f, moveDuration);
         float startFillAmount = safetyWindowFillImage != null
             ? safetyWindowFillImage.fillAmount
             : 0f;
@@ -266,18 +346,62 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
 
     IEnumerator AnimateBeltFrames(int steps)
     {
-        yield return AnimateFrames(beltRenderer, beltFrames, steps);
+        yield return AnimateBeltFrames(steps, beltFrameInterval, false);
+    }
+
+    IEnumerator AnimateBeltFrames(int steps, float frameInterval, bool restoreOriginal)
+    {
+        yield return AnimateFrames(beltRenderer, beltFrames, steps, frameInterval, restoreOriginal);
     }
 
     IEnumerator AnimateFrames(SpriteRenderer targetRenderer, Sprite[] frames, int steps)
     {
+        yield return AnimateFrames(targetRenderer, frames, steps, beltFrameInterval, false);
+    }
+
+    IEnumerator AnimateFrames(
+        SpriteRenderer targetRenderer,
+        Sprite[] frames,
+        int steps,
+        float frameInterval,
+        bool restoreOriginal)
+    {
         if (targetRenderer == null || frames == null || frames.Length == 0 || steps <= 0)
             yield break;
+
+        Sprite originalSprite = targetRenderer.sprite;
 
         for (int i = 0; i < steps; i++)
         {
             targetRenderer.sprite = frames[i % frames.Length];
-            yield return new WaitForSeconds(Mathf.Max(0.01f, beltFrameInterval));
+            yield return new WaitForSeconds(Mathf.Max(0.01f, frameInterval));
+        }
+
+        if (restoreOriginal)
+            targetRenderer.sprite = originalSprite;
+    }
+
+    IEnumerator JamBeltBlinkRoutine(Sprite originalSprite)
+    {
+        if (beltRenderer == null)
+            yield break;
+
+        Sprite nextSprite = GetNextBeltFrame(originalSprite);
+        if (nextSprite == null)
+            yield break;
+
+        int blinkCount = Mathf.Max(1, jamBeltFrameSteps);
+        float interval = Mathf.Max(0.01f, jamBeltFrameInterval);
+
+        for (int i = 0; i < blinkCount; i++)
+        {
+            beltRenderer.sprite = nextSprite;
+            yield return new WaitForSeconds(interval);
+
+            RestoreBeltSprite(originalSprite);
+
+            if (i < blinkCount - 1)
+                yield return new WaitForSeconds(interval);
         }
     }
 
@@ -301,24 +425,47 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         target.localPosition = origin;
     }
 
-    IEnumerator Flash(SpriteRenderer primary, SpriteRenderer secondary)
+    IEnumerator Flash(
+        SpriteRenderer primary,
+        SpriteRenderer secondary,
+        Color primaryFlashColor,
+        Color secondaryFlashColor)
+    {
+        yield return Flash(
+            primary,
+            secondary,
+            primaryFlashColor,
+            secondaryFlashColor,
+            WarningFlashCount,
+            WarningFlashInterval);
+    }
+
+    IEnumerator Flash(
+        SpriteRenderer primary,
+        SpriteRenderer secondary,
+        Color primaryFlashColor,
+        Color secondaryFlashColor,
+        int flashCount,
+        float flashInterval)
     {
         if (primary == null && secondary == null)
             yield break;
 
         RendererState primaryState = Capture(primary);
         RendererState secondaryState = Capture(secondary);
-        Color flashColor = new Color(1f, 0.08f, 0.04f, 1f);
 
-        for (int i = 0; i < WarningFlashCount; i++)
+        int count = Mathf.Max(1, flashCount);
+        float interval = Mathf.Max(0.01f, flashInterval);
+
+        for (int i = 0; i < count; i++)
         {
-            ApplyFlash(primary, flashColor, true);
-            ApplyFlash(secondary, flashColor, true);
-            yield return new WaitForSeconds(WarningFlashInterval);
+            ApplyFlash(primary, primaryFlashColor, true);
+            ApplyFlash(secondary, secondaryFlashColor, true);
+            yield return new WaitForSeconds(interval);
 
-            ApplyFlash(primary, flashColor, false);
-            ApplyFlash(secondary, flashColor, false);
-            yield return new WaitForSeconds(WarningFlashInterval);
+            ApplyFlash(primary, primaryFlashColor, false);
+            ApplyFlash(secondary, secondaryFlashColor, false);
+            yield return new WaitForSeconds(interval);
         }
 
         Restore(primary, primaryState);
@@ -403,6 +550,34 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     static float Smooth(float t)
     {
         return t * t * (3f - 2f * t);
+    }
+
+    Color JamOverlayColor()
+    {
+        return new Color(1f, 0.04f, 0.02f, Mathf.Clamp01(jamWarningOverlayAlpha));
+    }
+
+    void RestoreBeltSprite(Sprite sprite)
+    {
+        if (beltRenderer != null)
+            beltRenderer.sprite = sprite;
+    }
+
+    Sprite GetNextBeltFrame(Sprite currentSprite)
+    {
+        if (beltFrames == null || beltFrames.Length == 0)
+            return null;
+
+        if (beltFrames.Length == 1)
+            return beltFrames[0];
+
+        for (int i = 0; i < beltFrames.Length; i++)
+        {
+            if (beltFrames[i] == currentSprite)
+                return beltFrames[(i + 1) % beltFrames.Length];
+        }
+
+        return beltFrames[1] != null ? beltFrames[1] : beltFrames[0];
     }
 
     static void SetCollidersEnabled(Collider2D[] colliders, bool enabled)

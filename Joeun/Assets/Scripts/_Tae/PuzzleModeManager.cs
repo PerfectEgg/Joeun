@@ -34,12 +34,26 @@ public class PuzzleModeManager : MonoBehaviour
 
     void Update()
     {
+        if (SkillInteractionLock.IsLocked)
+        {
+            if (CurrentMode != Mode.None)
+                SetMode(Mode.None);
+
+            return;
+        }
+
         if (Input.GetKeyDown(rotateKey))   Toggle(Mode.Rotate);
         if (Input.GetKeyDown(assembleKey)) Toggle(Mode.Assemble);
     }
 
     void Toggle(Mode m)
     {
+        if (SkillInteractionLock.IsLocked)
+            return;
+
+        if (!IsModeAllowed(m))
+            return;
+
         // 같은 모드면 해제(None), 아니면 그 모드로 전환
         CurrentMode = (CurrentMode == m) ? Mode.None : m;
         Debug.Log($"[ModeManager] 현재 모드 → {CurrentMode}");
@@ -49,7 +63,26 @@ public class PuzzleModeManager : MonoBehaviour
     /// <summary>UI 버튼에서 직접 모드를 켜고 싶을 때 (선택)</summary>
     public void SetMode(Mode m)
     {
+        if (m != Mode.None && SkillInteractionLock.IsLocked)
+            m = Mode.None;
+
+        if (!IsModeAllowed(m))
+            m = Mode.None;
+
         CurrentMode = m;
         OnModeChanged?.Invoke(CurrentMode);
+    }
+
+    bool IsModeAllowed(Mode mode)
+    {
+        switch (mode)
+        {
+            case Mode.Rotate:
+                return SkillModeStageRules.IsAllowed(SkillModeType.Rotate);
+            case Mode.Assemble:
+                return SkillModeStageRules.IsAllowed(SkillModeType.Assemble);
+            default:
+                return true;
+        }
     }
 }

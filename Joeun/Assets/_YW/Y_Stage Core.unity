@@ -1065,7 +1065,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6204422867027944585, guid: 0ebddd468abe6cc4993849e922e3f29f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1952440089}
   m_SourcePrefab: {fileID: 100100000, guid: 0ebddd468abe6cc4993849e922e3f29f, type: 3}
 --- !u!224 &731904253 stripped
 RectTransform:
@@ -1077,7 +1080,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7654709333394446093, guid: 0ebddd468abe6cc4993849e922e3f29f, type: 3}
   m_PrefabInstance: {fileID: 731904252}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1952440085}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4f2200aab97a0cf4a853dbcbd4214d96, type: 3}
@@ -2140,6 +2143,27 @@ Transform:
   - {fileID: 697009933}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1952440085 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6204422867027944585, guid: 0ebddd468abe6cc4993849e922e3f29f, type: 3}
+  m_PrefabInstance: {fileID: 731904252}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1952440089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1952440085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d7a66be1fcf4c259c64e9d8d074fd97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryDragVisualEnhancer
+  showShadow: 1
+  shadowColor: {r: 0, g: 0, b: 0, a: 0.69803923}
+  shadowOffset: {x: 15, y: -15}
+  shadowScale: 0.9
 --- !u!1 &1958011899
 GameObject:
   m_ObjectHideFlags: 0

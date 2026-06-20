@@ -43,6 +43,8 @@ public class PathPuzzleVisual : MonoBehaviour
     private RectTransform activeShakeTarget;
     private Vector2 activeShakeOriginalPosition;
     private bool hasShakeOriginalPosition;
+    private bool ownsInteractionLock;
+    private bool isSolved;
     private readonly Dictionary<Image, Color> slotIdleColors = new Dictionary<Image, Color>();
 
     private void Reset()
@@ -60,6 +62,7 @@ public class PathPuzzleVisual : MonoBehaviour
     {
         Apply();
         BindManagerEvents();
+        ApplyStartButtonState();
     }
 
     private void OnDisable()
@@ -76,6 +79,7 @@ public class PathPuzzleVisual : MonoBehaviour
         if (shakeRoutine != null)
             StopCoroutine(shakeRoutine);
 
+        ReleaseInteractionLock();
         RestoreShakeTarget();
     }
 
@@ -93,6 +97,7 @@ public class PathPuzzleVisual : MonoBehaviour
         gameObject.SetActive(true);
         Apply();
         ResetPuzzleVisuals();
+        ApplyStartButtonState();
 
         SetObjectsActive(showOnOpen, true);
         SetObjectsActive(hideOnOpen, false);
@@ -121,13 +126,22 @@ public class PathPuzzleVisual : MonoBehaviour
 
     public void StartTrace()
     {
-        if (isRunning)
+        if (isRunning || isSolved || manager != null && manager.IsSolved)
+        {
+            ApplyStartButtonState();
             return;
+        }
 
         Apply();
 
         if (manager == null)
             return;
+
+        if (manager.IsSolved)
+        {
+            ApplyStartButtonState();
+            return;
+        }
 
         if (visualTraceRoutine != null)
             StopCoroutine(visualTraceRoutine);
@@ -135,11 +149,14 @@ public class PathPuzzleVisual : MonoBehaviour
         if (feedbackRoutine != null)
             StopCoroutine(feedbackRoutine);
 
+        SetStartButtonsInteractable(false);
         visualTraceRoutine = StartCoroutine(TraceRoutine());
     }
 
     public void PlaySuccessFeedback()
     {
+        MarkSolved();
+
         if (feedbackRoutine != null)
             StopCoroutine(feedbackRoutine);
 
@@ -153,6 +170,9 @@ public class PathPuzzleVisual : MonoBehaviour
 
         if (feedbackRoutine != null)
             StopCoroutine(feedbackRoutine);
+
+        if (!isSolved && (manager == null || !manager.IsSolved))
+            SetStartButtonsInteractable(true);
 
         feedbackRoutine = StartCoroutine(FailFeedbackRoutine());
     }
@@ -370,6 +390,7 @@ public class PathPuzzleVisual : MonoBehaviour
     private IEnumerator TraceRoutine()
     {
         isRunning = true;
+        AcquireInteractionLock();
         ApplyTraceSlotLimit();
 
         List<GridSlot> slots = manager.slots;
@@ -470,9 +491,11 @@ public class PathPuzzleVisual : MonoBehaviour
 
         bool success = !fail && current == goalCell && count == manager.requiredCount;
         isRunning = false;
+        ReleaseInteractionLock();
 
         if (success)
         {
+            MarkSolved();
             manager.onSuccess?.Invoke();
         }
         else
@@ -480,8 +503,53 @@ public class PathPuzzleVisual : MonoBehaviour
             if (string.IsNullOrEmpty(reason))
                 reason = count < manager.requiredCount ? "Not enough cells" : "Invalid trace";
 
+            SetStartButtonsInteractable(true);
             manager.onFail?.Invoke(reason);
         }
+    }
+
+    private void MarkSolved()
+    {
+        isSolved = true;
+
+        if (manager != null)
+            manager.MarkSolved();
+
+        SetStartButtonsInteractable(false);
+    }
+
+    private void ApplyStartButtonState()
+    {
+        bool solved = isSolved || manager != null && manager.IsSolved;
+        SetStartButtonsInteractable(!isRunning && !solved);
+    }
+
+    private void SetStartButtonsInteractable(bool interactable)
+    {
+        Button[] buttons = GetComponentsInChildren<Button>(true);
+        foreach (Button button in buttons)
+        {
+            if (button != null && button.name == "Start")
+                button.interactable = interactable;
+        }
+    }
+
+    private void AcquireInteractionLock()
+    {
+        if (ownsInteractionLock)
+            return;
+
+        ownsInteractionLock = true;
+        SkillInteractionLock.Push();
+    }
+
+    private void ReleaseInteractionLock()
+    {
+        if (!ownsInteractionLock)
+            return;
+
+        ownsInteractionLock = false;
+        SkillInteractionLock.Pop();
     }
 
     private void LightSlot(GridSlot slot)

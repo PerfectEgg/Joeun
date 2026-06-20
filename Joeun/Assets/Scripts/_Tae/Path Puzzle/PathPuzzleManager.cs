@@ -42,6 +42,12 @@ public class PathPuzzleManager : MonoBehaviour
     Dictionary<Vector2Int, GridSlot> grid = new();
     Vector2Int startCell, goalCell;
     bool isRunning;
+    bool ownsInteractionLock;
+    bool isSolved;
+
+    public bool IsRunning => isRunning;
+    public bool IsSolved => isSolved;
+    public bool CanEdit => !isRunning && !isSolved;
 
     void Awake()
     {
@@ -49,6 +55,11 @@ public class PathPuzzleManager : MonoBehaviour
             slots.AddRange(GetComponentsInChildren<GridSlot>());
 
         BuildGrid();
+    }
+
+    void OnDisable()
+    {
+        ReleaseInteractionLock();
     }
 
     void BuildGrid()
@@ -89,7 +100,7 @@ public class PathPuzzleManager : MonoBehaviour
     // ── Start: 경로 추적 시작 (Start 버튼 OnClick에 연결) ────────────
     public void StartTrace()
     {
-        if (isRunning) return;
+        if (isRunning || isSolved) return;
         StopAllCoroutines();
         StartCoroutine(TraceRoutine());
     }
@@ -97,6 +108,7 @@ public class PathPuzzleManager : MonoBehaviour
     IEnumerator TraceRoutine()
     {
         isRunning = true;
+        AcquireInteractionLock();
         ResetVisuals();
 
         var visited = new HashSet<Vector2Int>();
@@ -140,6 +152,7 @@ public class PathPuzzleManager : MonoBehaviour
             if (count == requiredCount)
             {
                 Debug.Log($"[PathPuzzle] ★ 성공! 정확히 {requiredCount}개 노드로 B 도달");
+                MarkSolved();
                 onSuccess?.Invoke();
             }
             else
@@ -153,15 +166,43 @@ public class PathPuzzleManager : MonoBehaviour
         else FailLog(reason);
 
         isRunning = false;
+        ReleaseInteractionLock();
     }
 
     void FailLog(string reason)
     {
         Debug.Log($"[PathPuzzle] ✗ 실패 — {reason}");
+        isRunning = false;
+        ReleaseInteractionLock();
         onFail?.Invoke(reason);
     }
 
+    public void MarkSolved()
+    {
+        isSolved = true;
+        isRunning = false;
+        ReleaseInteractionLock();
+    }
+
     // ── 헬퍼 ────────────────────────────────────────────────────────
+    void AcquireInteractionLock()
+    {
+        if (ownsInteractionLock)
+            return;
+
+        ownsInteractionLock = true;
+        SkillInteractionLock.Push();
+    }
+
+    void ReleaseInteractionLock()
+    {
+        if (!ownsInteractionLock)
+            return;
+
+        ownsInteractionLock = false;
+        SkillInteractionLock.Pop();
+    }
+
     GridNode NodeAt(Vector2Int cell)
     {
         return grid.TryGetValue(cell, out var s) ? s.currentNode : null;

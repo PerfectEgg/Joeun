@@ -29,12 +29,18 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
     private float spriteHoverTint = 0.35f;
     private float fadeInDuration = 0.08f;
     private float fadeOutDuration = 0.08f;
+    private float pulseSpeed = 3.4f;
+    private float pulseGlowSize = 5f;
+    private float pulseGlowAlpha = 0.14f;
+    private float pulseBorderThickness = 0.75f;
+    private float hoverFrameScale = 1.035f;
 
     private const string FrameObjectName = "__SkillHighlightFrame";
     private const string OldGlowObjectName = "__SkillHighlightGlow";
     private const string OldCoreGlowObjectName = "__SkillHighlightCoreGlow";
 
     private SkillHighlightFrameGraphic frameGraphic;
+    private RectTransform frameRect;
     private readonly Dictionary<SpriteRenderer, Color> spriteBaseColors = new Dictionary<SpriteRenderer, Color>();
     private SpriteRenderer[] spriteRenderers;
     private bool isHovering;
@@ -74,14 +80,25 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         EnsureFrame();
         SkillIconModeView.OnSkillModeChanged += HandleSkillModeChanged;
+        SkillInteractionLock.OnChanged += HandleInteractionLockChanged;
         Apply(SkillIconModeView.CurrentMode);
     }
 
     private void OnDisable()
     {
         SkillIconModeView.OnSkillModeChanged -= HandleSkillModeChanged;
+        SkillInteractionLock.OnChanged -= HandleInteractionLockChanged;
         StopFrameFade();
         Clear();
+    }
+
+    private void LateUpdate()
+    {
+        if (frameGraphic == null)
+            return;
+
+        if (Matches(SkillIconModeView.CurrentMode))
+            Apply(SkillIconModeView.CurrentMode);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -99,6 +116,11 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
     private void HandleSkillModeChanged(SkillModeType mode)
     {
         Apply(mode);
+    }
+
+    private void HandleInteractionLockChanged(bool locked)
+    {
+        Apply(SkillIconModeView.CurrentMode);
     }
 
     private void Apply(SkillModeType mode)
@@ -121,18 +143,26 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
         if (frameGraphic == null)
             return;
 
-        Color borderColor = Color.Lerp(Color.white, skillColor, 0.35f);
-        borderColor.a = isHovering ? hoverBorderAlpha : borderAlpha;
+        float pulse = (Mathf.Sin(Time.unscaledTime * pulseSpeed) + 1f) * 0.5f;
+
+        Color borderColor = Color.Lerp(Color.white, skillColor, 0.46f);
+        borderColor.a = Mathf.Clamp01((isHovering ? hoverBorderAlpha : borderAlpha) + pulse * 0.08f);
 
         Color glowColor = skillColor;
-        glowColor.a = isHovering ? hoverOuterGlowAlpha : outerGlowAlpha;
+        glowColor.a = Mathf.Clamp01((isHovering ? hoverOuterGlowAlpha : outerGlowAlpha) + pulse * pulseGlowAlpha);
+
+        float thickness = (isHovering ? hoverBorderThickness : borderThickness) + pulse * pulseBorderThickness;
+        float glowSize = (isHovering ? hoverOuterGlowSize : outerGlowSize) + pulse * pulseGlowSize;
 
         frameGraphic.SetVisual(
             borderColor,
             glowColor,
-            isHovering ? hoverBorderThickness : borderThickness,
-            isHovering ? hoverOuterGlowSize : outerGlowSize,
+            thickness,
+            glowSize,
             outerGlowSteps);
+
+        if (frameRect != null)
+            frameRect.localScale = Vector3.one * (isHovering ? hoverFrameScale : 1f);
 
         ShowFrame();
     }
@@ -141,6 +171,9 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (frameGraphic != null)
             HideFrame();
+
+        if (frameRect != null)
+            frameRect.localScale = Vector3.one;
 
         foreach (KeyValuePair<SpriteRenderer, Color> entry in spriteBaseColors)
         {
@@ -203,6 +236,15 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
 
     private bool Matches(SkillModeType mode)
     {
+        if (SkillInteractionLock.IsLocked)
+            return false;
+
+        if (!SkillModeStageRules.IsAllowed(mode))
+            return false;
+
+        if (IsBlockedByPathPuzzleState())
+            return false;
+
         switch (mode)
         {
             case SkillModeType.Rotate:
@@ -221,6 +263,19 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
             default:
                 return false;
         }
+    }
+
+    private bool IsBlockedByPathPuzzleState()
+    {
+        bool pathTarget = GetComponent<GridNode>() != null
+            || GetComponent<GridSlot>() != null
+            || GetComponentInParent<GridSlot>() != null;
+
+        if (!pathTarget)
+            return false;
+
+        PathPuzzleManager pathPuzzle = GetComponentInParent<PathPuzzleManager>();
+        return pathPuzzle != null && !pathPuzzle.CanEdit;
     }
 
     private Color ColorFor(SkillModeType mode)
@@ -273,14 +328,13 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
             ? existing.gameObject
             : CreateFrameObject(highlightRect);
 
-        RectTransform rect = frameObject.transform as RectTransform;
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = Vector2.zero;
-        rect.localScale = Vector3.one;
+        frameRect = frameObject.transform as RectTransform;
+        frameRect.anchorMin = Vector2.zero;
+        frameRect.anchorMax = Vector2.one;
+        frameRect.offsetMin = Vector2.zero;
+        frameRect.offsetMax = Vector2.zero;
+        frameRect.pivot = new Vector2(0.5f, 0.5f);
+        frameRect.anchoredPosition = Vector2.zero;
 
         frameObject.transform.SetAsLastSibling();
         frameGraphic = frameObject.GetComponent<SkillHighlightFrameGraphic>();

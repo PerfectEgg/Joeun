@@ -30,12 +30,15 @@ public class SkillIconModeView : MonoBehaviour
     private void OnEnable()
     {
         activeView = this;
+        SkillInteractionLock.OnChanged += HandleInteractionLockChanged;
         BindIfNeeded();
         ApplyMode();
     }
 
     private void OnDisable()
     {
+        SkillInteractionLock.OnChanged -= HandleInteractionLockChanged;
+
         if (boundManager != null)
             boundManager.SetMode(PuzzleModeManager.Mode.None);
 
@@ -47,6 +50,11 @@ public class SkillIconModeView : MonoBehaviour
 
     public static void SelectMode(SkillModeType mode)
     {
+        if (mode != SkillModeType.None && SkillInteractionLock.IsLocked)
+        {
+            mode = SkillModeType.None;
+        }
+
         if (activeView != null)
         {
             activeView.BindIfNeeded();
@@ -69,6 +77,14 @@ public class SkillIconModeView : MonoBehaviour
     private void Update()
     {
         BindIfNeeded();
+
+        if (SkillInteractionLock.IsLocked)
+        {
+            if (CurrentMode != SkillModeType.None)
+                SetMode(SkillModeType.None);
+
+            return;
+        }
 
         if (Input.GetKeyDown(KeyCode.Q))
             ToggleMode(SkillModeType.Rotate);
@@ -105,6 +121,9 @@ public class SkillIconModeView : MonoBehaviour
 
     private void ToggleMode(SkillModeType mode)
     {
+        if (SkillInteractionLock.IsLocked)
+            return;
+
         if (!IsAllowed(mode))
             return;
 
@@ -113,6 +132,9 @@ public class SkillIconModeView : MonoBehaviour
 
     private void SetMode(SkillModeType mode)
     {
+        if (mode != SkillModeType.None && SkillInteractionLock.IsLocked)
+            mode = SkillModeType.None;
+
         if (CurrentMode == mode)
         {
             ApplyMode();
@@ -168,7 +190,18 @@ public class SkillIconModeView : MonoBehaviour
 
     private bool IsAllowed(SkillModeType mode)
     {
+        if (mode != SkillModeType.None && SkillInteractionLock.IsLocked)
+            return false;
+
         return SkillModeStageRules.IsAllowed(mode);
+    }
+
+    private void HandleInteractionLockChanged(bool locked)
+    {
+        if (locked)
+            SetMode(SkillModeType.None);
+        else
+            ApplyMode();
     }
 
     private void SetSprite(Sprite sprite)

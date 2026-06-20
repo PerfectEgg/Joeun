@@ -84,12 +84,14 @@ public class AssembleCompositeOutlineTarget : MonoBehaviour
         ResolveRoot();
         EnsureOutlineObject();
         SkillIconModeView.OnSkillModeChanged += HandleSkillModeChanged;
+        SkillInteractionLock.OnChanged += HandleInteractionLockChanged;
         ApplyMode(SkillIconModeView.CurrentMode, true);
     }
 
     void OnDisable()
     {
         SkillIconModeView.OnSkillModeChanged -= HandleSkillModeChanged;
+        SkillInteractionLock.OnChanged -= HandleInteractionLockChanged;
         currentAlpha = 0f;
         hoverBlend = 0f;
         isHovering = false;
@@ -143,6 +145,11 @@ public class AssembleCompositeOutlineTarget : MonoBehaviour
         ApplyMode(mode, false);
     }
 
+    void HandleInteractionLockChanged(bool locked)
+    {
+        ApplyMode(SkillIconModeView.CurrentMode, false);
+    }
+
     void ApplyMode(SkillModeType mode, bool immediate)
     {
         bool shouldShow = ShouldShow(mode);
@@ -161,6 +168,9 @@ public class AssembleCompositeOutlineTarget : MonoBehaviour
 
     bool ShouldShow(SkillModeType mode)
     {
+        if (SkillInteractionLock.IsLocked)
+            return false;
+
         if (forceVisibleForPreview)
             return true;
 

@@ -23,6 +23,12 @@ public class GridNode : MonoBehaviour, IPointerClickHandler
 
     // 격자 좌표 (PathPuzzleManager가 설정)
     [HideInInspector] public int row, col;
+    PathPuzzleManager manager;
+
+    void Awake()
+    {
+        manager = GetComponentInParent<PathPuzzleManager>();
+    }
 
     void Start()
     {
@@ -32,6 +38,9 @@ public class GridNode : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData ev)
     {
+        if (manager != null && !manager.CanEdit)
+            return;
+
         if (PuzzleModeManager.Instance != null && PuzzleModeManager.Instance.IsRotate)
             Rotate();
     }

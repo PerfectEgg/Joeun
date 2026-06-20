@@ -348,6 +348,9 @@ public class ShowCompletedAssembly : MonoBehaviour
 
     private static bool IsAssembleMode()
     {
+        if (SkillInteractionLock.IsLocked)
+            return false;
+
         return SkillIconModeView.CurrentMode == SkillModeType.Assemble
             || PuzzleModeManager.Instance != null && PuzzleModeManager.Instance.IsAssemble;
     }

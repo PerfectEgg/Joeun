@@ -27,6 +27,9 @@ public class GridSlot : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData ev)
     {
+        if (manager != null && !manager.CanEdit)
+            return;
+
         var mode = PuzzleModeManager.Instance;
         if (mode == null || !mode.IsAssemble) return;     // Assemble 모드 아니면 무시
         if (!assemblable || currentNode != null) return;  // 막힌 칸 / 이미 노드 있음
