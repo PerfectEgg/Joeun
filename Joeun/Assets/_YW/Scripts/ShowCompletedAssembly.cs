@@ -48,6 +48,7 @@ public class ShowCompletedAssembly : MonoBehaviour
     private bool inputQuietAfterReady;
     private int readyFrame;
     private AssembleCompositeOutlineTarget outlineTarget;
+    private AssemblyScanLineEffect scanLineEffect;
     private readonly List<CompletedAssemblyAnchorAligner> completedVisualAligners =
         new List<CompletedAssemblyAnchorAligner>();
 
@@ -58,6 +59,7 @@ public class ShowCompletedAssembly : MonoBehaviour
     {
         ResolvePuzzleManager();
         ResolveOutlineTarget();
+        ResolveScanLineEffect();
     }
 
     private void OnEnable()
@@ -66,6 +68,7 @@ public class ShowCompletedAssembly : MonoBehaviour
             ActiveAssemblies.Add(this);
 
         ResolveOutlineTarget();
+        ResolveScanLineEffect();
         BindPuzzleManagerEvents();
     }
 
@@ -167,6 +170,10 @@ public class ShowCompletedAssembly : MonoBehaviour
             showRoutine = null;
         }
 
+        ResolveScanLineEffect();
+        if (scanLineEffect != null)
+            scanLineEffect.Hide();
+
         isReadyForAssemble = false;
         isCompletedVisualShown = true;
         PrepareCompletedVisualObjects();
@@ -188,6 +195,10 @@ public class ShowCompletedAssembly : MonoBehaviour
             StopCoroutine(showRoutine);
             showRoutine = null;
         }
+
+        ResolveScanLineEffect();
+        if (scanLineEffect != null)
+            scanLineEffect.Hide();
 
         isReadyForAssemble = false;
         isCompletedVisualShown = false;
@@ -214,7 +225,7 @@ public class ShowCompletedAssembly : MonoBehaviour
 
         PrepareCompletedVisualObjects();
         ApplyCompletedVisualAlignment();
-        SetShowObjectsAlpha(0f);
+        SetShowObjectsAlpha(showFadeDuration > 0f ? 0f : 1f);
         SetObjectsActive(showObjects, true);
 
         if (showFadeDuration > 0f)
@@ -232,6 +243,11 @@ public class ShowCompletedAssembly : MonoBehaviour
         SetImagesEnabled(hideImages, false);
         SetBehavioursEnabled(disableBehaviours, false);
         SetObjectsActive(hideObjects, false);
+
+        ResolveScanLineEffect();
+        if (scanLineEffect != null)
+            yield return StartCoroutine(scanLineEffect.Play());
+
         showRoutine = null;
         onAssembled?.Invoke();
     }
@@ -260,6 +276,50 @@ public class ShowCompletedAssembly : MonoBehaviour
             outlineTarget = GetComponentInChildren<AssembleCompositeOutlineTarget>(true);
         if (outlineTarget == null && puzzleManager != null)
             outlineTarget = puzzleManager.GetComponentInParent<AssembleCompositeOutlineTarget>();
+    }
+
+    private void ResolveScanLineEffect()
+    {
+        if (scanLineEffect != null)
+            return;
+
+        scanLineEffect = GetComponent<AssemblyScanLineEffect>();
+        if (scanLineEffect == null)
+            scanLineEffect = GetComponentInParent<AssemblyScanLineEffect>();
+        if (scanLineEffect == null)
+            scanLineEffect = GetComponentInChildren<AssemblyScanLineEffect>(true);
+        if (scanLineEffect == null && puzzleManager != null)
+            scanLineEffect = puzzleManager.GetComponentInParent<AssemblyScanLineEffect>();
+        if (scanLineEffect == null && transform is RectTransform)
+            scanLineEffect = gameObject.AddComponent<AssemblyScanLineEffect>();
+
+        if (scanLineEffect != null)
+            scanLineEffect.SetScanArea(FindCompletedVisualScanArea());
+    }
+
+    private RectTransform FindCompletedVisualScanArea()
+    {
+        if (showObjects == null)
+            return null;
+
+        foreach (GameObject obj in showObjects)
+        {
+            if (obj == null)
+                continue;
+
+            Image image = obj.GetComponent<Image>();
+            if (image != null && image.sprite != null)
+                return image.rectTransform;
+
+            Image[] childImages = obj.GetComponentsInChildren<Image>(true);
+            foreach (Image childImage in childImages)
+            {
+                if (childImage != null && childImage.sprite != null)
+                    return childImage.rectTransform;
+            }
+        }
+
+        return null;
     }
 
     private void BindPuzzleManagerEvents()

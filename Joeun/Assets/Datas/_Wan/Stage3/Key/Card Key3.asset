@@ -15,4 +15,4 @@ MonoBehaviour:
   itemID: Card_Key3
   itemName: "\uCE74\uB4DC \uD0A4"
   description: "\uCD9C\uAD6C\uB97C \uC5F4\uAE30 \uC704\uD55C \uCE74\uB4DC \uD0A4"
-  itemIcon: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  itemIcon: {fileID: 8797517929017219174, guid: 153c4c04851083a4d8bbb938cf72f871, type: 3}
