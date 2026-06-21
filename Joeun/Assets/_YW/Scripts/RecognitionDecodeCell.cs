@@ -91,8 +91,8 @@ public class RecognitionDecodeCell : MonoBehaviour, IDecodable, IPointerClickHan
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (controller != null && controller.AutoDecodeOnAreaClick && controller.CanDecode)
-            controller.Decode();
+        if (controller != null)
+            controller.TryDecodeFromClick();
     }
 
     void AutoWire()

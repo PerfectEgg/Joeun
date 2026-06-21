@@ -6,9 +6,9 @@ public class RecognitionDecodePathPuzzleConnector : MonoBehaviour
 {
     [SerializeField] PathPuzzleManager pathPuzzle;
     [SerializeField] RecognitionDecodeAreaController[] decodeAreas;
-    [SerializeField] GameObject decodeInventoryRoot;
-    [SerializeField] bool openDecodeInventoryOnSuccess = true;
     [SerializeField] bool selectDecodeModeOnSuccess = true;
+    [SerializeField, HideInInspector] GameObject decodeInventoryRoot;
+    [SerializeField, HideInInspector] bool openDecodeInventoryOnSuccess = true;
 
     [FormerlySerializedAs("decodeArea")]
     [SerializeField, HideInInspector] RecognitionDecodeAreaController legacyDecodeArea;
@@ -77,9 +77,6 @@ public class RecognitionDecodePathPuzzleConnector : MonoBehaviour
                 continue;
 
             area.MarkDecodeReady();
-
-            if (decodeInventoryRoot == null)
-                area.SetAutoDecodeOnAreaClick(true);
         }
     }
 }

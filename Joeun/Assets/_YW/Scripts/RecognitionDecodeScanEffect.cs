@@ -50,25 +50,35 @@ public class RecognitionDecodeScanEffect : MonoBehaviour
 
     public void ShowResolved(char letter)
     {
+        ShowResolved(letter == '\0' ? "?" : letter.ToString());
+    }
+
+    public void ShowResolved(string text)
+    {
         EnsureObjects();
         if (scanGraphic == null || letterText == null)
             return;
 
         scanGraphic.enabled = true;
         scanGraphic.SetResolved(DecodeColor);
-        ApplyLetter(letter, 1f, 1f);
+        ApplyLetter(text, 1f, 1f);
     }
 
     public IEnumerator Play(char letter)
     {
+        yield return Play(letter == '\0' ? "?" : letter.ToString());
+    }
+
+    public IEnumerator Play(string text)
+    {
         if (routine != null)
             StopCoroutine(routine);
 
-        routine = StartCoroutine(PlayRoutine(letter));
+        routine = StartCoroutine(PlayRoutine(text));
         yield return routine;
     }
 
-    IEnumerator PlayRoutine(char letter)
+    IEnumerator PlayRoutine(string text)
     {
         EnsureObjects();
         if (scanGraphic == null || letterText == null)
@@ -104,12 +114,12 @@ public class RecognitionDecodeScanEffect : MonoBehaviour
             float scale = Mathf.LerpUnclamped(0.72f, 1f, eased);
 
             scanGraphic.SetResolved(DecodeColor);
-            ApplyLetter(letter, alpha, scale);
+            ApplyLetter(text, alpha, scale);
             yield return null;
         }
 
         scanGraphic.SetResolved(DecodeColor);
-        ApplyLetter(letter, 1f, 1f);
+        ApplyLetter(text, 1f, 1f);
         routine = null;
     }
 
@@ -169,10 +179,10 @@ public class RecognitionDecodeScanEffect : MonoBehaviour
         }
     }
 
-    void ApplyLetter(char letter, float alpha, float scale)
+    void ApplyLetter(string text, float alpha, float scale)
     {
         letterText.enabled = true;
-        letterText.text = letter == '\0' ? "?" : letter.ToString();
+        letterText.text = string.IsNullOrWhiteSpace(text) ? "?" : text.Trim().ToUpperInvariant();
         Color color = LetterColor;
         color.a = alpha;
         letterText.color = color;
@@ -308,7 +318,7 @@ public class RecognitionDecodeScanGraphic : MaskableGraphic
     {
         float width = Mathf.Min(Mathf.Clamp(rect.width * 0.28f, 28f, 58f), rect.width);
         float halfWidth = width * 0.5f;
-        float center = Mathf.Lerp(rect.xMin + halfWidth, rect.xMax - halfWidth, progress);
+        float center = Mathf.Lerp(rect.xMin - halfWidth, rect.xMax + halfWidth, progress);
 
         Color core = Color.white;
         core.a = 0.72f;
@@ -330,13 +340,13 @@ public class RecognitionDecodeScanGraphic : MaskableGraphic
             float leftSoft = Mathf.Lerp(x0, center, 0.48f);
             float rightSoft = Mathf.Lerp(center, x1, 0.52f);
 
-            AddGradientQuad(vh, x0, y0, leftSoft, y1, WithAlpha(effectColor, 0f), WithAlpha(effectColor, 0.32f));
-            AddGradientQuad(vh, leftSoft, y0, center, y1, WithAlpha(effectColor, 0.32f), WithAlpha(Color.white, 0.9f));
-            AddGradientQuad(vh, center, y0, rightSoft, y1, WithAlpha(Color.white, 0.9f), WithAlpha(effectColor, 0.32f));
-            AddGradientQuad(vh, rightSoft, y0, x1, y1, WithAlpha(effectColor, 0.32f), WithAlpha(effectColor, 0f));
+            AddClippedGradientQuad(vh, rect, x0, y0, leftSoft, y1, WithAlpha(effectColor, 0f), WithAlpha(effectColor, 0.32f));
+            AddClippedGradientQuad(vh, rect, leftSoft, y0, center, y1, WithAlpha(effectColor, 0.32f), WithAlpha(Color.white, 0.9f));
+            AddClippedGradientQuad(vh, rect, center, y0, rightSoft, y1, WithAlpha(Color.white, 0.9f), WithAlpha(effectColor, 0.32f));
+            AddClippedGradientQuad(vh, rect, rightSoft, y0, x1, y1, WithAlpha(effectColor, 0.32f), WithAlpha(effectColor, 0f));
 
             float coreHalf = Mathf.Lerp(0.75f, 1.45f, edge);
-            AddQuad(vh, center - coreHalf, y0, center + coreHalf, y1, core);
+            AddClippedQuad(vh, rect, center - coreHalf, y0, center + coreHalf, y1, core);
         }
     }
 
@@ -394,6 +404,16 @@ public class RecognitionDecodeScanGraphic : MaskableGraphic
         vh.AddTriangle(start + 2, start + 3, start);
     }
 
+    static void AddClippedQuad(VertexHelper vh, Rect clip, float xMin, float yMin, float xMax, float yMax, Color color)
+    {
+        xMin = Mathf.Max(xMin, clip.xMin);
+        xMax = Mathf.Min(xMax, clip.xMax);
+        yMin = Mathf.Max(yMin, clip.yMin);
+        yMax = Mathf.Min(yMax, clip.yMax);
+
+        AddQuad(vh, xMin, yMin, xMax, yMax, color);
+    }
+
     static void AddGradientQuad(VertexHelper vh, float xMin, float yMin, float xMax, float yMax, Color left, Color right)
     {
         if (xMax <= xMin || yMax <= yMin)
@@ -416,5 +436,29 @@ public class RecognitionDecodeScanGraphic : MaskableGraphic
 
         vh.AddTriangle(start, start + 1, start + 2);
         vh.AddTriangle(start + 2, start + 3, start);
+    }
+
+    static void AddClippedGradientQuad(VertexHelper vh, Rect clip, float xMin, float yMin, float xMax, float yMax, Color left, Color right)
+    {
+        if (xMax <= xMin || yMax <= yMin)
+            return;
+
+        float originalXMin = xMin;
+        float originalXMax = xMax;
+
+        float clippedXMin = Mathf.Max(xMin, clip.xMin);
+        float clippedXMax = Mathf.Min(xMax, clip.xMax);
+        float clippedYMin = Mathf.Max(yMin, clip.yMin);
+        float clippedYMax = Mathf.Min(yMax, clip.yMax);
+
+        if (clippedXMax <= clippedXMin || clippedYMax <= clippedYMin)
+            return;
+
+        float leftT = Mathf.InverseLerp(originalXMin, originalXMax, clippedXMin);
+        float rightT = Mathf.InverseLerp(originalXMin, originalXMax, clippedXMax);
+        Color clippedLeft = Color.Lerp(left, right, leftT);
+        Color clippedRight = Color.Lerp(left, right, rightT);
+
+        AddGradientQuad(vh, clippedXMin, clippedYMin, clippedXMax, clippedYMax, clippedLeft, clippedRight);
     }
 }

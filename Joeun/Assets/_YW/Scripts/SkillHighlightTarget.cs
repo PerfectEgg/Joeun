@@ -34,6 +34,7 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
     private float pulseGlowAlpha = 0.14f;
     private float pulseBorderThickness = 0.75f;
     private float hoverFrameScale = 1.035f;
+    private bool stableFrame;
 
     private const string FrameObjectName = "__SkillHighlightFrame";
     private const string OldGlowObjectName = "__SkillHighlightGlow";
@@ -60,6 +61,26 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
             EnsureFrame();
             Apply(SkillIconModeView.CurrentMode);
         }
+    }
+
+    public void SetStableFrame(bool value)
+    {
+        stableFrame = value;
+
+        if (isActiveAndEnabled)
+            Apply(SkillIconModeView.CurrentMode);
+    }
+
+    public void ForceClear()
+    {
+        StopFrameFade();
+        Clear();
+
+        if (frameGraphic != null)
+            frameGraphic.enabled = false;
+
+        if (frameRect != null)
+            frameRect.localScale = Vector3.one;
     }
 
     private void Reset()
@@ -97,7 +118,7 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
         if (frameGraphic == null)
             return;
 
-        if (Matches(SkillIconModeView.CurrentMode))
+        if (!stableFrame && Matches(SkillIconModeView.CurrentMode))
             Apply(SkillIconModeView.CurrentMode);
     }
 
@@ -143,7 +164,7 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
         if (frameGraphic == null)
             return;
 
-        float pulse = (Mathf.Sin(Time.unscaledTime * pulseSpeed) + 1f) * 0.5f;
+        float pulse = stableFrame ? 0f : (Mathf.Sin(Time.unscaledTime * pulseSpeed) + 1f) * 0.5f;
 
         Color borderColor = Color.Lerp(Color.white, skillColor, 0.46f);
         borderColor.a = Mathf.Clamp01((isHovering ? hoverBorderAlpha : borderAlpha) + pulse * 0.08f);
@@ -162,7 +183,12 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
             outerGlowSteps);
 
         if (frameRect != null)
-            frameRect.localScale = Vector3.one * (isHovering ? hoverFrameScale : 1f);
+        {
+            if (stableFrame)
+                frameRect.localScale = Vector3.one;
+            else
+                frameRect.localScale = Vector3.one * (isHovering ? hoverFrameScale : 1f);
+        }
 
         ShowFrame();
     }

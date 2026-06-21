@@ -18,6 +18,7 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
     [Header("Answer")]
     [SerializeField] DecodeData answerData;
     [SerializeField] char expectedLetter;
+    [SerializeField] string expectedText;
     [SerializeField] bool inferLetterFromObjectName = true;
 
     [Header("2x2 Bit Pattern")]
@@ -52,7 +53,9 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
     public bool DecodeReady => decodeReady;
     public bool IsDecoded => decoded;
     public bool AutoDecodeOnAreaClick => autoDecodeOnAreaClick;
-    public char ExpectedLetter => ResolveExpectedLetter();
+    public char ExpectedLetter => FirstLetter(ExpectedText);
+    public string ExpectedText => ResolveExpectedText();
+    public event System.Action<RecognitionDecodeAreaController> Decoded;
 
     public bool CanDecode
     {
@@ -111,6 +114,19 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
         SetDecodeReady(true);
     }
 
+    public void SetExpectedText(string text)
+    {
+        expectedText = string.IsNullOrWhiteSpace(text)
+            ? string.Empty
+            : text.Trim().ToUpperInvariant();
+
+        if (expectedText.Length == 1)
+            expectedLetter = expectedText[0];
+
+        ApplyVisual();
+        ApplyDecodeAvailability();
+    }
+
     public void SetDecodeReady(bool ready)
     {
         if (decodeReady == ready)
@@ -133,6 +149,18 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
         }
 
         ApplyDecodeAvailability();
+    }
+
+    public void ClearDecodeHighlight()
+    {
+        if (scanEffect != null)
+            scanEffect.Hide();
+
+        if (decodeHighlight != null)
+        {
+            decodeHighlight.ForceClear();
+            decodeHighlight.enabled = false;
+        }
     }
 
     public void ResetDecode()
@@ -175,14 +203,12 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (autoDecodeOnAreaClick && CanDecode)
-            Decode();
+        TryDecodeFromClick();
     }
 
     void OnMouseDown()
     {
-        if (autoDecodeOnAreaClick && CanDecode)
-            Decode();
+        TryDecodeFromClick();
     }
 
     public void SetAutoDecodeOnAreaClick(bool enabled)
@@ -190,15 +216,26 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
         autoDecodeOnAreaClick = enabled;
     }
 
+    public void TryDecodeFromClick()
+    {
+        if (CanDecode)
+            Decode();
+    }
+
     void AutoWire()
     {
+        bool usesLetterBankVisual = GetComponent<LetterBankLetterView>() != null;
+
         if (areaCollider == null)
             areaCollider = GetComponent<Collider2D>();
 
         if (scanEffect == null)
             scanEffect = GetComponent<RecognitionDecodeScanEffect>();
 
-        if (revealImage == null)
+        if (usesLetterBankVisual && revealImage == GetComponent<Image>())
+            revealImage = null;
+
+        if (!usesLetterBankVisual && revealImage == null)
         {
             Image image = GetComponent<Image>();
             if (image != null && image.sprite != null)
@@ -210,10 +247,16 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
 
         SanitizeRevealTextRefs();
 
-        if (revealText == null)
+        if (usesLetterBankVisual && revealText == GetComponent<Text>())
+            revealText = null;
+
+        if (usesLetterBankVisual && revealTmpText == GetComponent<TMP_Text>())
+            revealTmpText = null;
+
+        if (!usesLetterBankVisual && revealText == null)
             revealText = GetComponent<Text>();
 
-        if (revealTmpText == null)
+        if (!usesLetterBankVisual && revealTmpText == null)
             revealTmpText = GetComponent<TMP_Text>();
 
         bool hasCell = false;
@@ -241,6 +284,8 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
 
     void ConfigureHighlight()
     {
+        bool usesLetterBankVisual = GetComponent<LetterBankLetterView>() != null;
+
         if (highlightRect == null)
             highlightRect = transform as RectTransform;
 
@@ -251,6 +296,7 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
             decodeHighlight = gameObject.AddComponent<SkillHighlightTarget>();
 
         decodeHighlight.Configure(false, false, true, highlightRect);
+        decodeHighlight.SetStableFrame(usesLetterBankVisual);
     }
 
     void ApplyVisual()
@@ -290,7 +336,7 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
             revealSpriteRenderer.enabled = decoded && revealSpriteRenderer.sprite != null;
         }
 
-        string text = ExpectedLetter == '\0' ? string.Empty : ExpectedLetter.ToString();
+        string text = ExpectedText;
         if (revealText != null)
         {
             revealText.text = text;
@@ -321,7 +367,13 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
         }
 
         if (decodeHighlight != null)
-            decodeHighlight.enabled = decodeReady && !decoded && !isDecoding;
+        {
+            bool showHighlight = decodeReady && !decoded && !isDecoding;
+            decodeHighlight.enabled = showHighlight;
+
+            if (!showHighlight)
+                decodeHighlight.ForceClear();
+        }
     }
 
     void SanitizeRevealTextRefs()
@@ -341,7 +393,7 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
 
         EnsureScanEffect();
         if (scanEffect != null)
-            yield return scanEffect.Play(ExpectedLetter);
+            yield return scanEffect.Play(ExpectedText);
 
         decoded = true;
         isDecoding = false;
@@ -349,6 +401,7 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
 
         ApplyVisual();
         ApplyDecodeAvailability();
+        Decoded?.Invoke(this);
         onDecoded?.Invoke();
     }
 
@@ -394,23 +447,34 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
         scanEffect.Prepare();
     }
 
-    char ResolveExpectedLetter()
+    string ResolveExpectedText()
     {
         if (answerData != null && answerData.decodeLetter != '\0')
-            return answerData.decodeLetter;
+            return answerData.decodeLetter.ToString();
+
+        if (!string.IsNullOrWhiteSpace(expectedText))
+            return expectedText.Trim().ToUpperInvariant();
 
         if (expectedLetter != '\0')
-            return expectedLetter;
+            return expectedLetter.ToString();
 
         if (!inferLetterFromObjectName)
-            return '\0';
+            return string.Empty;
 
         string objectName = name;
         int separator = objectName.LastIndexOf('_');
         if (separator >= 0 && separator + 1 < objectName.Length)
-            return objectName[separator + 1];
+            return objectName.Substring(separator + 1).Trim().ToUpperInvariant();
 
-        return '\0';
+        return string.Empty;
+    }
+
+    static char FirstLetter(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return '\0';
+
+        return Normalize(value.Trim()[0]);
     }
 
     static char Normalize(char value)
