@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Serialization;
+using System.Collections;
 
 [DisallowMultipleComponent]
 public class RecognitionDecodePathPuzzleConnector : MonoBehaviour
@@ -7,6 +8,8 @@ public class RecognitionDecodePathPuzzleConnector : MonoBehaviour
     [SerializeField] PathPuzzleManager pathPuzzle;
     [SerializeField] RecognitionDecodeAreaController[] decodeAreas;
     [SerializeField] bool selectDecodeModeOnSuccess = true;
+    [SerializeField, Min(0f)] float decodeReadyDelay = 0.4f;
+    [SerializeField, Min(0f)] float successSettleDelay = 0.5f;
     [SerializeField, HideInInspector] GameObject decodeInventoryRoot;
     [SerializeField, HideInInspector] bool openDecodeInventoryOnSuccess = true;
 
@@ -14,6 +17,8 @@ public class RecognitionDecodePathPuzzleConnector : MonoBehaviour
     [SerializeField, HideInInspector] RecognitionDecodeAreaController legacyDecodeArea;
     [FormerlySerializedAs("decodeInventory")]
     [SerializeField, HideInInspector] MonoBehaviour legacyDecodeInventory;
+
+    Coroutine successRoutine;
 
     void Awake()
     {
@@ -35,10 +40,28 @@ public class RecognitionDecodePathPuzzleConnector : MonoBehaviour
     {
         if (pathPuzzle != null)
             pathPuzzle.onSuccess.RemoveListener(HandlePathPuzzleSuccess);
+
+        if (successRoutine != null)
+        {
+            StopCoroutine(successRoutine);
+            successRoutine = null;
+        }
     }
 
     public void HandlePathPuzzleSuccess()
     {
+        if (successRoutine != null)
+            StopCoroutine(successRoutine);
+
+        successRoutine = StartCoroutine(HandlePathPuzzleSuccessRoutine());
+    }
+
+    IEnumerator HandlePathPuzzleSuccessRoutine()
+    {
+        float delay = decodeReadyDelay + successSettleDelay;
+        if (delay > 0f)
+            yield return new WaitForSecondsRealtime(delay);
+
         MarkDecodeAreasReady();
 
         if (openDecodeInventoryOnSuccess && decodeInventoryRoot != null)
@@ -49,6 +72,8 @@ public class RecognitionDecodePathPuzzleConnector : MonoBehaviour
             SkillModeStageRules.Grant(SkillModeType.Decode);
             SkillIconModeView.SelectMode(SkillModeType.Decode);
         }
+
+        successRoutine = null;
     }
 
     void AutoWire()

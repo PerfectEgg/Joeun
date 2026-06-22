@@ -144,6 +144,7 @@ public class ManualInventorySlotManager : MonoBehaviour
         if (image != null)
         {
             image.sprite = itemData.itemIcon;
+            image.type = Image.Type.Simple;
             image.preserveAspect = true;
         }
 

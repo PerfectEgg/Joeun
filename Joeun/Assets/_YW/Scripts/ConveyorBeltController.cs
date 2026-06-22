@@ -30,6 +30,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     [SerializeField] bool sawPuzzleSolved;
     [FormerlySerializedAs("jammed")]
     [SerializeField] bool blockingItemPresent = true;
+    [SerializeField] ItemData blockingItemData;
 
     [Header("Belt Motion")]
     [SerializeField] SpriteRenderer beltRenderer;
@@ -108,9 +109,16 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
 
     public bool SawPuzzleSolved => sawPuzzleSolved;
     public bool BlockingItemPresent => blockingItemPresent;
+    public ItemData BlockingItemData => blockingItemData;
     public bool DriveReady => sawPuzzleSolved;
     public bool Jammed => blockingItemPresent;
     public bool IsBusy => activeRoutine != null;
+
+    void OnValidate()
+    {
+        if (blockingItemData != null && !string.IsNullOrEmpty(blockingItemData.itemID))
+            blockingItemId = blockingItemData.itemID;
+    }
 
     void Reset()
     {
@@ -130,6 +138,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
 
     void OnEnable()
     {
+        SyncBlockingItemStateFromChildItem();
         GameEvent.EOnItemCollected += HandleItemCollected;
     }
 
@@ -217,7 +226,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
 
     void HandleItemCollected(ItemData itemData)
     {
-        if (itemData == null || itemData.itemID != blockingItemId)
+        if (!IsBlockingItem(itemData))
             return;
 
         ClearBlockingItem();
@@ -225,7 +234,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
 
     void SyncBlockingItemStateFromChildItem()
     {
-        if (!syncBlockingItemFromChildItem || string.IsNullOrEmpty(blockingItemId))
+        if (!syncBlockingItemFromChildItem || (blockingItemData == null && string.IsNullOrEmpty(blockingItemId)))
             return;
 
         ToolItem[] childItems = GetComponentsInChildren<ToolItem>(true);
@@ -234,12 +243,23 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
             if (item == null || item._itemData == null)
                 continue;
 
-            if (item._itemData.itemID == blockingItemId && item.gameObject.activeInHierarchy)
+            if (IsBlockingItem(item._itemData) && item.gameObject.activeSelf)
             {
                 blockingItemPresent = true;
                 return;
             }
         }
+    }
+
+    bool IsBlockingItem(ItemData itemData)
+    {
+        if (itemData == null)
+            return false;
+
+        if (blockingItemData != null)
+            return itemData == blockingItemData;
+
+        return !string.IsNullOrEmpty(blockingItemId) && itemData.itemID == blockingItemId;
     }
 
     IEnumerator SawPuzzleMissingRoutine()

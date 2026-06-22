@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6261225241522582306}
   - component: {fileID: 5158570083970968937}
   - component: {fileID: 622201433773838973}
+  - component: {fileID: 6476478727967867111}
   m_Layer: 5
   m_Name: Node
   m_TagString: Untagged
@@ -85,7 +86,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ec894e9ad47245b408db1c5e6dd2d677, type: 3}
+  m_Sprite: {fileID: -8680133773001298793, guid: 8b736bf0ca583f7459e3113fe33fa3ba, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -95,3 +96,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6476478727967867111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3855592042585757375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f09dea8ed7e61354b862ffe6322af635, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillHighlightTarget
+  highlightOnRotate: 1
+  highlightOnAssemble: 0
+  highlightOnDecode: 0
+  highlightRect: {fileID: 0}

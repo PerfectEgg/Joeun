@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3475356359181725145}
   - component: {fileID: -1433864471807502025}
   - component: {fileID: 7654709333394446093}
+  - component: {fileID: 8909747332903001965}
   m_Layer: 5
   m_Name: UI_ItemPrefab
   m_TagString: Untagged
@@ -136,3 +137,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIInventoryItem
   _myItemData: {fileID: 0}
+--- !u!114 &8909747332903001965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6204422867027944585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d7a66be1fcf4c259c64e9d8d074fd97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryDragVisualEnhancer
+  showShadow: 1
+  shadowColor: {r: 0, g: 0, b: 0, a: 0.69803923}
+  shadowOffset: {x: 15, y: -15}
+  shadowScale: 0.9

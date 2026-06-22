@@ -15,4 +15,8 @@ public class ItemData : ScriptableObject
     
     [Header("UI 시각 자료")]
     public Sprite itemIcon;        // 인벤토리에 들어갈 픽셀 아트 아이콘
+
+    [Header("UI Feedback")]
+    [Min(0.1f)] public float inventoryHoverScaleMultiplier = 1.2f;
+    [Min(0.1f)] public float inventoryDragScaleMultiplier = 1.35f;
 }

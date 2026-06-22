@@ -7,8 +7,12 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public sealed class LetterBankSlot : MonoBehaviour
 {
+    const string LetterResourceFolder = "DecodeLetters";
+
     static readonly Color OffPanelColor = new Color(0.34f, 0.34f, 0.34f, 0.62f);
     static readonly Color OnPanelColor = new Color(1f, 1f, 1f, 1f);
+    static readonly Color OffLetterColor = new Color(0.24f, 0.18f, 0.28f, 0.58f);
+    static readonly Color OnLetterColor = Color.white;
     static readonly Color OffTextColor = new Color(0.62f, 0.62f, 0.62f, 0.52f);
     static readonly Color OnTextColor = new Color(1f, 1f, 1f, 1f);
     static readonly Color PulseColor = new Color(0.82f, 0.88f, 0.9f, 1f);
@@ -22,6 +26,7 @@ public sealed class LetterBankSlot : MonoBehaviour
     [SerializeField] private GameObject offVisual;
     [SerializeField] private GameObject onVisual;
     [SerializeField] private bool clickableWhenUnlocked;
+    [SerializeField, HideInInspector] private bool useLetterSpriteOnPanel = true;
     [SerializeField] private UnityEvent onSelected;
 
     private LetterBankController bank;
@@ -131,8 +136,7 @@ public sealed class LetterBankSlot : MonoBehaviour
             tmpText.color = unlocked ? OnTextColor : OffTextColor;
         }
 
-        if (panelGraphic != null)
-            panelGraphic.color = unlocked ? OnPanelColor : OffPanelColor;
+        ApplyPanelGraphic();
 
         if (canvasGroup != null)
         {
@@ -209,5 +213,37 @@ public sealed class LetterBankSlot : MonoBehaviour
             return '\0';
 
         return char.ToUpperInvariant(value);
+    }
+
+    void ApplyPanelGraphic()
+    {
+        if (panelGraphic == null)
+            return;
+
+        Color color = unlocked ? OnPanelColor : OffPanelColor;
+
+        if (useLetterSpriteOnPanel && panelGraphic is Image image && Letter != '\0')
+        {
+            Sprite letterSprite = LoadLetterSprite(Letter);
+            if (letterSprite != null)
+            {
+                image.sprite = letterSprite;
+                image.preserveAspect = true;
+                color = unlocked ? OnLetterColor : OffLetterColor;
+            }
+        }
+
+        panelGraphic.color = color;
+    }
+
+    static Sprite LoadLetterSprite(char letter)
+    {
+        string path = $"{LetterResourceFolder}/letter_{Normalize(letter)}";
+        Sprite sprite = Resources.Load<Sprite>(path);
+        if (sprite != null)
+            return sprite;
+
+        Sprite[] sprites = Resources.LoadAll<Sprite>(path);
+        return sprites != null && sprites.Length > 0 ? sprites[0] : null;
     }
 }

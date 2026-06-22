@@ -15,6 +15,7 @@ public class UIInventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     private Image _iconImage;
     private Vector3 _originPos;
     private Vector3 _originScale;
+    private bool _isDragging;
 
     // 빈자리를 지켜줄 투명한 더미 객체
     private GameObject _placeholder;
@@ -36,6 +37,8 @@ public class UIInventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         _myItemData = data;
         _iconImage.sprite = data.itemIcon; // 에디터에서 넣은 이미지로 변경
+        _iconImage.type = Image.Type.Simple;
+        _iconImage.preserveAspect = true;
 
         // 아이템이 들어오면 이미지와 상호작용을 켭니다.
         _iconImage.enabled = true;
@@ -96,6 +99,8 @@ public class UIInventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         transform.SetParent(transform.root); // 캔버스 최상단으로 이동
         
         _iconImage.raycastTarget = false;     // 마우스 클릭 방해 해제
+        _isDragging = true;
+        transform.localScale = _originScale * GetInventoryDragScaleMultiplier();
     }
 
     // 드래그 도중 마우스 위치로 아이템 이동
@@ -111,6 +116,8 @@ public class UIInventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     {
         if (_myItemData == null) return; // 빈 칸이면 드래그 방지
         _iconImage.raycastTarget = true;
+        _isDragging = false;
+        transform.localScale = _originScale;
 
         // 고정된 8칸 중 하나이므로 무조건 제자리(플레이스홀더 위치)로 돌아갑니다.
         transform.position = _originPos;
@@ -119,9 +126,9 @@ public class UIInventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         Destroy(_placeholder);
 
         Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Collider2D hit = Physics2D.OverlapPoint(worldPoint);
-        
-        if (hit != null && hit.TryGetComponent(out IPickable target))
+        IPickable target = FindPickableTarget(worldPoint);
+
+        if (target != null)
         {
             if (target.TryUnlock(_myItemData.itemID))
             {
@@ -134,17 +141,74 @@ public class UIInventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     }
     #endregion
 
+    private IPickable FindPickableTarget(Vector2 worldPoint)
+    {
+        Collider2D[] hits2D = Physics2D.OverlapPointAll(worldPoint);
+        foreach (Collider2D hit in hits2D)
+        {
+            if (hit == null)
+                continue;
+
+            if (hit.TryGetComponent(out IPickable target))
+                return target;
+
+            target = FindPickableInParents(hit.transform);
+            if (target != null)
+                return target;
+        }
+
+        return null;
+    }
+
+    private IPickable FindPickableInParents(Transform start)
+    {
+        Transform current = start != null ? start.parent : null;
+        while (current != null)
+        {
+            MonoBehaviour[] behaviours = current.GetComponents<MonoBehaviour>();
+            foreach (MonoBehaviour behaviour in behaviours)
+            {
+                if (behaviour is IPickable pickable)
+                    return pickable;
+            }
+
+            current = current.parent;
+        }
+
+        return null;
+    }
+
     #region IPointerHandler 구현
     public virtual void OnPointerEnter(PointerEventData eventData)
     {
         if (_myItemData == null) return; // 빈 칸이면 드래그 방지
-        transform.localScale = transform.localScale * 1.2f;
+        if (_isDragging) return;
+
+        transform.localScale = _originScale * GetInventoryHoverScaleMultiplier();
     }
 
     public virtual void OnPointerExit(PointerEventData eventData)
     {
         if (_myItemData == null) return; // 빈 칸이면 드래그 방지
+        if (_isDragging) return;
+
         transform.localScale = _originScale;
     }
     #endregion
+
+    private float GetInventoryHoverScaleMultiplier()
+    {
+        if (_myItemData == null || _myItemData.inventoryHoverScaleMultiplier <= 0f)
+            return 1.2f;
+
+        return _myItemData.inventoryHoverScaleMultiplier;
+    }
+
+    private float GetInventoryDragScaleMultiplier()
+    {
+        if (_myItemData == null || _myItemData.inventoryDragScaleMultiplier <= 0f)
+            return 1.35f;
+
+        return _myItemData.inventoryDragScaleMultiplier;
+    }
 }

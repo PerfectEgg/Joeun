@@ -8,6 +8,10 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPointerClickHandler
 {
+    const string RuntimeAreaShadeObjectName = "__RecognitionDecodeAreaShade";
+
+    static readonly Color DecodedAreaShadeColor = new Color(0.012f, 0.016f, 0.022f, 0.88f);
+
     [Header("Decode Gate")]
     [SerializeField] bool decodeReady;
     [SerializeField] bool requireDecodeMode = true;
@@ -37,9 +41,14 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
 
     [Header("Highlight")]
     [SerializeField] SkillHighlightTarget decodeHighlight;
-    [SerializeField] RectTransform highlightRect;
+    [SerializeField] Image highlightImage;
+    [SerializeField] RecognitionDecodeScanVisualMode scanVisualMode = RecognitionDecodeScanVisualMode.ProceduralLine;
+    [SerializeField] UnityEngine.Object scanImageAsset;
+    [SerializeField, HideInInspector] RectTransform highlightRect;
     [SerializeField] Collider2D areaCollider;
     [SerializeField, HideInInspector] RecognitionDecodeScanEffect scanEffect;
+    [SerializeField, HideInInspector] Image areaShadeImage;
+    float decodeHighlightCornerRadius = -1f;
 
     [Header("Events")]
     [SerializeField] UnityEvent onDecodeReady;
@@ -82,6 +91,12 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
     void Reset()
     {
         AutoWire();
+    }
+
+    void OnValidate()
+    {
+        if (highlightImage != null)
+            highlightRect = highlightImage.rectTransform;
     }
 
     void OnEnable()
@@ -232,14 +247,14 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
         if (scanEffect == null)
             scanEffect = GetComponent<RecognitionDecodeScanEffect>();
 
-        if (usesLetterBankVisual && revealImage == GetComponent<Image>())
+        Image selfImage = GetComponent<Image>();
+        if ((usesLetterBankVisual || IsAreaMarkerImage(selfImage)) && revealImage == selfImage)
             revealImage = null;
 
         if (!usesLetterBankVisual && revealImage == null)
         {
-            Image image = GetComponent<Image>();
-            if (image != null && image.sprite != null)
-                revealImage = image;
+            if (selfImage != null && selfImage.sprite != null && !IsAreaMarkerImage(selfImage))
+                revealImage = selfImage;
         }
 
         if (revealSpriteRenderer == null)
@@ -285,9 +300,7 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
     void ConfigureHighlight()
     {
         bool usesLetterBankVisual = GetComponent<LetterBankLetterView>() != null;
-
-        if (highlightRect == null)
-            highlightRect = transform as RectTransform;
+        RectTransform targetRect = ResolveHighlightRect();
 
         if (decodeHighlight == null)
             decodeHighlight = GetComponentInChildren<SkillHighlightTarget>(true);
@@ -295,12 +308,115 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
         if (decodeHighlight == null)
             decodeHighlight = gameObject.AddComponent<SkillHighlightTarget>();
 
-        decodeHighlight.Configure(false, false, true, highlightRect);
+        decodeHighlight.SetFrameCornerRadius(decodeHighlightCornerRadius);
+        decodeHighlight.Configure(false, false, true, targetRect);
         decodeHighlight.SetStableFrame(usesLetterBankVisual);
+
+        if (scanEffect != null)
+            ApplyScanEffectArea();
+
+        EnsureAreaShade();
+    }
+
+    RectTransform FindHighlightAreaRect()
+    {
+        Image image = FindHighlightAreaImage();
+        return image != null ? image.rectTransform : null;
+    }
+
+    Image FindHighlightAreaImage()
+    {
+        Image[] images = GetComponentsInChildren<Image>(true);
+        Image namedFallback = null;
+
+        foreach (Image image in images)
+        {
+            if (image == null)
+                continue;
+
+            if (image.transform == transform)
+            {
+                if (IsAreaMarkerImage(image))
+                    return image;
+
+                continue;
+            }
+
+            if (image == revealImage)
+                continue;
+
+            if (image.GetComponentInParent<RecognitionDecodeCell>() != null)
+                continue;
+
+            if (image.name.StartsWith("__RecognitionDecode", System.StringComparison.Ordinal))
+                continue;
+
+            string normalizedName = image.name.Replace(" ", string.Empty).Replace("_", string.Empty).ToLowerInvariant();
+            bool explicitArea =
+                normalizedName.Contains("highlight")
+                || normalizedName.Contains("hitarea")
+                || normalizedName.Contains("decodearea")
+                || normalizedName.Contains("area");
+
+            if (!explicitArea)
+                continue;
+
+            if (IsAreaMarkerImage(image))
+                return image;
+
+            if (namedFallback == null)
+                namedFallback = image;
+        }
+
+        return namedFallback;
+    }
+
+    RectTransform ResolveHighlightRect()
+    {
+        if (highlightImage != null)
+        {
+            highlightRect = highlightImage.rectTransform;
+            return highlightRect;
+        }
+
+        if (highlightRect != null)
+            return highlightRect;
+
+        highlightImage = FindHighlightAreaImage();
+        if (highlightImage != null)
+        {
+            highlightRect = highlightImage.rectTransform;
+            return highlightRect;
+        }
+
+        highlightRect = transform as RectTransform;
+        return highlightRect;
+    }
+
+    void ApplyScanEffectArea()
+    {
+        if (scanEffect == null)
+            return;
+
+        scanEffect.SetScanVisualMode(scanVisualMode);
+        scanEffect.SetFillScanAsset(scanImageAsset);
+
+        if (highlightImage != null)
+        {
+            scanEffect.SetScanImage(highlightImage);
+            return;
+        }
+
+        RectTransform targetRect = ResolveHighlightRect();
+        if (targetRect != null)
+            scanEffect.SetScanArea(targetRect);
     }
 
     void ApplyVisual()
     {
+        bool showDecodeResult = decoded || isDecoding;
+        SetAreaShadeVisible(showDecodeResult);
+
         if (hiddenVisual != null)
             hiddenVisual.SetActive(!decoded);
 
@@ -312,7 +428,6 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
             if (cell == null)
                 continue;
 
-            bool showDecodeResult = decoded || isDecoding;
             cell.SetDecodeResultVisual(showDecodeResult);
             cell.SetBitsVisible(showDecodeResult || !decoded || !hideBitsWhenDecoded);
             cell.SetDecodeAvailable(CanDecode);
@@ -325,7 +440,10 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
             if (icon != null)
                 revealImage.sprite = icon;
 
-            revealImage.enabled = decoded && revealImage.sprite != null;
+            if (IsAreaMarkerImage(revealImage))
+                revealImage.enabled = true;
+            else
+                revealImage.enabled = decoded && revealImage.sprite != null;
         }
 
         if (revealSpriteRenderer != null)
@@ -358,7 +476,12 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
             areaCollider.enabled = canDecode;
 
         if (inputRaycastGraphic != null)
+        {
+            if (IsAreaMarkerImage(inputRaycastGraphic as Image))
+                inputRaycastGraphic.enabled = true;
+
             inputRaycastGraphic.raycastTarget = canDecode;
+        }
 
         foreach (RecognitionDecodeCell cell in bitCells)
         {
@@ -433,6 +556,21 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
         inputRaycastGraphic = graphic;
     }
 
+    bool IsAreaMarkerImage(Image image)
+    {
+        if (image == null)
+            return false;
+
+        if (image.color.a <= 0.08f)
+            return true;
+
+        string normalizedName = image.name.Replace(" ", string.Empty).Replace("_", string.Empty).ToLowerInvariant();
+        return normalizedName.Contains("highlight")
+            || normalizedName.Contains("hitarea")
+            || normalizedName.Contains("decodearea")
+            || normalizedName.Contains("area");
+    }
+
     void EnsureScanEffect()
     {
         if (!(transform is RectTransform))
@@ -444,7 +582,66 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
         if (scanEffect == null)
             scanEffect = gameObject.AddComponent<RecognitionDecodeScanEffect>();
 
+        ApplyScanEffectArea();
+
         scanEffect.Prepare();
+    }
+
+    void EnsureAreaShade()
+    {
+        RectTransform targetRect = ResolveHighlightRect();
+        if (targetRect == null)
+            return;
+
+        if (areaShadeImage != null && areaShadeImage.transform.parent == targetRect)
+            return;
+
+        Transform existing = targetRect.Find(RuntimeAreaShadeObjectName);
+        GameObject shadeObject = existing != null
+            ? existing.gameObject
+            : new GameObject(RuntimeAreaShadeObjectName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+
+        if (existing == null)
+            shadeObject.transform.SetParent(targetRect, false);
+
+        RectTransform shadeRect = shadeObject.transform as RectTransform;
+        Stretch(shadeRect);
+
+        areaShadeImage = shadeObject.GetComponent<Image>();
+        areaShadeImage.raycastTarget = false;
+        areaShadeImage.maskable = false;
+        areaShadeImage.color = DecodedAreaShadeColor;
+        areaShadeImage.sprite = highlightImage != null ? highlightImage.sprite : null;
+        areaShadeImage.type = highlightImage != null ? highlightImage.type : Image.Type.Simple;
+        areaShadeImage.preserveAspect = false;
+        areaShadeImage.enabled = false;
+        areaShadeImage.transform.SetAsFirstSibling();
+    }
+
+    void SetAreaShadeVisible(bool visible)
+    {
+        EnsureAreaShade();
+
+        if (areaShadeImage == null)
+            return;
+
+        areaShadeImage.enabled = visible;
+        areaShadeImage.color = DecodedAreaShadeColor;
+        areaShadeImage.transform.SetAsFirstSibling();
+    }
+
+    static void Stretch(RectTransform rect)
+    {
+        if (rect == null)
+            return;
+
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.localScale = Vector3.one;
     }
 
     string ResolveExpectedText()

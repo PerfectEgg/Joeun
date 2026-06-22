@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public sealed class LetterBankLetterView : MonoBehaviour
 {
     private const string LetterResourceFolder = "DecodeLetters";
+    private static readonly Color LockedImageColor = new Color(0.24f, 0.18f, 0.28f, 0.58f);
+    private static readonly Color UnlockedImageColor = Color.white;
 
     [SerializeField] private LetterBankController bank;
     [SerializeField] private string letter;
@@ -163,9 +165,19 @@ public sealed class LetterBankLetterView : MonoBehaviour
 
         ResolveSpritesIfNeeded();
 
-        Sprite sprite = unlocked ? unlockedSprite : lockedSprite;
+        Sprite sprite = unlocked
+            ? unlockedSprite
+            : unlockedSprite != null
+                ? unlockedSprite
+                : lockedSprite;
+
         if (sprite != null)
+        {
             image.sprite = sprite;
+            image.enabled = true;
+        }
+
+        image.color = unlocked ? UnlockedImageColor : LockedImageColor;
     }
 
     private void ResolveSpritesIfNeeded()

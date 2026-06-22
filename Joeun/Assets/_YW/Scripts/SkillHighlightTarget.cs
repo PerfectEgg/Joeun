@@ -34,6 +34,7 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
     private float pulseGlowAlpha = 0.14f;
     private float pulseBorderThickness = 0.75f;
     private float hoverFrameScale = 1.035f;
+    private float frameCornerRadius;
     private bool stableFrame;
 
     private const string FrameObjectName = "__SkillHighlightFrame";
@@ -66,6 +67,14 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
     public void SetStableFrame(bool value)
     {
         stableFrame = value;
+
+        if (isActiveAndEnabled)
+            Apply(SkillIconModeView.CurrentMode);
+    }
+
+    public void SetFrameCornerRadius(float value)
+    {
+        frameCornerRadius = value;
 
         if (isActiveAndEnabled)
             Apply(SkillIconModeView.CurrentMode);
@@ -180,7 +189,8 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
             glowColor,
             thickness,
             glowSize,
-            outerGlowSteps);
+            outerGlowSteps,
+            frameCornerRadius);
 
         if (frameRect != null)
         {
@@ -421,14 +431,16 @@ public class SkillHighlightFrameGraphic : MaskableGraphic
     private float borderThickness = 3f;
     private float outerGlowSize = 10f;
     private int outerGlowSteps = 5;
+    private float cornerRadius;
 
-    public void SetVisual(Color border, Color glow, float borderWidth, float glowSize, int glowSteps)
+    public void SetVisual(Color border, Color glow, float borderWidth, float glowSize, int glowSteps, float radius = 0f)
     {
         borderColor = border;
         glowColor = glow;
         borderThickness = Mathf.Max(0f, borderWidth);
         outerGlowSize = Mathf.Max(0f, glowSize);
         outerGlowSteps = Mathf.Max(1, glowSteps);
+        cornerRadius = radius;
         SetVerticesDirty();
     }
 
@@ -450,12 +462,12 @@ public class SkillHighlightFrameGraphic : MaskableGraphic
                 Color c = glowColor;
                 c.a *= t * t;
 
-                AddRing(vh, Expand(rect, outerOffset), Expand(rect, innerOffset), c);
+                AddRing(vh, Expand(rect, outerOffset), Expand(rect, innerOffset), c, outerOffset, innerOffset);
             }
         }
 
         if (borderThickness > 0f && borderColor.a > 0f)
-            AddRing(vh, rect, Inset(rect, borderThickness), borderColor);
+            AddRing(vh, rect, Inset(rect, borderThickness), borderColor, 0f, -borderThickness);
     }
 
     private static Rect Expand(Rect rect, float amount)
@@ -476,12 +488,66 @@ public class SkillHighlightFrameGraphic : MaskableGraphic
         return rect;
     }
 
-    private static void AddRing(VertexHelper vh, Rect outer, Rect inner, Color color)
+    private void AddRing(VertexHelper vh, Rect outer, Rect inner, Color color, float outerRadiusOffset, float innerRadiusOffset)
     {
+        if (cornerRadius != 0f)
+        {
+            float baseRadius = cornerRadius < 0f
+                ? Mathf.Min(outer.width, outer.height) * 0.22f
+                : cornerRadius;
+
+            AddRoundedRing(
+                vh,
+                outer,
+                inner,
+                color,
+                baseRadius + outerRadiusOffset,
+                baseRadius + innerRadiusOffset);
+            return;
+        }
+
         AddQuad(vh, outer.xMin, inner.yMax, outer.xMax, outer.yMax, color);
         AddQuad(vh, outer.xMin, outer.yMin, outer.xMax, inner.yMin, color);
         AddQuad(vh, outer.xMin, inner.yMin, inner.xMin, inner.yMax, color);
         AddQuad(vh, inner.xMax, inner.yMin, outer.xMax, inner.yMax, color);
+    }
+
+    private static void AddRoundedRing(VertexHelper vh, Rect outer, Rect inner, Color color, float outerRadius, float innerRadius)
+    {
+        if (outer.width <= 0f || outer.height <= 0f || inner.width <= 0f || inner.height <= 0f || color.a <= 0f)
+            return;
+
+        const int segmentsPerCorner = 8;
+        List<Vector2> outerPoints = BuildRoundedRect(outer, outerRadius, segmentsPerCorner);
+        List<Vector2> innerPoints = BuildRoundedRect(inner, innerRadius, segmentsPerCorner);
+        int count = Mathf.Min(outerPoints.Count, innerPoints.Count);
+
+        for (int i = 0; i < count; i++)
+        {
+            int next = (i + 1) % count;
+            AddQuad(vh, outerPoints[i], outerPoints[next], innerPoints[next], innerPoints[i], color);
+        }
+    }
+
+    private static List<Vector2> BuildRoundedRect(Rect rect, float radius, int segmentsPerCorner)
+    {
+        radius = Mathf.Clamp(radius, 0f, Mathf.Min(rect.width, rect.height) * 0.5f);
+
+        List<Vector2> points = new List<Vector2>((segmentsPerCorner + 1) * 4);
+        AddArc(points, new Vector2(rect.xMax - radius, rect.yMax - radius), radius, 90f, 0f, segmentsPerCorner);
+        AddArc(points, new Vector2(rect.xMax - radius, rect.yMin + radius), radius, 0f, -90f, segmentsPerCorner);
+        AddArc(points, new Vector2(rect.xMin + radius, rect.yMin + radius), radius, -90f, -180f, segmentsPerCorner);
+        AddArc(points, new Vector2(rect.xMin + radius, rect.yMax - radius), radius, 180f, 90f, segmentsPerCorner);
+        return points;
+    }
+
+    private static void AddArc(List<Vector2> points, Vector2 center, float radius, float startAngle, float endAngle, int segments)
+    {
+        for (int i = 0; i <= segments; i++)
+        {
+            float angle = Mathf.Lerp(startAngle, endAngle, (float)i / segments) * Mathf.Deg2Rad;
+            points.Add(center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius);
+        }
     }
 
     private static void AddQuad(VertexHelper vh, float xMin, float yMin, float xMax, float yMax, Color color)
@@ -500,6 +566,25 @@ public class SkillHighlightFrameGraphic : MaskableGraphic
         vertex.position = new Vector3(xMax, yMax);
         vh.AddVert(vertex);
         vertex.position = new Vector3(xMax, yMin);
+        vh.AddVert(vertex);
+
+        vh.AddTriangle(start, start + 1, start + 2);
+        vh.AddTriangle(start + 2, start + 3, start);
+    }
+
+    private static void AddQuad(VertexHelper vh, Vector2 a, Vector2 b, Vector2 c, Vector2 d, Color color)
+    {
+        int start = vh.currentVertCount;
+        UIVertex vertex = UIVertex.simpleVert;
+        vertex.color = color;
+
+        vertex.position = a;
+        vh.AddVert(vertex);
+        vertex.position = b;
+        vh.AddVert(vertex);
+        vertex.position = c;
+        vh.AddVert(vertex);
+        vertex.position = d;
         vh.AddVert(vertex);
 
         vh.AddTriangle(start, start + 1, start + 2);

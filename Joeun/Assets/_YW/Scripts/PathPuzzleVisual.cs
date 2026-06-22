@@ -5,6 +5,37 @@ using UnityEngine.UI;
 
 public class PathPuzzleVisual : MonoBehaviour
 {
+    [System.Serializable]
+    private class ToggleVisual
+    {
+        [SerializeField] private GameObject onVisual;
+        [SerializeField] private GameObject offVisual;
+
+        public void SetOn(bool isOn)
+        {
+            if (onVisual != null)
+                onVisual.SetActive(isOn);
+
+            if (offVisual != null)
+                offVisual.SetActive(!isOn);
+        }
+    }
+
+    private class InitialSlotState
+    {
+        public GridSlot slot;
+        public GridNode node;
+        public bool hadNode;
+        public bool nodeActive;
+        public GridNode.Dir direction;
+        public Transform parent;
+        public int siblingIndex;
+    }
+
+    private const string SlotHighlightAreaName = "__PathPuzzleSlotHighlightArea";
+    private const string SlotLitOverlayName = "__PathPuzzleLitOverlay";
+    private const string TraceErrorOverlayName = "__TraceErrorOverlay";
+
     [Header("References")]
     [SerializeField] private PathPuzzleManager manager;
     [SerializeField] private Graphic failGlowTarget;
@@ -16,16 +47,29 @@ public class PathPuzzleVisual : MonoBehaviour
     [SerializeField] private GameObject[] showOnSuccess;
     [SerializeField] private GameObject[] hideOnSuccess;
 
-    private bool hideUnusedTraceSlots = true;
+    [Header("Control Feedback")]
+    [SerializeField] private ToggleVisual startVisual;
+    [SerializeField] private ToggleVisual resetVisual;
+    [SerializeField] private Button[] startButtons;
+    [SerializeField] private Button[] resetButtons;
+    [SerializeField] private float resetOnSeconds = 1f;
+
     private bool useSlotAsNodeBackground = true;
     private bool includeGoalSlotInTrace = true;
     private bool autoAddSlotHighlights = true;
     private bool fitNodesToSlots = true;
-    private bool autoLayoutTraceSlots = true;
     private float nodeFillPadding = 0f;
+    private bool useNodeSpriteStates = true;
+    private Sprite nodeIdleSprite = null;
+    private Sprite nodeLitSprite = null;
+    [SerializeField] private UnityEngine.Object nodeLitOverlayAsset = null;
+    private Sprite nodeStartSprite = null;
+    private Sprite nodeGoalSprite = null;
+    private float nodeHighlightCornerRadius = -1f;
+    private float slotHighlightCornerRadius = -1f;
     private bool autoBindManagerEvents = false;
-    private Color successColor = new Color(0.35f, 0.95f, 0.55f);
     private Color failColor = new Color(0.95f, 0.2f, 0.18f);
+    private Color traceMissingColor = new Color(1f, 0.08f, 0.08f, 0.86f);
     private float successDelay = 1.5f;
     private float failFlashInterval = 0.12f;
     private int failFlashCount = 2;
@@ -38,6 +82,7 @@ public class PathPuzzleVisual : MonoBehaviour
     private Coroutine visualTraceRoutine;
     private Coroutine feedbackRoutine;
     private Coroutine shakeRoutine;
+    private Coroutine resetPulseRoutine;
     private bool isRunning;
     private Outline failOutline;
     private RectTransform activeShakeTarget;
@@ -45,7 +90,13 @@ public class PathPuzzleVisual : MonoBehaviour
     private bool hasShakeOriginalPosition;
     private bool ownsInteractionLock;
     private bool isSolved;
+    private bool initialStateCaptured;
+    private int lastTraceCount;
     private readonly Dictionary<Image, Color> slotIdleColors = new Dictionary<Image, Color>();
+    private readonly List<InitialSlotState> initialSlotStates = new List<InitialSlotState>();
+    private readonly HashSet<GridNode> initialNodes = new HashSet<GridNode>();
+    private Texture2D runtimeNodeLitOverlayTexture;
+    private Sprite runtimeNodeLitOverlaySprite;
 
     private void Reset()
     {
@@ -62,6 +113,10 @@ public class PathPuzzleVisual : MonoBehaviour
     {
         Apply();
         BindManagerEvents();
+
+        if (!IsSolvedState())
+            ResetToInitialPuzzleState(true);
+
         ApplyStartButtonState();
     }
 
@@ -79,8 +134,18 @@ public class PathPuzzleVisual : MonoBehaviour
         if (shakeRoutine != null)
             StopCoroutine(shakeRoutine);
 
+        if (resetPulseRoutine != null)
+            StopCoroutine(resetPulseRoutine);
+
         ReleaseInteractionLock();
         RestoreShakeTarget();
+        SetStartVisual(false);
+        SetResetVisual(false);
+    }
+
+    private void OnDestroy()
+    {
+        ClearRuntimeNodeLitOverlaySprite();
     }
 
     private void LateUpdate()
@@ -96,7 +161,9 @@ public class PathPuzzleVisual : MonoBehaviour
     {
         gameObject.SetActive(true);
         Apply();
-        ResetPuzzleVisuals();
+        if (!IsSolvedState())
+            ResetToInitialPuzzleState(true);
+
         ApplyStartButtonState();
 
         SetObjectsActive(showOnOpen, true);
@@ -120,7 +187,8 @@ public class PathPuzzleVisual : MonoBehaviour
         BindNodeBackgrounds();
         FitNodesToSlots();
         EnsureSlotHighlights();
-        ApplyTraceSlotLimit();
+        CaptureInitialStateIfNeeded();
+        ResetTraceIndicators();
         ApplyFailGlow(false);
     }
 
@@ -150,7 +218,52 @@ public class PathPuzzleVisual : MonoBehaviour
             StopCoroutine(feedbackRoutine);
 
         SetStartButtonsInteractable(false);
+        SetResetButtonsInteractable(true);
+        SetStartVisual(true);
         visualTraceRoutine = StartCoroutine(TraceRoutine());
+    }
+
+    public void ResetAttemptVisuals()
+    {
+        if (IsSolvedState())
+            return;
+
+        StopActiveTrace();
+        StopFeedback();
+        ResetToInitialPuzzleState(true);
+        ApplyStartButtonState();
+        PulseResetVisual();
+    }
+
+    private void StopActiveTrace()
+    {
+        if (visualTraceRoutine != null)
+        {
+            StopCoroutine(visualTraceRoutine);
+            visualTraceRoutine = null;
+        }
+
+        isRunning = false;
+        ReleaseInteractionLock();
+        SetStartVisual(false);
+    }
+
+    private void StopFeedback()
+    {
+        if (feedbackRoutine != null)
+        {
+            StopCoroutine(feedbackRoutine);
+            feedbackRoutine = null;
+        }
+
+        if (shakeRoutine != null)
+        {
+            StopCoroutine(shakeRoutine);
+            shakeRoutine = null;
+        }
+
+        RestoreShakeTarget();
+        ApplyFailGlow(false);
     }
 
     public void PlaySuccessFeedback()
@@ -172,7 +285,10 @@ public class PathPuzzleVisual : MonoBehaviour
             StopCoroutine(feedbackRoutine);
 
         if (!isSolved && (manager == null || !manager.IsSolved))
+        {
             SetStartButtonsInteractable(true);
+            SetResetButtonsInteractable(true);
+        }
 
         feedbackRoutine = StartCoroutine(FailFeedbackRoutine());
     }
@@ -198,14 +314,22 @@ public class PathPuzzleVisual : MonoBehaviour
             if (node == null)
                 continue;
 
-            Image slotImage = slot.GetComponent<Image>();
-            if (slotImage != null)
+            PatternPuzzleNodeVisual nodeVisual = ConfigureNodeVisual(node, slot);
+            if (nodeVisual != null)
             {
-                if (!slotIdleColors.ContainsKey(slotImage))
-                    slotIdleColors.Add(slotImage, slotImage.color);
+                node.background = null;
+            }
+            else
+            {
+                Image slotImage = slot.GetComponent<Image>();
+                if (slotImage != null)
+                {
+                    if (!slotIdleColors.ContainsKey(slotImage))
+                        slotIdleColors.Add(slotImage, slotImage.color);
 
-                node.background = slotImage;
-                node.idleColor = slotIdleColors[slotImage];
+                    node.background = slotImage;
+                    node.idleColor = slotIdleColors[slotImage];
+                }
             }
 
             if (node.arrow == null)
@@ -274,18 +398,48 @@ public class PathPuzzleVisual : MonoBehaviour
             if (highlight == null)
                 highlight = slot.gameObject.AddComponent<SkillHighlightTarget>();
 
-            highlight.Configure(false, true, false, slot.transform as RectTransform);
+            highlight.SetFrameCornerRadius(slotHighlightCornerRadius);
+            highlight.Configure(false, true, false, GetOrCreateSlotHighlightRect(slot));
         }
     }
 
-    private void ApplyTraceSlotLimit()
+    private RectTransform GetOrCreateSlotHighlightRect(GridSlot slot)
     {
-        if (manager.traceSlots == null)
+        if (slot == null)
+            return null;
+
+        RectTransform slotRect = slot.transform as RectTransform;
+        if (slotRect == null)
+            return null;
+
+        Transform existing = slotRect.Find(SlotHighlightAreaName);
+        GameObject areaObject = existing != null
+            ? existing.gameObject
+            : new GameObject(SlotHighlightAreaName, typeof(RectTransform));
+
+        if (existing == null)
+            areaObject.transform.SetParent(slotRect, false);
+
+        RectTransform areaRect = areaObject.transform as RectTransform;
+        areaRect.anchorMin = Vector2.zero;
+        areaRect.anchorMax = Vector2.one;
+        areaRect.offsetMin = new Vector2(nodeFillPadding, nodeFillPadding);
+        areaRect.offsetMax = new Vector2(-nodeFillPadding, -nodeFillPadding);
+        areaRect.pivot = new Vector2(0.5f, 0.5f);
+        areaRect.anchoredPosition = Vector2.zero;
+        areaRect.localScale = Vector3.one;
+        areaObject.transform.SetAsLastSibling();
+
+        return areaRect;
+    }
+
+    private void ResetTraceIndicators()
+    {
+        if (manager == null || manager.traceSlots == null)
             return;
 
-        int visibleCount = Mathf.Min(VisibleTraceCount(), manager.traceSlots.Count);
-        if (autoLayoutTraceSlots)
-            LayoutTraceSlots(visibleCount);
+        lastTraceCount = 0;
+        HideTraceErrorOverlays();
 
         for (int i = 0; i < manager.traceSlots.Count; i++)
         {
@@ -293,13 +447,8 @@ public class PathPuzzleVisual : MonoBehaviour
             if (traceSlot == null)
                 continue;
 
-            bool used = i < VisibleTraceCount();
-
-            if (hideUnusedTraceSlots)
-                traceSlot.gameObject.SetActive(used);
-
-            if (used)
-                traceSlot.color = manager.traceEmptyColor;
+            traceSlot.gameObject.SetActive(true);
+            SetTraceSlotAlpha(traceSlot, 0f);
         }
     }
 
@@ -308,90 +457,29 @@ public class PathPuzzleVisual : MonoBehaviour
         if (!autoAddSlotHighlights || node == null)
             return;
 
-        SkillHighlightTarget highlight = node.GetComponent<SkillHighlightTarget>();
-        if (highlight == null)
-            highlight = node.gameObject.AddComponent<SkillHighlightTarget>();
-
-        highlight.Configure(true, false, false, node.transform as RectTransform);
-    }
-
-    private void LayoutTraceSlots(int visibleCount)
-    {
-        if (visibleCount <= 0 || manager.traceSlots == null)
-            return;
-
-        RectTransform parent = manager.traceSlots[0] != null
-            ? manager.traceSlots[0].transform.parent as RectTransform
-            : null;
-
-        if (parent == null)
-            return;
-
-        float parentHeight = parent.rect.height;
-        if (parentHeight <= 0f)
-            return;
-
-        float slotHeight = 0f;
-        float slotWidth = 0f;
-        for (int i = 0; i < manager.traceSlots.Count; i++)
+        SkillHighlightTarget[] highlights = node.GetComponents<SkillHighlightTarget>();
+        if (highlights == null || highlights.Length == 0)
         {
-            if (manager.traceSlots[i] == null)
-                continue;
-
-            RectTransform rect = manager.traceSlots[i].transform as RectTransform;
-            if (rect == null)
-                continue;
-
-            slotHeight = rect.rect.height > 0f ? rect.rect.height : rect.sizeDelta.y;
-            slotWidth = rect.rect.width > 0f ? rect.rect.width : rect.sizeDelta.x;
-            break;
+            SkillHighlightTarget highlight = node.gameObject.AddComponent<SkillHighlightTarget>();
+            highlights = new[] { highlight };
         }
 
-        if (slotHeight <= 0f)
-            slotHeight = parentHeight / visibleCount;
-
-        if (slotWidth <= 0f)
-            slotWidth = parent.rect.width;
-
-        float spacing = visibleCount > 1
-            ? (parentHeight - slotHeight * visibleCount) / (visibleCount - 1)
-            : 0f;
-
-        if (spacing < 0f)
+        RectTransform nodeRect = node.transform as RectTransform;
+        foreach (SkillHighlightTarget highlight in highlights)
         {
-            slotHeight = parentHeight / visibleCount;
-            spacing = 0f;
-        }
-
-        for (int i = 0; i < manager.traceSlots.Count; i++)
-        {
-            Image traceSlot = manager.traceSlots[i];
-            if (traceSlot == null)
+            if (highlight == null)
                 continue;
 
-            RectTransform rect = traceSlot.transform as RectTransform;
-            if (rect == null)
-                continue;
-
-            rect.anchorMin = new Vector2(0.5f, 0f);
-            rect.anchorMax = new Vector2(0.5f, 0f);
-            rect.pivot = new Vector2(0.5f, 0f);
-            rect.sizeDelta = new Vector2(slotWidth, slotHeight);
-            rect.anchoredPosition = new Vector2(0f, i * (slotHeight + spacing));
-            rect.localScale = Vector3.one;
+            highlight.SetFrameCornerRadius(nodeHighlightCornerRadius);
+            highlight.Configure(true, false, false, nodeRect);
         }
-    }
-
-    private int VisibleTraceCount()
-    {
-        return manager.requiredCount;
     }
 
     private IEnumerator TraceRoutine()
     {
         isRunning = true;
         AcquireInteractionLock();
-        ApplyTraceSlotLimit();
+        ResetTraceIndicators();
 
         List<GridSlot> slots = manager.slots;
         if (slots == null || slots.Count == 0)
@@ -420,7 +508,9 @@ public class PathPuzzleVisual : MonoBehaviour
                 : slot.GetComponentInChildren<GridNode>(true);
 
             if (node != null)
-                node.SetLit(false);
+                SetNodeLit(node, slot, false);
+
+            SetSlotLitOverlay(slot, false);
         }
 
         HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
@@ -468,7 +558,7 @@ public class PathPuzzleVisual : MonoBehaviour
                 break;
             }
 
-            node.SetLit(true);
+            SetNodeLit(node, slot, true);
             FillTraceSlot(++count);
 
             if (count > manager.requiredCount)
@@ -491,6 +581,7 @@ public class PathPuzzleVisual : MonoBehaviour
 
         bool success = !fail && current == goalCell && count == manager.requiredCount;
         isRunning = false;
+        visualTraceRoutine = null;
         ReleaseInteractionLock();
 
         if (success)
@@ -504,6 +595,8 @@ public class PathPuzzleVisual : MonoBehaviour
                 reason = count < manager.requiredCount ? "Not enough cells" : "Invalid trace";
 
             SetStartButtonsInteractable(true);
+            SetResetButtonsInteractable(true);
+            SetStartVisual(false);
             manager.onFail?.Invoke(reason);
         }
     }
@@ -516,22 +609,97 @@ public class PathPuzzleVisual : MonoBehaviour
             manager.MarkSolved();
 
         SetStartButtonsInteractable(false);
+        SetResetButtonsInteractable(false);
+        SetStartVisual(true);
+        SetResetVisual(false);
     }
 
     private void ApplyStartButtonState()
     {
-        bool solved = isSolved || manager != null && manager.IsSolved;
+        bool solved = IsSolvedState();
         SetStartButtonsInteractable(!isRunning && !solved);
+        SetResetButtonsInteractable(!solved);
+        SetStartVisual(isRunning || solved);
+
+        if (solved)
+            SetResetVisual(false);
+    }
+
+    private bool IsSolvedState()
+    {
+        return isSolved || manager != null && manager.IsSolved;
     }
 
     private void SetStartButtonsInteractable(bool interactable)
     {
+        if (SetExplicitButtonsInteractable(startButtons, interactable))
+            return;
+
         Button[] buttons = GetComponentsInChildren<Button>(true);
         foreach (Button button in buttons)
         {
             if (button != null && button.name == "Start")
                 button.interactable = interactable;
         }
+    }
+
+    private void SetResetButtonsInteractable(bool interactable)
+    {
+        if (SetExplicitButtonsInteractable(resetButtons, interactable))
+            return;
+
+        Button[] buttons = GetComponentsInChildren<Button>(true);
+        foreach (Button button in buttons)
+        {
+            if (button != null && button.name == "Reset")
+                button.interactable = interactable;
+        }
+    }
+
+    private bool SetExplicitButtonsInteractable(Button[] buttons, bool interactable)
+    {
+        if (buttons == null || buttons.Length == 0)
+            return false;
+
+        bool hasButton = false;
+        foreach (Button button in buttons)
+        {
+            if (button == null)
+                continue;
+
+            button.interactable = interactable;
+            hasButton = true;
+        }
+
+        return hasButton;
+    }
+
+    private void SetStartVisual(bool isOn)
+    {
+        if (startVisual != null)
+            startVisual.SetOn(isOn);
+    }
+
+    private void SetResetVisual(bool isOn)
+    {
+        if (resetVisual != null)
+            resetVisual.SetOn(isOn);
+    }
+
+    private void PulseResetVisual()
+    {
+        if (resetPulseRoutine != null)
+            StopCoroutine(resetPulseRoutine);
+
+        resetPulseRoutine = StartCoroutine(ResetPulseRoutine());
+    }
+
+    private IEnumerator ResetPulseRoutine()
+    {
+        SetResetVisual(true);
+        yield return new WaitForSeconds(Mathf.Max(0f, resetOnSeconds));
+        SetResetVisual(false);
+        resetPulseRoutine = null;
     }
 
     private void AcquireInteractionLock()
@@ -554,6 +722,19 @@ public class PathPuzzleVisual : MonoBehaviour
 
     private void LightSlot(GridSlot slot)
     {
+        GridNode node = slot.currentNode != null
+            ? slot.currentNode
+            : slot.GetComponentInChildren<GridNode>(true);
+
+        if (node != null)
+        {
+            SetNodeLit(node, slot, true);
+            return;
+        }
+
+        if (SetSlotLitOverlay(slot, true))
+            return;
+
         Image slotImage = slot.GetComponent<Image>();
         if (slotImage != null)
             slotImage.color = manager.traceFilledColor;
@@ -561,18 +742,116 @@ public class PathPuzzleVisual : MonoBehaviour
 
     private void FillTraceSlot(int count)
     {
-        int index = count - 1;
-        if (manager.traceSlots == null || index < 0 || index >= manager.traceSlots.Count)
+        if (manager == null || manager.traceSlots == null)
             return;
 
-        Image traceSlot = manager.traceSlots[index];
-        if (traceSlot != null)
-            traceSlot.color = manager.traceFilledColor;
+        int litCount = Mathf.Clamp(count, 0, manager.requiredCount);
+        lastTraceCount = litCount;
+
+        List<Image> orderedSlots = GetTraceSlotsBottomFirst();
+        for (int i = 0; i < orderedSlots.Count; i++)
+            SetTraceSlotAlpha(orderedSlots[i], i < litCount ? 1f : 0f);
+    }
+
+    private bool SetSlotLitOverlay(GridSlot slot, bool lit)
+    {
+        if (slot == null || !(slot.transform is RectTransform slotRect))
+            return false;
+
+        Sprite overlaySprite = ResolveNodeLitOverlaySprite();
+        Transform existing = slotRect.Find(SlotLitOverlayName);
+        Image overlayImage = existing != null ? existing.GetComponent<Image>() : null;
+
+        if (overlaySprite == null)
+        {
+            if (overlayImage != null)
+                overlayImage.enabled = false;
+
+            return false;
+        }
+
+        if (overlayImage == null)
+        {
+            GameObject overlayObject = existing != null
+                ? existing.gameObject
+                : new GameObject(SlotLitOverlayName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+
+            if (existing == null)
+                overlayObject.transform.SetParent(slotRect, false);
+
+            RectTransform overlayRect = overlayObject.transform as RectTransform;
+            Stretch(overlayRect);
+            overlayImage = overlayObject.GetComponent<Image>();
+        }
+
+        overlayImage.sprite = overlaySprite;
+        overlayImage.color = Color.white;
+        overlayImage.preserveAspect = true;
+        overlayImage.raycastTarget = false;
+        overlayImage.enabled = lit;
+        overlayImage.transform.SetAsLastSibling();
+        return true;
+    }
+
+    private Sprite ResolveNodeLitOverlaySprite()
+    {
+        if (nodeLitOverlayAsset is Sprite assetSprite)
+            return assetSprite;
+
+        if (nodeLitOverlayAsset is Texture2D assetTexture)
+            return GetOrCreateRuntimeNodeLitOverlaySprite(assetTexture);
+
+        return nodeLitSprite;
+    }
+
+    private Sprite GetOrCreateRuntimeNodeLitOverlaySprite(Texture2D texture)
+    {
+        if (texture == null)
+            return null;
+
+        if (runtimeNodeLitOverlaySprite != null && runtimeNodeLitOverlayTexture == texture)
+            return runtimeNodeLitOverlaySprite;
+
+        ClearRuntimeNodeLitOverlaySprite();
+        runtimeNodeLitOverlayTexture = texture;
+        runtimeNodeLitOverlaySprite = Sprite.Create(
+            texture,
+            new Rect(0f, 0f, texture.width, texture.height),
+            new Vector2(0.5f, 0.5f),
+            100f,
+            0,
+            SpriteMeshType.FullRect);
+
+        return runtimeNodeLitOverlaySprite;
+    }
+
+    private void ClearRuntimeNodeLitOverlaySprite()
+    {
+        if (runtimeNodeLitOverlaySprite != null)
+        {
+            Destroy(runtimeNodeLitOverlaySprite);
+            runtimeNodeLitOverlaySprite = null;
+        }
+
+        runtimeNodeLitOverlayTexture = null;
+    }
+
+    private static void Stretch(RectTransform rect)
+    {
+        if (rect == null)
+            return;
+
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.localScale = Vector3.one;
     }
 
     private IEnumerator SuccessFeedbackRoutine()
     {
-        SetVisibleTraceSlotColor(successColor);
         yield return new WaitForSeconds(successDelay);
 
         SetObjectsActive(showOnSuccess, true);
@@ -584,6 +863,7 @@ public class PathPuzzleVisual : MonoBehaviour
     {
         int count = Mathf.Max(1, failFlashCount);
 
+        ShowMissingTraceOverlays(lastTraceCount);
         StartFailShake();
 
         for (int i = 0; i < count; i++)
@@ -644,23 +924,9 @@ public class PathPuzzleVisual : MonoBehaviour
         hasShakeOriginalPosition = false;
     }
 
-    private void SetVisibleTraceSlotColor(Color color)
-    {
-        if (manager == null || manager.traceSlots == null)
-            return;
-
-        int count = Mathf.Min(VisibleTraceCount(), manager.traceSlots.Count);
-        for (int i = 0; i < count; i++)
-        {
-            Image traceSlot = manager.traceSlots[i];
-            if (traceSlot != null && traceSlot.gameObject.activeSelf)
-                traceSlot.color = color;
-        }
-    }
-
     private void ResetPuzzleVisuals()
     {
-        ApplyTraceSlotLimit();
+        ResetTraceIndicators();
 
         if (manager == null)
             return;
@@ -683,8 +949,152 @@ public class PathPuzzleVisual : MonoBehaviour
                 : slot.GetComponentInChildren<GridNode>(true);
 
             if (node != null)
-                node.SetLit(false);
+                SetNodeLit(node, slot, false);
+
+            SetSlotLitOverlay(slot, false);
         }
+    }
+
+    private void ResetToInitialPuzzleState(bool includeNodeState)
+    {
+        StopFeedback();
+        ApplyFailGlow(false);
+        HideTraceErrorOverlays();
+        ResetTraceIndicators();
+
+        if (manager == null)
+            return;
+
+        if (includeNodeState)
+            RestoreInitialNodeState();
+
+        ResetPuzzleVisuals();
+    }
+
+    private void CaptureInitialStateIfNeeded()
+    {
+        if (initialStateCaptured || manager == null)
+            return;
+
+        List<GridSlot> slots = manager.slots;
+        if (slots == null || slots.Count == 0)
+            slots = new List<GridSlot>(manager.GetComponentsInChildren<GridSlot>(true));
+
+        initialSlotStates.Clear();
+        initialNodes.Clear();
+
+        foreach (GridSlot slot in slots)
+        {
+            if (slot == null)
+                continue;
+
+            GridNode node = slot.currentNode != null
+                ? slot.currentNode
+                : slot.GetComponentInChildren<GridNode>(true);
+
+            InitialSlotState state = new InitialSlotState
+            {
+                slot = slot,
+                node = node,
+                hadNode = node != null,
+                nodeActive = node != null && node.gameObject.activeSelf,
+                direction = node != null ? node.direction : GridNode.Dir.Right,
+                parent = node != null ? node.transform.parent : null,
+                siblingIndex = node != null ? node.transform.GetSiblingIndex() : -1
+            };
+
+            initialSlotStates.Add(state);
+
+            if (node != null)
+            {
+                initialNodes.Add(node);
+                slot.currentNode = node;
+            }
+        }
+
+        initialStateCaptured = true;
+    }
+
+    private void RestoreInitialNodeState()
+    {
+        CaptureInitialStateIfNeeded();
+
+        foreach (InitialSlotState state in initialSlotStates)
+        {
+            if (state == null || state.slot == null)
+                continue;
+
+            GridNode[] childNodes = state.slot.GetComponentsInChildren<GridNode>(true);
+            foreach (GridNode childNode in childNodes)
+            {
+                if (childNode == null || initialNodes.Contains(childNode))
+                    continue;
+
+                Destroy(childNode.gameObject);
+            }
+
+            if (!state.hadNode || state.node == null)
+            {
+                state.slot.currentNode = null;
+                continue;
+            }
+
+            Transform nodeTransform = state.node.transform;
+            if (state.parent != null && nodeTransform.parent != state.parent)
+                nodeTransform.SetParent(state.parent, false);
+
+            if (nodeTransform.parent != null
+                && state.siblingIndex >= 0
+                && state.siblingIndex < nodeTransform.parent.childCount)
+            {
+                nodeTransform.SetSiblingIndex(state.siblingIndex);
+            }
+
+            state.node.gameObject.SetActive(state.nodeActive);
+            state.slot.currentNode = state.node;
+            ApplyNodeDirection(state.node, state.direction);
+            SetNodeLit(state.node, state.slot, false);
+            SetSlotLitOverlay(state.slot, false);
+        }
+
+        BindNodeBackgrounds();
+        FitNodesToSlots();
+    }
+
+    private static void ApplyNodeDirection(GridNode node, GridNode.Dir direction)
+    {
+        if (node == null)
+            return;
+
+        node.direction = direction;
+
+        Transform target = node.arrow != null ? node.arrow : node.transform;
+        target.localEulerAngles = new Vector3(0f, 0f, GridNode.ZAngle(direction));
+    }
+
+    private PatternPuzzleNodeVisual ConfigureNodeVisual(GridNode node, GridSlot slot)
+    {
+        if (!useNodeSpriteStates || node == null)
+            return null;
+
+        PatternPuzzleNodeVisual visual = node.GetComponent<PatternPuzzleNodeVisual>();
+        if (visual == null)
+            visual = node.gameObject.AddComponent<PatternPuzzleNodeVisual>();
+
+        visual.Configure(slot, nodeIdleSprite, nodeLitSprite, nodeStartSprite, nodeGoalSprite, nodeLitOverlayAsset);
+        return visual;
+    }
+
+    private void SetNodeLit(GridNode node, GridSlot slot, bool lit)
+    {
+        PatternPuzzleNodeVisual visual = ConfigureNodeVisual(node, slot);
+        if (visual != null)
+        {
+            visual.SetLit(lit);
+            return;
+        }
+
+        node.SetLit(lit);
     }
 
     private void ApplyFailGlow(bool on)
@@ -740,6 +1150,121 @@ public class PathPuzzleVisual : MonoBehaviour
 
         manager.onSuccess.RemoveListener(PlaySuccessFeedback);
         manager.onFail.RemoveListener(PlayFailFeedback);
+    }
+
+    private List<Image> GetTraceSlotsBottomFirst()
+    {
+        List<Image> slots = new List<Image>();
+        if (manager == null || manager.traceSlots == null)
+            return slots;
+
+        foreach (Image traceSlot in manager.traceSlots)
+        {
+            if (traceSlot != null)
+                slots.Add(traceSlot);
+        }
+
+        slots.Sort(CompareTraceSlotBottomFirst);
+        return slots;
+    }
+
+    private static int CompareTraceSlotBottomFirst(Image a, Image b)
+    {
+        float ay = a.transform.position.y;
+        float by = b.transform.position.y;
+
+        int yCompare = ay.CompareTo(by);
+        if (yCompare != 0)
+            return yCompare;
+
+        return a.transform.GetSiblingIndex().CompareTo(b.transform.GetSiblingIndex());
+    }
+
+    private static void SetTraceSlotAlpha(Image traceSlot, float alpha)
+    {
+        if (traceSlot == null)
+            return;
+
+        Color color = traceSlot.color;
+        color.a = Mathf.Clamp01(alpha);
+        traceSlot.color = color;
+    }
+
+    private void ShowMissingTraceOverlays(int completedCount)
+    {
+        HideTraceErrorOverlays();
+
+        if (manager == null || manager.traceSlots == null)
+            return;
+
+        List<Image> orderedSlots = GetTraceSlotsBottomFirst();
+        int requiredCount = Mathf.Clamp(manager.requiredCount, 0, orderedSlots.Count);
+        int startIndex = Mathf.Clamp(completedCount, 0, requiredCount);
+
+        for (int i = startIndex; i < requiredCount; i++)
+        {
+            Image overlay = GetOrCreateTraceErrorOverlay(orderedSlots[i]);
+            if (overlay == null)
+                continue;
+
+            overlay.sprite = orderedSlots[i].sprite;
+            overlay.type = orderedSlots[i].type;
+            overlay.preserveAspect = orderedSlots[i].preserveAspect;
+            overlay.fillCenter = orderedSlots[i].fillCenter;
+            overlay.fillMethod = orderedSlots[i].fillMethod;
+            overlay.fillOrigin = orderedSlots[i].fillOrigin;
+            overlay.fillClockwise = orderedSlots[i].fillClockwise;
+            overlay.fillAmount = orderedSlots[i].fillAmount;
+            overlay.color = traceMissingColor;
+            overlay.enabled = true;
+            overlay.transform.SetAsLastSibling();
+        }
+    }
+
+    private void HideTraceErrorOverlays()
+    {
+        if (manager == null || manager.traceSlots == null)
+            return;
+
+        foreach (Image traceSlot in manager.traceSlots)
+        {
+            if (traceSlot == null)
+                continue;
+
+            Transform existing = traceSlot.transform.Find(TraceErrorOverlayName);
+            if (existing == null)
+                continue;
+
+            Image overlay = existing.GetComponent<Image>();
+            if (overlay != null)
+                overlay.enabled = false;
+        }
+    }
+
+    private Image GetOrCreateTraceErrorOverlay(Image traceSlot)
+    {
+        if (traceSlot == null)
+            return null;
+
+        Transform existing = traceSlot.transform.Find(TraceErrorOverlayName);
+        Image overlay = existing != null ? existing.GetComponent<Image>() : null;
+        if (overlay != null)
+            return overlay;
+
+        GameObject overlayObject = existing != null
+            ? existing.gameObject
+            : new GameObject(TraceErrorOverlayName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+
+        if (existing == null)
+            overlayObject.transform.SetParent(traceSlot.transform, false);
+
+        RectTransform overlayRect = overlayObject.transform as RectTransform;
+        Stretch(overlayRect);
+
+        overlay = overlayObject.GetComponent<Image>();
+        overlay.raycastTarget = false;
+        overlay.enabled = false;
+        return overlay;
     }
 
     private void OnValidate()

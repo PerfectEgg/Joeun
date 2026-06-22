@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -18,7 +19,13 @@ public abstract class InteractiveItem : MonoBehaviour, IInteractive, ICollectibl
 
     protected SpriteRenderer _spriteRenderer;
     protected int _originSortingOrder;
-    protected Vector3 _originScale;    
+    protected Vector3 _originScale;
+    protected bool _suppressHoverUntilPointerExit;
+
+    [Header("Feedback")]
+    [SerializeField, Min(0.1f)] protected float hoverScaleMultiplier = 1.2f;
+    [SerializeField, Min(0.1f)] protected float pickupScaleMultiplier = 1.45f;
+    [SerializeField, Min(0f)] protected float pickupFeedbackDuration = 0.08f;
 
     protected virtual void Awake()
     {
@@ -28,6 +35,11 @@ public abstract class InteractiveItem : MonoBehaviour, IInteractive, ICollectibl
 
         // SpriteRenderer 캐싱
         _spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    protected virtual void OnEnable()
+    {
+        _suppressHoverUntilPointerExit = IsPointerAlreadyOverItem();
     }
     
     #region IInteractive 구현
@@ -49,7 +61,10 @@ public abstract class InteractiveItem : MonoBehaviour, IInteractive, ICollectibl
         OnItemCollected?.Invoke(); // 아이템 자체에 연결된 이벤트도 실행 (예: 효과음, 이펙트 등)
         
         // 2. 월드에서 내 자신을 숨김 (파괴하지 않음)
-        gameObject.SetActive(false);
+        if (pickupFeedbackDuration > 0f && isActiveAndEnabled)
+            StartCoroutine(PickupFeedbackRoutine());
+        else
+            gameObject.SetActive(false);
     }
 
     public virtual void OnAcquire()
@@ -61,12 +76,68 @@ public abstract class InteractiveItem : MonoBehaviour, IInteractive, ICollectibl
     #region IHoverable 구현
     public virtual void OnHoverEnter()
     {
-        transform.localScale = transform.localScale * 1.2f;
+        if (IsAcquired) return;
+        if (_suppressHoverUntilPointerExit) return;
+
+        transform.localScale = _originScale * GetHoverScaleMultiplier();
     }
 
     public virtual void OnHoverExit()
     {
+        if (IsAcquired) return;
+
+        _suppressHoverUntilPointerExit = false;
         transform.localScale = _originScale;
     }
     #endregion
+
+    protected virtual IEnumerator PickupFeedbackRoutine()
+    {
+        Vector3 startScale = transform.localScale;
+        Vector3 targetScale = _originScale * GetPickupScaleMultiplier();
+        float duration = Mathf.Max(0.01f, pickupFeedbackDuration);
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float eased = 1f - Mathf.Pow(1f - t, 3f);
+            transform.localScale = Vector3.LerpUnclamped(startScale, targetScale, eased);
+            yield return null;
+        }
+
+        gameObject.SetActive(false);
+    }
+
+    protected float GetHoverScaleMultiplier()
+    {
+        return hoverScaleMultiplier > 0f ? hoverScaleMultiplier : 1.2f;
+    }
+
+    protected float GetPickupScaleMultiplier()
+    {
+        return pickupScaleMultiplier > 0f ? pickupScaleMultiplier : 1.45f;
+    }
+
+    private bool IsPointerAlreadyOverItem()
+    {
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null)
+            return false;
+
+        Vector2 mousePosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        Collider2D[] hits = Physics2D.OverlapPointAll(mousePosition);
+        foreach (Collider2D hit in hits)
+        {
+            if (hit == null)
+                continue;
+
+            Transform hitTransform = hit.transform;
+            if (hitTransform == transform || hitTransform.IsChildOf(transform))
+                return true;
+        }
+
+        return false;
+    }
 }
