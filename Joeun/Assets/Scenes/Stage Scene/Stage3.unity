@@ -1379,7 +1379,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 3
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!61 &209303128
 BoxCollider2D:
@@ -1482,8 +1481,19 @@ MonoBehaviour:
       m_Calls: []
   OnInteractive:
     m_PersistentCalls:
-      m_Calls: []
-  _isConditionRequired: 0
+      m_Calls:
+      - m_Target: {fileID: 428357673}
+        m_TargetAssemblyTypeName: EventBridge, Assembly-CSharp
+        m_MethodName: PlaySFX
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Exit_Door_Open
+          m_BoolArgument: 0
+        m_CallState: 2
   _conditionCount: 0
 --- !u!61 &216832778
 BoxCollider2D:
@@ -2568,7 +2578,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 4
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!61 &303315317
 BoxCollider2D:
@@ -2771,7 +2780,6 @@ MonoBehaviour:
   _requiredKeyID: Sawtooth
   _isLocked: 1
   _setZLayer: 1
-  _isConditionRequired: 0
   _conditionCount: 0
   OnInteractive:
     m_PersistentCalls:
@@ -3246,7 +3254,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractiveButton
   _isOneShot: 1
   _setZLayer: 1
-  _isConditionRequired: 1
   _conditionCount: 2
   OnPressed:
     m_PersistentCalls:
@@ -3353,7 +3360,9 @@ MonoBehaviour:
   _requiredKeyID: Iron_Cabinet_Key
   _targetDoor: {fileID: 1601017194}
   _setZLayer: 1
-  _isConditionRequired: 0
+  OnInteractive:
+    m_PersistentCalls:
+      m_Calls: []
   _conditionCount: 0
 --- !u!222 &413826765
 CanvasRenderer:
@@ -3458,6 +3467,50 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: -0.00000047683716, y: 0}
   m_Radius: 0.49999997
+--- !u!1 &428357672
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 428357674}
+  - component: {fileID: 428357673}
+  m_Layer: 0
+  m_Name: EventBridge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &428357673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 428357672}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a017e18ae51fb95489e1b5dbaf8a3b57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+--- !u!4 &428357674
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 428357672}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &431636993
 GameObject:
   m_ObjectHideFlags: 0
@@ -3754,7 +3807,6 @@ MonoBehaviour:
   _requiredKeyID: Screwdriver
   _isLocked: 1
   _setZLayer: 1
-  _isConditionRequired: 0
   _conditionCount: 0
   OnInteractive:
     m_PersistentCalls:
@@ -4196,7 +4248,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 1
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!61 &608573476
 BoxCollider2D:
@@ -4668,7 +4719,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 2
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!1 &636373463
 GameObject:
@@ -5637,7 +5687,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 2
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!1 &801484229
 GameObject:
@@ -5826,7 +5875,21 @@ MonoBehaviour:
   _requiredKeyID: Card_Key3
   _targetDoor: {fileID: 216832777}
   _setZLayer: 1
-  _isConditionRequired: 0
+  OnInteractive:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 428357673}
+        m_TargetAssemblyTypeName: EventBridge, Assembly-CSharp
+        m_MethodName: PlaySFX
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Reader_Success
+          m_BoolArgument: 0
+        m_CallState: 2
   _conditionCount: 0
 --- !u!222 &801931719
 CanvasRenderer:
@@ -6108,7 +6171,6 @@ MonoBehaviour:
   _requiredKeyID: Nipper
   _isLocked: 1
   _setZLayer: 1
-  _isConditionRequired: 0
   _conditionCount: 0
   OnInteractive:
     m_PersistentCalls:
@@ -6966,7 +7028,21 @@ MonoBehaviour:
   _requiredKeyID: Hand_Model
   _targetDoor: {fileID: 1451746675}
   _setZLayer: 1
-  _isConditionRequired: 0
+  OnInteractive:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 428357673}
+        m_TargetAssemblyTypeName: EventBridge, Assembly-CSharp
+        m_MethodName: PlaySFX
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Reader_Success
+          m_BoolArgument: 0
+        m_CallState: 2
   _conditionCount: 0
 --- !u!222 &1056071362
 CanvasRenderer:
@@ -7753,7 +7829,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 2
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!1 &1231476657
 GameObject:
@@ -8323,7 +8398,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1256247961
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8427,7 +8502,6 @@ MonoBehaviour:
   _requiredKeyID: Skin_Flake
   _isLocked: 1
   _setZLayer: 2
-  _isConditionRequired: 0
   _conditionCount: 0
   OnInteractive:
     m_PersistentCalls:
@@ -8561,7 +8635,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 0
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!61 &1303979379
 BoxCollider2D:
@@ -9138,7 +9211,6 @@ MonoBehaviour:
   OnInteractive:
     m_PersistentCalls:
       m_Calls: []
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!61 &1451746676
 BoxCollider2D:
@@ -10478,7 +10550,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 2
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!1 &1584236069
 GameObject:
@@ -10687,7 +10758,6 @@ MonoBehaviour:
   OnInteractive:
     m_PersistentCalls:
       m_Calls: []
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!222 &1601017195
 CanvasRenderer:
@@ -11286,7 +11356,6 @@ MonoBehaviour:
   _requiredKeyID: Skeleton_Frame_Parts
   _isLocked: 1
   _setZLayer: 1
-  _isConditionRequired: 0
   _conditionCount: 0
   OnInteractive:
     m_PersistentCalls:
@@ -11892,7 +11961,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoomableObject
   zoomViewIndex: 5
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!61 &2013540081
 BoxCollider2D:
@@ -12924,7 +12992,6 @@ MonoBehaviour:
   OnInteractive:
     m_PersistentCalls:
       m_Calls: []
-  _isConditionRequired: 0
   _conditionCount: 0
 --- !u!212 &2118186942
 SpriteRenderer:
@@ -13170,4 +13237,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 618210700}
   - {fileID: 803572609}
+  - {fileID: 428357674}
   - {fileID: 738319840}

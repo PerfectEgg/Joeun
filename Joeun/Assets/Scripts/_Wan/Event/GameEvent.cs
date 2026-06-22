@@ -15,14 +15,11 @@ public class GameEvent
     #endregion
 
     #region 🚪 상호작용 및 퍼즐 관련 이벤트
-    // 특정 문이나 자물쇠가 열렸을 때 (전달값: 열린 객체의 ID)
-    public static Action<string> EOnLockOpened;
-    
-    // 퍼즐을 클리어했을 때 (전달값: 클리어한 퍼즐 ID)
-    public static Action<string> EOnPuzzleSolved;
+    // 특정 디코드 해금 했을 때
+    public static Action<int> EOnDecodeOpened;
 
-    // 디코드 해금 했을 때
-    public static Action EOnDecodeOpened;
+    // 모든 디코드 해금 했을 때
+    public static Action EOnAllDecodeOpened;
     #endregion
 
     #region 📹 CCTV 관련 이벤트
@@ -36,4 +33,11 @@ public class GameEvent
     #region 🎬 스테이지 및 씬 전환 관련 이벤트
     public static Action EStageClear;   // 스테이지 클리어 시 (전달값 없음)
     #endregion
+
+    #region 📣 사운드 관련 이벤트
+    public static Action<string> EBGMPlay;   // 배경 음악 재생 시
+    public static Action<string> ESFXPlay;   // 효과음 재생 시
+    #endregion
+
+    
 }

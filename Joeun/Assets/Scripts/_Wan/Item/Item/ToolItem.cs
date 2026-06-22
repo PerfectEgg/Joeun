@@ -14,6 +14,7 @@ public class ToolItem : InteractiveItem
             
             // Item 클래스에 있는 획득 로직 실행
             Collect();
+            GameEvent.ESFXPlay?.Invoke("Acquired_Item");
         }
     }
     #endregion

@@ -66,9 +66,6 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
 
         OnUnlockSuccess?.Invoke();
 
-        // ★ SaveManager가 감지하도록 이벤트 발동
-        GameEvent.EOnLockOpened?.Invoke(gameObject.name);
-
         if (IsRecyclable)
         {
             DevLog.Log("문이 다시 잠길 수 있도록 설정되었습니다.");

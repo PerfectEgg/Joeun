@@ -13,13 +13,13 @@ public class DecodeManager : MonoBehaviour
     [Tooltip("에디터에서 12개의 UIDecode 스크립트를 순서대로 넣어주세요.")]
     [SerializeField] private UIDecode[] _uiSlots = new UIDecode[12];
 
-    [Header("기본 제공 문자 데이터 (4개)")]
-    [Tooltip("처음부터 제공될 C, O, D, E 등 4개의 데이터를 넣으세요.")]
-    [SerializeField] private List<DecodeData> _initialData;
+    [Header("정해진 문자 데이터 (12개)")]
+    [Tooltip("패널에 표시될 12개의 문자를 순서대로 넣으세요.")]
+    [SerializeField] private DecodeData[] _presetData = new DecodeData[12];
 
-    [Header("추가 해금 문자 데이터 (8개)")]
-    [Tooltip("나중에 해금될 8개의 데이터를 넣으세요.")]
-    [SerializeField] private List<DecodeData> _additionalData;
+    [Header("초기 활성화 인덱스")]
+    [Tooltip("게임 시작 시 처음부터 흰색으로 열려있을 슬롯의 번호(0~11)를 적으세요.")]
+    [SerializeField] private List<int> _initialUnlockedIndices = new List<int> { 1, 2, 3, 8};
 
     // 현재 플레이어가 사용할 수 있도록 활성화된 문자들의 리스트
     private List<DecodeData> _currentActiveData = new List<DecodeData>();
@@ -27,59 +27,60 @@ public class DecodeManager : MonoBehaviour
     private void OnEnable()
     {
         // 버스의 OnDecodeOpened 채널 구독
-        GameEvent.EOnDecodeOpened += UnlockAndSortAll;
+        GameEvent.EOnDecodeOpened += UnlockDecodePanel;
+        GameEvent.EOnAllDecodeOpened += UnlockAllDecodePanel;
     }
 
     private void OnDisable()
     {
         // 메모리 누수 방지를 위해 꼭 구독 해제
-        GameEvent.EOnDecodeOpened -= UnlockAndSortAll;
+        GameEvent.EOnDecodeOpened -= UnlockDecodePanel;
+        GameEvent.EOnAllDecodeOpened -= UnlockAllDecodePanel;
     }
 
     private void Start()
     {
         // 1. 게임 시작 시, 처음 4개만 세팅합니다 (기획 의도대로 정렬 없이 세팅)
-        _currentActiveData.Clear();
-        _currentActiveData.AddRange(_initialData);
-        
-        RedrawSlots();
+        InitializeDecodePanel();
+    }
+
+    /// <summary>
+    /// 12개의 문자를 일괄 배치하고, 초기 해금 상태를 지정합니다.
+    /// </summary>
+    private void InitializeDecodePanel()
+    {
+        for (int i = 0; i < _uiSlots.Length; i++)
+        {
+            if (i < _presetData.Length && _presetData[i] != null)
+            {
+                // _initialUnlockedIndices 리스트에 포함된 번호만 true, 나머지는 false로 세팅
+                bool isUnlockedAtStart = _initialUnlockedIndices.Contains(i);
+                _uiSlots[i].Setup(_presetData[i], isUnlockedAtStart);
+            }
+        }
     }
 
     /// <summary>
     /// 퍼즐 클리어 이벤트 수신 시 나머지 8개를 추가하고 알파벳 순으로 재정렬합니다.
     /// </summary>
-    private void UnlockAndSortAll()
+    private void UnlockDecodePanel(int index)
     {
-        // 1. 나머지 8개의 데이터를 리스트에 밀어 넣습니다.
-        _currentActiveData.AddRange(_additionalData);
-
-        // 2. C# 내장 Sort 기능으로 알파벳 순(A-Z)으로 전체 정렬합니다. 
-        // 이렇게 하면 'O' 문자가 C, D, E를 비롯한 다른 문자 뒤로 알아서 밀려납니다.
-        _currentActiveData.Sort((x, y) => x.decodeLetter.CompareTo(y.decodeLetter));
-
-        // 3. 정렬된 리스트를 바탕으로 UI 슬롯을 다시 그립니다.
-        RedrawSlots();
-        
-        DevLog.Log("[DecodeManager] 추가 문자 8개 해금 및 알파벳 순 정렬 완료!");
+        if (index >= 0 && index < _uiSlots.Length)
+        {
+            _uiSlots[index].SetUnlockState(true);
+            DevLog.Log($"[DecodeManager] {index}번 슬롯 해금 완료!");
+        }
     }
 
     /// <summary>
-    /// 현재 활성화된 데이터 리스트를 바탕으로 12칸의 슬롯을 업데이트합니다.
+    /// 남은 모든 슬롯을 한 번에 해금합니다.
     /// </summary>
-    private void RedrawSlots()
+    public void UnlockAllDecodePanel()
     {
         for (int i = 0; i < _uiSlots.Length; i++)
         {
-            if (i < _currentActiveData.Count)
-            {
-                // 데이터가 있으면 켜기
-                _uiSlots[i].Setup(_currentActiveData[i]);
-            }
-            else
-            {
-                // 없으면 빈 칸(투명) 처리
-                _uiSlots[i].Clear();
-            }
+            _uiSlots[i].SetUnlockState(true);
         }
+        DevLog.Log("[DecodeManager] 모든 디코드 문자 해금 완료!");
     }
 }

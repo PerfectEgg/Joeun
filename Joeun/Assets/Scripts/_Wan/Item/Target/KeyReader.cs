@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 // ==========================================
 // 키 인식 오브젝트 클래스
@@ -15,6 +16,9 @@ public class KeyReader : MonoBehaviour, IPickable, IConditionRequirable
     [Header("Z 레이어 설정")]
     [Tooltip("열쇠의 물리 충돌을 위해 Z 레이어를 낮춰서 화면 앞으로 나타내는 설정값입니다.")]
     [SerializeField] private int _setZLayer = 1; // Z레이어를 낮춰서 플레이어 뒤에 숨기기 위한 설정값
+
+    [Header("상호작용 이벤트")]
+    public UnityEvent OnInteractive; // 문이 열릴 때 실행할 이벤트 (예: 애니메이션, 사운드 등)
 
     [Header("조건 설정")]
     [Tooltip("잠금 해제 조건이 필요한지 여부 (예: 선행 오브젝트 처리)")]
@@ -61,7 +65,7 @@ public class KeyReader : MonoBehaviour, IPickable, IConditionRequirable
             DevLog.Log("삐빅- 인증되었습니다.");
 
             // 중앙 버스에 문이 열렸음을 방송 (업적, 효과음, 퍼즐 연동용)
-            GameEvent.EOnLockOpened?.Invoke(gameObject.name);
+            OnInteractive?.Invoke();
             
             // 핵심: 내 판정이 성공했으니, 연결된 문에게 잠금을 풀라고 명령!
             _targetDoor.UnlockFromExternal();
