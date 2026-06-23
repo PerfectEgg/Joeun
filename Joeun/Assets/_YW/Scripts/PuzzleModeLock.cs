@@ -1,11 +1,21 @@
 using UnityEngine;
+using System.Collections.Generic;
 
+[DefaultExecutionOrder(-1100)]
 public class PuzzleModeLock : MonoBehaviour
 {
+    private static readonly List<PuzzleModeLock> activeLocks = new List<PuzzleModeLock>();
+    private static bool hasContextLock;
+    private static bool contextAllowRotate;
+    private static bool contextAllowAssemble;
+    private static bool contextAllowDecode;
+
     [SerializeField] private PuzzleModeManager modeManager;
     [SerializeField] private bool allowRotate = true;
     [SerializeField] private bool allowAssemble;
+    [SerializeField] private bool allowDecode = true;
     [SerializeField] private bool clearBlockedMode = true;
+    [SerializeField] private bool controlPuzzleManagerKeys;
     [SerializeField] private KeyCode rotateKeyWhenAllowed = KeyCode.Q;
     [SerializeField] private KeyCode assembleKeyWhenAllowed = KeyCode.W;
 
@@ -22,13 +32,84 @@ public class PuzzleModeLock : MonoBehaviour
 
     private void OnEnable()
     {
+        if (!activeLocks.Contains(this))
+            activeLocks.Add(this);
+
+        SetContextLock(allowRotate, allowAssemble, allowDecode);
         SkillIconModeView.OnSkillModeChanged += HandleSkillModeChanged;
         ApplyLock();
     }
 
     private void OnDisable()
     {
+        activeLocks.Remove(this);
         SkillIconModeView.OnSkillModeChanged -= HandleSkillModeChanged;
+    }
+
+    public static bool IsAllowedByActiveLocks(SkillModeType mode)
+    {
+        if (mode == SkillModeType.None)
+            return true;
+
+        PuzzleModeLock activeLock = GetCurrentActiveLock();
+        if (activeLock != null)
+            return activeLock.Allows(mode);
+
+        if (hasContextLock)
+            return AllowsContext(mode);
+
+        return true;
+    }
+
+    public static void ClearContextLock()
+    {
+        hasContextLock = false;
+        contextAllowRotate = false;
+        contextAllowAssemble = false;
+        contextAllowDecode = false;
+    }
+
+    private static PuzzleModeLock GetCurrentActiveLock()
+    {
+        for (int i = activeLocks.Count - 1; i >= 0; i--)
+        {
+            PuzzleModeLock modeLock = activeLocks[i];
+            if (modeLock == null)
+            {
+                activeLocks.RemoveAt(i);
+                continue;
+            }
+
+            if (!modeLock.isActiveAndEnabled)
+                continue;
+
+            return modeLock;
+        }
+
+        return null;
+    }
+
+    private static void SetContextLock(bool rotateAllowed, bool assembleAllowed, bool decodeAllowed)
+    {
+        hasContextLock = true;
+        contextAllowRotate = rotateAllowed;
+        contextAllowAssemble = assembleAllowed;
+        contextAllowDecode = decodeAllowed;
+    }
+
+    private static bool AllowsContext(SkillModeType mode)
+    {
+        switch (mode)
+        {
+            case SkillModeType.Rotate:
+                return contextAllowRotate;
+            case SkillModeType.Assemble:
+                return contextAllowAssemble;
+            case SkillModeType.Decode:
+                return contextAllowDecode;
+            default:
+                return true;
+        }
     }
 
     private void LateUpdate()
@@ -38,15 +119,37 @@ public class PuzzleModeLock : MonoBehaviour
 
     public void Configure(bool rotateAllowed, bool assembleAllowed, bool clearBlocked = true)
     {
+        Configure(rotateAllowed, assembleAllowed, true, clearBlocked);
+    }
+
+    public void Configure(bool rotateAllowed, bool assembleAllowed, bool decodeAllowed, bool clearBlocked = true)
+    {
         allowRotate = rotateAllowed;
         allowAssemble = assembleAllowed;
+        allowDecode = decodeAllowed;
         clearBlockedMode = clearBlocked;
+        SetContextLock(allowRotate, allowAssemble, allowDecode);
         ApplyLock();
     }
 
     private void HandleSkillModeChanged(SkillModeType mode)
     {
         ApplyLock();
+    }
+
+    private bool Allows(SkillModeType mode)
+    {
+        switch (mode)
+        {
+            case SkillModeType.Rotate:
+                return allowRotate;
+            case SkillModeType.Assemble:
+                return allowAssemble;
+            case SkillModeType.Decode:
+                return allowDecode;
+            default:
+                return true;
+        }
     }
 
     private void ApplyLock()
@@ -56,21 +159,25 @@ public class PuzzleModeLock : MonoBehaviour
         if (modeManager == null)
             return;
 
-        if (allowRotate)
-            modeManager.rotateKey = rotateKeyWhenAllowed;
+        if (controlPuzzleManagerKeys)
+        {
+            modeManager.rotateKey = allowRotate ? rotateKeyWhenAllowed : KeyCode.None;
+            modeManager.assembleKey = allowAssemble ? assembleKeyWhenAllowed : KeyCode.None;
+        }
         else
+        {
             modeManager.rotateKey = KeyCode.None;
-
-        if (allowAssemble)
-            modeManager.assembleKey = assembleKeyWhenAllowed;
-        else
             modeManager.assembleKey = KeyCode.None;
+        }
 
         if (!allowRotate && modeManager.IsRotate)
-            ClearMode();
+            ClearPuzzleMode();
 
         if (!allowAssemble && modeManager.IsAssemble)
-            ClearMode();
+            ClearPuzzleMode();
+
+        if (!allowDecode && SkillIconModeView.CurrentMode == SkillModeType.Decode)
+            ClearSkillMode();
     }
 
     private void ResolveModeManager()
@@ -87,7 +194,7 @@ public class PuzzleModeLock : MonoBehaviour
             modeManager = PuzzleModeManager.Instance;
     }
 
-    private void ClearMode()
+    private void ClearPuzzleMode()
     {
         if (clearBlockedMode)
         {
@@ -99,5 +206,13 @@ public class PuzzleModeLock : MonoBehaviour
                 SkillIconModeView.ClearMode();
             }
         }
+    }
+
+    private void ClearSkillMode()
+    {
+        if (!clearBlockedMode)
+            return;
+
+        SkillIconModeView.ClearMode();
     }
 }

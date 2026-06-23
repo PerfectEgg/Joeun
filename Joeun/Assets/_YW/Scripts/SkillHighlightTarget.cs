@@ -278,6 +278,9 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
         if (!SkillModeStageRules.IsAllowed(mode))
             return false;
 
+        if (!PuzzleModeLock.IsAllowedByActiveLocks(mode))
+            return false;
+
         if (IsBlockedByPathPuzzleState())
             return false;
 

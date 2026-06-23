@@ -10,6 +10,7 @@ public enum PatternPuzzleVariant
 }
 
 [DisallowMultipleComponent]
+[DefaultExecutionOrder(-1000)]
 public sealed class PatternPuzzleVariantController : MonoBehaviour
 {
     [Header("Variant")]
@@ -141,9 +142,10 @@ public sealed class PatternPuzzleVariantController : MonoBehaviour
         if (modeLock == null)
             return;
 
-        bool allowRotate = variant == PatternPuzzleVariant.Rotate;
-        bool allowAssemble = variant == PatternPuzzleVariant.Assemble;
-        modeLock.Configure(allowRotate, allowAssemble, true);
+        bool allowRotate = AllowsRotate(variant);
+        bool allowAssemble = AllowsAssemble(variant);
+        bool allowDecode = AllowsDecode(variant);
+        modeLock.Configure(allowRotate, allowAssemble, allowDecode, true);
     }
 
     private void ApplyDecodeObjects()
@@ -189,12 +191,42 @@ public sealed class PatternPuzzleVariantController : MonoBehaviour
 
     private void GrantAndMaybeSelect(SkillModeType mode)
     {
-        SkillModeStageRules.Grant(mode);
+        GrantUnlockedSkills();
         openedSkillMode = mode;
         openedWithSkillMode = true;
 
         if (selectSkillOnOpen)
             SkillIconModeView.SelectMode(mode);
+    }
+
+    private void GrantUnlockedSkills()
+    {
+        if (AllowsRotate(variant))
+            SkillModeStageRules.Grant(SkillModeType.Rotate);
+
+        if (AllowsAssemble(variant))
+            SkillModeStageRules.Grant(SkillModeType.Assemble);
+
+        if (AllowsDecode(variant))
+            SkillModeStageRules.Grant(SkillModeType.Decode);
+    }
+
+    private static bool AllowsRotate(PatternPuzzleVariant puzzleVariant)
+    {
+        return puzzleVariant == PatternPuzzleVariant.Rotate
+            || puzzleVariant == PatternPuzzleVariant.Assemble
+            || puzzleVariant == PatternPuzzleVariant.Decode;
+    }
+
+    private static bool AllowsAssemble(PatternPuzzleVariant puzzleVariant)
+    {
+        return puzzleVariant == PatternPuzzleVariant.Assemble
+            || puzzleVariant == PatternPuzzleVariant.Decode;
+    }
+
+    private static bool AllowsDecode(PatternPuzzleVariant puzzleVariant)
+    {
+        return puzzleVariant == PatternPuzzleVariant.Decode;
     }
 
     private GameObject[] CollectDecodeObjects()

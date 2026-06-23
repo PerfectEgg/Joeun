@@ -8,6 +8,7 @@ public class SkillIconModeView : MonoBehaviour
     public static SkillModeType CurrentMode { get; private set; } = SkillModeType.None;
     public static event Action<SkillModeType> OnSkillModeChanged;
     private static SkillIconModeView activeView;
+    private static bool waitForSkillKeysReleased;
 
     [SerializeField] private Sprite emptySprite;
     [SerializeField] private Sprite rotateSprite;
@@ -50,6 +51,8 @@ public class SkillIconModeView : MonoBehaviour
 
     public static void SelectMode(SkillModeType mode)
     {
+        waitForSkillKeysReleased = true;
+
         if (mode != SkillModeType.None && SkillInteractionLock.IsLocked)
         {
             mode = SkillModeType.None;
@@ -84,6 +87,14 @@ public class SkillIconModeView : MonoBehaviour
                 SetMode(SkillModeType.None);
 
             return;
+        }
+
+        if (waitForSkillKeysReleased)
+        {
+            if (IsAnySkillKeyHeld())
+                return;
+
+            waitForSkillKeysReleased = false;
         }
 
         if (Input.GetKeyDown(KeyCode.Q))
@@ -130,9 +141,19 @@ public class SkillIconModeView : MonoBehaviour
         SetMode(CurrentMode == mode ? SkillModeType.None : mode);
     }
 
+    private static bool IsAnySkillKeyHeld()
+    {
+        return Input.GetKey(KeyCode.Q)
+            || Input.GetKey(KeyCode.W)
+            || Input.GetKey(KeyCode.E);
+    }
+
     private void SetMode(SkillModeType mode)
     {
         if (mode != SkillModeType.None && SkillInteractionLock.IsLocked)
+            mode = SkillModeType.None;
+
+        if (!IsAllowed(mode))
             mode = SkillModeType.None;
 
         if (CurrentMode == mode)
@@ -193,7 +214,7 @@ public class SkillIconModeView : MonoBehaviour
         if (mode != SkillModeType.None && SkillInteractionLock.IsLocked)
             return false;
 
-        return SkillModeStageRules.IsAllowed(mode);
+        return SkillModeStageRules.IsAllowed(mode) && PuzzleModeLock.IsAllowedByActiveLocks(mode);
     }
 
     private void HandleInteractionLockChanged(bool locked)

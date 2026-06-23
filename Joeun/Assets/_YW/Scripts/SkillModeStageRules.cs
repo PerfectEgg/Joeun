@@ -59,6 +59,7 @@ public class SkillModeStageRules : MonoBehaviour
         if (clearRuntimeGrantsOnEnable)
             ClearRuntimeGrants();
 
+        PuzzleModeLock.ClearContextLock();
         activeRules = this;
         SkillIconModeView.ClearMode();
     }
