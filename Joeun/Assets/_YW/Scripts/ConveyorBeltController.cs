@@ -31,6 +31,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     [FormerlySerializedAs("jammed")]
     [SerializeField] bool blockingItemPresent = true;
     [SerializeField] ItemData blockingItemData;
+    [SerializeField] bool runOnlyOnce = true;
 
     [Header("Belt Motion")]
     [SerializeField] SpriteRenderer beltRenderer;
@@ -39,6 +40,19 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     [SerializeField] int beltRunCycles = 4;
     [Min(0.01f)]
     [SerializeField] float beltFrameInterval = 0.07f;
+
+    [Header("Button Visual")]
+    [SerializeField] GameObject[] buttonStateObjects;
+    [Min(0.01f)]
+    [SerializeField] float buttonFrameInterval = 0.08f;
+
+    [Header("Belt Output Item")]
+    [SerializeField] Transform beltOutputItem;
+    [SerializeField] Transform itemEndPoint;
+    [Min(0.01f)]
+    [SerializeField] float itemMoveDuration = 0.75f;
+    [SerializeField] bool hideOutputItemUntilRun = true;
+    [SerializeField] bool enableItemInteractionOnFinish = true;
 
     [Header("Missing Saw Puzzle Feedback")]
     [SerializeField] SpriteRenderer driveFeedbackRenderer;
@@ -104,8 +118,11 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     Coroutine activeRoutine;
     Vector3 windowClosedLocalPosition;
     Vector3 windowBaseLocalScale;
+    Vector3 outputItemStartPosition;
     bool hasWindowClosedPosition;
     bool hasWindowBaseScale;
+    bool hasOutputItemStartPosition;
+    bool runCompleted;
 
     public bool SawPuzzleSolved => sawPuzzleSolved;
     public bool BlockingItemPresent => blockingItemPresent;
@@ -113,6 +130,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     public bool DriveReady => sawPuzzleSolved;
     public bool Jammed => blockingItemPresent;
     public bool IsBusy => activeRoutine != null;
+    public bool RunCompleted => runCompleted;
 
     void OnValidate()
     {
@@ -130,10 +148,14 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     {
         CacheInitialPositions();
         CacheWindowScale();
+        CacheOutputItemStartPosition();
         SyncBlockingItemStateFromChildItem();
 
         if (windowVisualMode != WindowVisualMode.MoveOnly)
             SetWindowVisualAmount(0f);
+
+        SetButtonFrame(0);
+        PrepareOutputItemForIdle();
     }
 
     void OnEnable()
@@ -155,6 +177,9 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     public void PressButton()
     {
         if (activeRoutine != null)
+            return;
+
+        if (runOnlyOnce && runCompleted)
             return;
 
         if (!sawPuzzleSolved)
@@ -266,12 +291,14 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     {
         SetBusy(true);
 
+        Coroutine buttonRoutine = StartCoroutine(AnimateButtonFailure());
         onSawPuzzleMissingFeedback?.Invoke();
         yield return AnimateFrames(driveFeedbackRenderer, driveFeedbackFrames, FailedBeltSteps);
         yield return Shake(driveFeedbackShakeTarget != null
             ? driveFeedbackShakeTarget
             : shakeTarget != null ? shakeTarget : transform);
         yield return Flash(missingDriveWarning, null, WarningHighlightColor, WarningHighlightColor);
+        yield return buttonRoutine;
 
         SetBusy(false);
         activeRoutine = null;
@@ -281,6 +308,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     {
         SetBusy(true);
 
+        Coroutine buttonRoutine = StartCoroutine(AnimateButtonFailure());
         onBlockingItemFeedback?.Invoke();
         Sprite originalBeltSprite = beltRenderer != null ? beltRenderer.sprite : null;
 
@@ -306,6 +334,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
             yield return new WaitForSeconds(jamWindowHoldDuration);
 
         yield return MoveWindow(0f, jamWindowMoveDuration);
+        yield return buttonRoutine;
 
         SetBusy(false);
         activeRoutine = null;
@@ -316,10 +345,17 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         SetBusy(true);
         onRunStarted?.Invoke();
 
+        yield return AnimateButtonToPressed();
         yield return MoveWindow(1f);
-        yield return AnimateBeltFrames(beltRunCycles * FrameCount);
-        yield return MoveWindow(0f);
+        Coroutine beltRoutine = StartCoroutine(AnimateBeltFrames(beltRunCycles * FrameCount));
+        Coroutine itemRoutine = StartCoroutine(MoveOutputItemRoutine());
 
+        yield return beltRoutine;
+        yield return itemRoutine;
+        yield return MoveWindow(0f);
+        yield return AnimateButtonRelease();
+
+        runCompleted = true;
         onRunFinished?.Invoke();
         SetBusy(false);
         activeRoutine = null;
@@ -510,6 +546,78 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         hasWindowBaseScale = true;
     }
 
+    void CacheOutputItemStartPosition()
+    {
+        if (hasOutputItemStartPosition || beltOutputItem == null)
+            return;
+
+        outputItemStartPosition = beltOutputItem.position;
+        hasOutputItemStartPosition = true;
+    }
+
+    void PrepareOutputItemForIdle()
+    {
+        if (beltOutputItem == null)
+            return;
+
+        CacheOutputItemStartPosition();
+        beltOutputItem.position = outputItemStartPosition;
+
+        if (hideOutputItemUntilRun)
+            beltOutputItem.gameObject.SetActive(false);
+
+        if (enableItemInteractionOnFinish)
+            SetOutputItemInteraction(false);
+    }
+
+    IEnumerator MoveOutputItemRoutine()
+    {
+        if (beltOutputItem == null || itemEndPoint == null)
+            yield break;
+
+        CacheOutputItemStartPosition();
+
+        beltOutputItem.position = outputItemStartPosition;
+        beltOutputItem.gameObject.SetActive(true);
+
+        if (enableItemInteractionOnFinish)
+            SetOutputItemInteraction(false);
+
+        Vector3 start = outputItemStartPosition;
+        Vector3 target = itemEndPoint.position;
+        float elapsed = 0f;
+        float duration = Mathf.Max(0.01f, itemMoveDuration);
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Smooth(Mathf.Clamp01(elapsed / duration));
+            beltOutputItem.position = Vector3.Lerp(start, target, t);
+            yield return null;
+        }
+
+        beltOutputItem.position = target;
+
+        if (enableItemInteractionOnFinish)
+            SetOutputItemInteraction(true);
+    }
+
+    void SetOutputItemInteraction(bool enabled)
+    {
+        if (beltOutputItem == null)
+            return;
+
+        Collider2D[] colliders = beltOutputItem.GetComponentsInChildren<Collider2D>(true);
+        SetCollidersEnabled(colliders, enabled);
+
+        IInteractive[] interactives = beltOutputItem.GetComponentsInChildren<IInteractive>(true);
+        foreach (IInteractive interactive in interactives)
+        {
+            if (interactive is Behaviour behaviour)
+                behaviour.enabled = enabled;
+        }
+    }
+
     void SetWindowVisualAmount(float amount)
     {
         if (windowVisualMode == WindowVisualMode.MoveOnly)
@@ -567,6 +675,8 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
 
     int FrameCount => beltFrames != null && beltFrames.Length > 0 ? beltFrames.Length : 1;
 
+    bool CanAnimateButton => buttonStateObjects != null && buttonStateObjects.Length > 0;
+
     static float Smooth(float t)
     {
         return t * t * (3f - 2f * t);
@@ -581,6 +691,55 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     {
         if (beltRenderer != null)
             beltRenderer.sprite = sprite;
+    }
+
+    IEnumerator AnimateButtonFailure()
+    {
+        if (!CanAnimateButton)
+            yield break;
+
+        SetButtonFrame(0);
+        yield return StepButtonFrame(1);
+        yield return StepButtonFrame(0);
+    }
+
+    IEnumerator AnimateButtonToPressed()
+    {
+        if (!CanAnimateButton)
+            yield break;
+
+        SetButtonFrame(0);
+        yield return StepButtonFrame(1);
+        yield return StepButtonFrame(2);
+    }
+
+    IEnumerator AnimateButtonRelease()
+    {
+        if (!CanAnimateButton)
+            yield break;
+
+        SetButtonFrame(2);
+        yield return StepButtonFrame(1);
+        yield return StepButtonFrame(0);
+    }
+
+    IEnumerator StepButtonFrame(int frameIndex)
+    {
+        SetButtonFrame(frameIndex);
+        yield return new WaitForSeconds(Mathf.Max(0.01f, buttonFrameInterval));
+    }
+
+    void SetButtonFrame(int frameIndex)
+    {
+        if (buttonStateObjects == null || buttonStateObjects.Length == 0)
+            return;
+
+        int activeIndex = Mathf.Clamp(frameIndex, 0, buttonStateObjects.Length - 1);
+        for (int i = 0; i < buttonStateObjects.Length; i++)
+        {
+            if (buttonStateObjects[i] != null)
+                buttonStateObjects[i].SetActive(i == activeIndex);
+        }
     }
 
     Sprite GetNextBeltFrame(Sprite currentSprite)

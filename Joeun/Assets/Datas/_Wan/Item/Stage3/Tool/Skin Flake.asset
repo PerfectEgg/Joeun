@@ -15,4 +15,6 @@ MonoBehaviour:
   itemID: Skin_Flake
   itemName: "\uD53C\uBD80 \uC870\uAC01"
   description: "\uAEBC\uB9BC\uC9C1 \uD558\uAC8C \uC0DD\uAE34 \uD53C\uBD80 \uC870\uAC01"
-  itemIcon: {fileID: -5177388603050735206, guid: 8884154dfe85442a3a3578be807dbcdf, type: 3}
+  itemIcon: {fileID: 7468960622196648392, guid: 6c525c70cd762df49b4a1ecc78a0a99d, type: 3}
+  inventoryHoverScaleMultiplier: 1.2
+  inventoryDragScaleMultiplier: 1.35
