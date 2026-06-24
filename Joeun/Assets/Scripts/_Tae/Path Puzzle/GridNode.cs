@@ -42,7 +42,10 @@ public class GridNode : MonoBehaviour, IPointerClickHandler
             return;
 
         if (PuzzleModeManager.Instance != null && PuzzleModeManager.Instance.IsRotate)
+        {
+            GameEvent.ESFXPlay?.Invoke("Skill_Select");
             Rotate();
+        }
     }
 
     /// <summary>방향을 시계방향으로 90도 회전</summary>

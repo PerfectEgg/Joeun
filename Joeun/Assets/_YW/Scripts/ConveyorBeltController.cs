@@ -184,16 +184,19 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
 
         if (!sawPuzzleSolved)
         {
+            GameEvent.ESFXPlay?.Invoke("Container_Failed");
             activeRoutine = StartCoroutine(SawPuzzleMissingRoutine());
             return;
         }
 
         if (blockingItemPresent)
         {
+            GameEvent.ESFXPlay?.Invoke("Container_Failed");
             activeRoutine = StartCoroutine(BlockingItemRoutine());
             return;
         }
 
+        GameEvent.ESFXPlay?.Invoke("Container_Tried");
         activeRoutine = StartCoroutine(RunRoutine());
     }
 
@@ -347,6 +350,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
 
         yield return AnimateButtonToPressed();
         yield return MoveWindow(1f);
+        GameEvent.ESFXPlay?.Invoke("Container_Working");
         Coroutine beltRoutine = StartCoroutine(AnimateBeltFrames(beltRunCycles * FrameCount));
         Coroutine itemRoutine = StartCoroutine(MoveOutputItemRoutine());
 

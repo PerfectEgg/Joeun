@@ -34,6 +34,7 @@ public class GridSlot : MonoBehaviour, IPointerClickHandler
         if (mode == null || !mode.IsAssemble) return;     // Assemble 모드 아니면 무시
         if (!assemblable || currentNode != null) return;  // 막힌 칸 / 이미 노드 있음
 
+        GameEvent.ESFXPlay?.Invoke("Pattern_Recognition_Slot");
         manager?.SpawnNodeAt(this);
     }
 }

@@ -910,7 +910,7 @@ MonoBehaviour:
   _isLocked: 0
   _isRecyclable: 1
   _isExitDoor: 0
-  _isOpen: 1
+  _isOpen: 0
   _setZLayer: 2
   OnUnlockSuccess:
     m_PersistentCalls:
@@ -1917,6 +1917,18 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 884352091}
+        m_TargetAssemblyTypeName: EventBridge, Assembly-CSharp
+        m_MethodName: PlaySFX
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Zoom_Out
           m_BoolArgument: 1
         m_CallState: 2
 --- !u!114 &167046665
@@ -4213,6 +4225,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 884352091}
+        m_TargetAssemblyTypeName: EventBridge, Assembly-CSharp
+        m_MethodName: PlaySFX
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Zoom_In
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &312599748
 GameObject:
   m_ObjectHideFlags: 0
@@ -5787,7 +5811,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KeyReader
   _requiredKeyID: Iron_Cabinet_Key
   _targetDoor: {fileID: 1601017194}
-  _isCard: 1
+  _isCard: 0
   _setZLayer: 1
   OnInteractive:
     m_PersistentCalls:
@@ -6355,6 +6379,18 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 884352091}
+        m_TargetAssemblyTypeName: EventBridge, Assembly-CSharp
+        m_MethodName: PlaySFX
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Screwdriver
           m_BoolArgument: 1
         m_CallState: 2
 --- !u!61 &503483993
@@ -9490,6 +9526,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 884352091}
+        m_TargetAssemblyTypeName: EventBridge, Assembly-CSharp
+        m_MethodName: PlaySFX
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Zoom_In
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!61 &798420658
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -10324,6 +10372,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 884352091}
+        m_TargetAssemblyTypeName: EventBridge, Assembly-CSharp
+        m_MethodName: PlaySFX
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Cutting
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!61 &811744735
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -11089,6 +11149,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 854780012}
   m_CullTransparentMesh: 1
+--- !u!1 &884352090
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 884352092}
+  - component: {fileID: 884352091}
+  m_Layer: 0
+  m_Name: EventBridge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &884352091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 884352090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a017e18ae51fb95489e1b5dbaf8a3b57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+--- !u!4 &884352092
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 884352090}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &895927976
 GameObject:
   m_ObjectHideFlags: 0
@@ -13209,7 +13313,7 @@ MonoBehaviour:
   _isLocked: 0
   _isRecyclable: 1
   _isExitDoor: 0
-  _isOpen: 1
+  _isOpen: 0
   _setZLayer: 1
   OnUnlockSuccess:
     m_PersistentCalls:
@@ -17636,6 +17740,9 @@ MonoBehaviour:
   _setZLayer: 1
   OnUnlockSuccess:
     m_PersistentCalls:
+      m_Calls: []
+  OnInteractive:
+    m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1601017192}
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
@@ -17661,9 +17768,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-  OnInteractive:
-    m_PersistentCalls:
-      m_Calls: []
   _conditionCount: 0
 --- !u!222 &1601017195
 CanvasRenderer:
@@ -23297,6 +23401,14 @@ PrefabInstance:
       value: -122.5
       objectReference: {fileID: 0}
     - target: {fileID: 4704814016549264085, guid: 08eebcb59a7dfbc4b9d68a6e16ea987a, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704814016549264085, guid: 08eebcb59a7dfbc4b9d68a6e16ea987a, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[4].m_Mode
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704814016549264085, guid: 08eebcb59a7dfbc4b9d68a6e16ea987a, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 431636993}
@@ -23308,6 +23420,34 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_Target
       value: 
       objectReference: {fileID: 549668024}
+    - target: {fileID: 4704814016549264085, guid: 08eebcb59a7dfbc4b9d68a6e16ea987a, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[4].m_Target
+      value: 
+      objectReference: {fileID: 884352091}
+    - target: {fileID: 4704814016549264085, guid: 08eebcb59a7dfbc4b9d68a6e16ea987a, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[4].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704814016549264085, guid: 08eebcb59a7dfbc4b9d68a6e16ea987a, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[4].m_MethodName
+      value: PlaySFX
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704814016549264085, guid: 08eebcb59a7dfbc4b9d68a6e16ea987a, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[4].m_TargetAssemblyTypeName
+      value: EventBridge, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704814016549264085, guid: 08eebcb59a7dfbc4b9d68a6e16ea987a, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[4].m_Arguments.m_BoolArgument
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704814016549264085, guid: 08eebcb59a7dfbc4b9d68a6e16ea987a, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[4].m_Arguments.m_StringArgument
+      value: Zoom_Out
+      objectReference: {fileID: 0}
+    - target: {fileID: 4704814016549264085, guid: 08eebcb59a7dfbc4b9d68a6e16ea987a, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[4].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 5986329157927704986, guid: 08eebcb59a7dfbc4b9d68a6e16ea987a, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -24866,4 +25006,5 @@ SceneRoots:
   - {fileID: 618210700}
   - {fileID: 1343881072}
   - {fileID: 803572609}
+  - {fileID: 884352092}
   - {fileID: 738319840}

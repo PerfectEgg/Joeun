@@ -72,6 +72,7 @@ public class SafeKeypadImageController : MonoBehaviour
             return;
 
         currentInput += key;
+        GameEvent.ESFXPlay?.Invoke("Safe_Tried");
         UpdateDisplay();
 
         if (currentInput.Length == CodeLength)
@@ -124,6 +125,7 @@ public class SafeKeypadImageController : MonoBehaviour
     private IEnumerator PlaySuccess()
     {
         isUnlocked = true;
+        GameEvent.ESFXPlay?.Invoke("Safe_Open");
         SetFeedbackActive(failFeedbackObject, false);
         SetFeedbackActive(successFeedbackObject, true);
 
@@ -136,6 +138,7 @@ public class SafeKeypadImageController : MonoBehaviour
 
     private IEnumerator PlayFailure()
     {
+        GameEvent.ESFXPlay?.Invoke("Safe_Failed");
         SetFeedbackActive(successFeedbackObject, false);
         SetFeedbackActive(failFeedbackObject, true);
 

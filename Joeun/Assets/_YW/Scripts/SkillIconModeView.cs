@@ -138,6 +138,8 @@ public class SkillIconModeView : MonoBehaviour
         if (!IsAllowed(mode))
             return;
 
+        GameEvent.ESFXPlay?.Invoke("Skill_Select");
+
         SetMode(CurrentMode == mode ? SkillModeType.None : mode);
     }
 

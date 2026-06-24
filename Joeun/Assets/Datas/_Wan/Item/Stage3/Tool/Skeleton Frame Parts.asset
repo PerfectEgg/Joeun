@@ -15,4 +15,6 @@ MonoBehaviour:
   itemID: Skeleton_Frame_Parts
   itemName: "\uACE8\uACA9 \uD504\uB808\uC784 \uBD80\uD488"
   description: "\uBB34\uC5B8\uAC00\uC758 \uBF08\uB300\uAC00 \uB418\uB294 \uBD80\uD488"
-  itemIcon: {fileID: -9095717837082945937, guid: d909119cbc542c24f9d175a6f686c78c, type: 3}
+  itemIcon: {fileID: -8420612425396535410, guid: a13522ccda7a2454598f3c5348aa212c, type: 3}
+  inventoryHoverScaleMultiplier: 1.2
+  inventoryDragScaleMultiplier: 1.35

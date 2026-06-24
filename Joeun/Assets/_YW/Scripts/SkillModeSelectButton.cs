@@ -29,6 +29,8 @@ public sealed class SkillModeSelectButton : MonoBehaviour, IPointerClickHandler
         if (ignoreUnavailableMode && mode != SkillModeType.None && !IsSelectable(mode))
             return;
 
+        GameEvent.ESFXPlay?.Invoke("Skill_Select");
+
         if (allowToggleOff && SkillIconModeView.CurrentMode == mode)
             SkillIconModeView.ClearMode();
         else
