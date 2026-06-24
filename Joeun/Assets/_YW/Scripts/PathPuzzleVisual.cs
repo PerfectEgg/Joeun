@@ -610,7 +610,7 @@ public class PathPuzzleVisual : MonoBehaviour
 
         SetStartButtonsInteractable(false);
         SetResetButtonsInteractable(false);
-        SetStartVisual(true);
+        SetStartVisual(false);
         SetResetVisual(false);
     }
 
@@ -619,7 +619,7 @@ public class PathPuzzleVisual : MonoBehaviour
         bool solved = IsSolvedState();
         SetStartButtonsInteractable(!isRunning && !solved);
         SetResetButtonsInteractable(!solved);
-        SetStartVisual(isRunning || solved);
+        SetStartVisual(isRunning);
 
         if (solved)
             SetResetVisual(false);
