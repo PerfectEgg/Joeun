@@ -30,7 +30,12 @@ public class KeypadDoor : PasswordBase
         if (_currentInput.Length < _correctPassword.Length)
         {
             _currentInput += number;
+            GameEvent.ESFXPlay?.Invoke("Safe_Tried");
             UpdateDisplay();
+        }
+        else
+        {
+            GameEvent.ESFXPlay?.Invoke("Safe_Overflow");
         }
     }
 
@@ -41,7 +46,12 @@ public class KeypadDoor : PasswordBase
         if (_currentInput.Length > 0)
         {
             _currentInput = _currentInput.Substring(0, _currentInput.Length - 1);
+            GameEvent.ESFXPlay?.Invoke("Safe_Tried");
             UpdateDisplay();
+        }
+        else
+        {
+            GameEvent.ESFXPlay?.Invoke("Safe_Overflow");
         }
     }
 

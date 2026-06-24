@@ -38,11 +38,16 @@ public class PasswordBase : MonoBehaviour, IPickable, IInteractive
             IsLocked = false;
             DevLog.Log("딸깍- 올바른 암호/아이템입니다. 잠금이 해제되었습니다.");
             
+            GameEvent.ESFXPlay?.Invoke("Safe_Open");
             OnUnlockSuccess?.Invoke(); 
             return true; 
         }
-
-        return false; 
+        else
+        {
+            DevLog.Log("잘못된 암호입니다. 다시 입력해주세요.");
+            GameEvent.ESFXPlay?.Invoke("Safe_Failed");
+            return false; 
+        }
     }
     #endregion
 

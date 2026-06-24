@@ -13,6 +13,10 @@ public class KeyReader : MonoBehaviour, IPickable, IConditionRequirable
     [Tooltip("이 장치가 해금되었을 때 열릴 문을 연결하세요.")]
     [SerializeField] private Door _targetDoor;
 
+    [Header("카드/열쇠 여부")]
+    [Tooltip("여부에 따른 사운드 변화")]
+    [SerializeField] private bool _isCard = true;
+
     [Header("Z 레이어 설정")]
     [Tooltip("열쇠의 물리 충돌을 위해 Z 레이어를 낮춰서 화면 앞으로 나타내는 설정값입니다.")]
     [SerializeField] private int _setZLayer = 1; // Z레이어를 낮춰서 플레이어 뒤에 숨기기 위한 설정값
@@ -25,10 +29,16 @@ public class KeyReader : MonoBehaviour, IPickable, IConditionRequirable
     [SerializeField] private int _conditionCount = 0;
 
     public bool IsLocked { get; private set; } = true;
+    public bool IsCard { get; private set; } = true;
 
     void Awake()
     {
         transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - _setZLayer);
+    }
+
+    void Start()
+    {
+        IsCard = _isCard;
     }
 
     #region IConditionRequirable 구현
@@ -63,6 +73,9 @@ public class KeyReader : MonoBehaviour, IPickable, IConditionRequirable
         {
             IsLocked = false;
             DevLog.Log("삐빅- 인증되었습니다.");
+
+            if (IsCard) GameEvent.ESFXPlay?.Invoke("Reader_Success");
+            else GameEvent.ESFXPlay?.Invoke("Door_Unlocked");
 
             // 중앙 버스에 문이 열렸음을 방송 (업적, 효과음, 퍼즐 연동용)
             OnInteractive?.Invoke();

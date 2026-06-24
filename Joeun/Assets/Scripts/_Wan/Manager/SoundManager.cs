@@ -16,6 +16,9 @@ public class SoundManager : SingletonCore<SoundManager>
     [Header("AudioSource 연결")]
     [SerializeField] private AudioSource _sfxSource; // 효과음 재생용 채널
 
+    [Header("현재 스테이지")]
+    [SerializeField] private int _selectStageIndex = -1; // 효과음 재생용 채널
+
     // 현재 플레이 중인 스테이지 인덱스 (StageLoadManager와 동일한 번호)
     private int _currentStageIndex = 0;
 
@@ -27,6 +30,14 @@ public class SoundManager : SingletonCore<SoundManager>
     void OnDisable()
     {
         GameEvent.ESFXPlay -= PlaySFX;
+    }
+
+    void Start()
+    {
+        if(_selectStageIndex != -1)
+        {
+            _currentStageIndex = _selectStageIndex;
+        }
     }
 
     /// <summary>

@@ -54,6 +54,8 @@ public class CCTVManager : MonoBehaviour
         // ★ 새로운 뷰에 들어갈 때마다 스택에 현재 인덱스를 쌓아둡니다.
         _zoomHistory.Push(targetZoomIndex);
 
+        GameEvent.ESFXPlay?.Invoke("Zoom_In");
+
         UpdateViews();
         DevLog.Log($"[CCTV] 확대 뷰 진입: {zoomViews[currentZoomIndex].name}");
     }
@@ -80,6 +82,8 @@ public class CCTVManager : MonoBehaviour
             isZoomed = false;
             DevLog.Log($"[CCTV] 일반 방으로 복귀: {roomViews[currentRoomIndex].name}");
         }
+
+        GameEvent.ESFXPlay?.Invoke("Zoom_Out");
         
         UpdateViews();
         DevLog.Log($"[CCTV] 일반 방으로 복귀: {roomViews[currentRoomIndex].name}");
@@ -108,7 +112,9 @@ public class CCTVManager : MonoBehaviour
         {
             currentRoomIndex = 0;
         }
-        
+
+        GameEvent.ESFXPlay?.Invoke("Change_View");
+
         UpdateViews();
     }
 
@@ -124,6 +130,8 @@ public class CCTVManager : MonoBehaviour
         {
             currentRoomIndex = roomViews.Length - 1;
         }
+
+        GameEvent.ESFXPlay?.Invoke("Change_View");
         
         UpdateViews();
     }

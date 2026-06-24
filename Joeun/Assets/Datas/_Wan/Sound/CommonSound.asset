@@ -19,6 +19,12 @@ MonoBehaviour:
   - soundID: Exit_Door_Open
     clip: {fileID: 8300000, guid: 7d22fe66f1909e744abf2ffdd502bfa9, type: 3}
     volume: 0.6
+  - soundID: Door_Open
+    clip: {fileID: 8300000, guid: e6b84afc12c9af54194bcd09e30a8b33, type: 3}
+    volume: 0.7
+  - soundID: Door_Close
+    clip: {fileID: 8300000, guid: 56d4f5b3fbf9cc640ba68fdd551bb2ac, type: 3}
+    volume: 0.7
   - soundID: Interaction_Success
     clip: {fileID: 8300000, guid: fed1bb6f4bea31142821db5c3e07d877, type: 3}
     volume: 0.7
@@ -29,5 +35,14 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 84a31ba240313064c8e55599f99d1a47, type: 3}
     volume: 0.7
   - soundID: Acquired_Item
-    clip: {fileID: 8300000, guid: 84a31ba240313064c8e55599f99d1a47, type: 3}
+    clip: {fileID: 8300000, guid: d33874b07f6634847a094d5997f36a69, type: 3}
+    volume: 0.7
+  - soundID: Zoom_In
+    clip: {fileID: 8300000, guid: 329505a3806bb36409f1ebc7980c72e6, type: 3}
+    volume: 0.7
+  - soundID: Zoom_Out
+    clip: {fileID: 8300000, guid: e871dc7fad38f214cb101dffe765d9ac, type: 3}
+    volume: 0.7
+  - soundID: Change_View
+    clip: {fileID: 8300000, guid: 37109ac001516c340a815baebc356bb4, type: 3}
     volume: 0.7

@@ -10,6 +10,7 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
     [SerializeField] private bool _isLocked = true; // 초기값은 잠긴 상태
     [SerializeField] private bool _isRecyclable = true; // 문은 재활용 가능하도록 설정
     [SerializeField] private bool _isExitDoor = false; // 탈출구 설정
+    [SerializeField] private bool _isOpen = true; // 열러 있는 지 체크
 
     public bool IsLocked { get; set; } = true;
     public bool IsRecyclable { get; private set; } = true;
@@ -41,6 +42,7 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
         IsLocked = _isLocked;
         IsRecyclable = _isRecyclable;
         IsExitDoor = _isExitDoor;
+        IsOpen = _isOpen;
     }
 
     #region IConditionRequirable 구현
@@ -72,8 +74,7 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
         }
         else
         {
-            IsOpen = true; // 문이 열린 상태로 고정
-            gameObject.SetActive(false); // 문이 완전히 사라지도록 처리 (재활용 불가능)
+            Open();
             DevLog.Log("문이 완전히 잠금 해제되었습니다. 다시 잠기지 않습니다.");
         }
 
@@ -101,14 +102,16 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
 
         if(IsExitDoor)
         {
+            GameEvent.ESFXPlay?.Invoke("Exit_Door_Open");
+
             GameEvent.EStageClear?.Invoke();
 
             return;
         }
 
         // 3. 문이 잠겨있지 않을 때 클릭하면 상태에 따라 열거나 닫음
-        if (IsOpen) Close();
-        else Open();
+        if (IsOpen) Open();
+        else Close();
     }
     #endregion
 
@@ -117,24 +120,24 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
     {
         if (IsLocked) return; // 안전 장치
 
-        IsOpen = true;
-
         /// TODO.현재 열고 닫는 이미지가 없기 때문에 임시로 비활성화 차후 스프라이트로 교체 예정
         gameObject.SetActive(false);
         OnInteractive?.Invoke(); // 문이 열릴 때 실행할 이벤트 호출
 
         DevLog.Log("끼이익- 문이 열립니다.");
-        
-        // TODO: 열린 문 스프라이트로 변경 (예: spriteRenderer.sprite = openSprite;)
-        // CCTV 화면이라면 문이 열렸을 때 다음 방으로 넘어가는 충돌체(Trigger)를 활성화할 수도 있습니다.
+        GameEvent.ESFXPlay?.Invoke("Door_Open");
     }
 
     public void Close()
     {
-        IsOpen = false;
-        DevLog.Log("쾅! 문을 닫았습니다.");
+        if (IsLocked) return; // 안전 장치
         
-        // TODO: 닫힌 문 스프라이트로 복구
+        /// TODO.현재 열고 닫는 이미지가 없기 때문에 임시로 비활성화 차후 스프라이트로 교체 예정
+        gameObject.SetActive(false);
+        OnInteractive?.Invoke(); // 문이 열릴 때 실행할 이벤트 호출
+
+        DevLog.Log("끼이익- 문을 닫습니다.");
+        GameEvent.ESFXPlay?.Invoke("Door_Close");
     }
     #endregion
 }
