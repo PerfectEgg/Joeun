@@ -1986,7 +1986,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 397507332ffe3cb4092048f145d00a39, type: 2}
   - {fileID: 11400000, guid: 9d96aa0107212de4fb4235e06dc84145, type: 2}
   _sfxSource: {fileID: 1420713841}
-  _selectStageIndex: 2
+  _selectStageIndex: 0
 --- !u!1 &1494845510
 GameObject:
   m_ObjectHideFlags: 0

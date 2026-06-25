@@ -25,6 +25,9 @@ public class CCTVManager : MonoBehaviour
     private int currentZoomIndex = 0;
     // 확대 뷰에 진입했는지 여부 (뒤로가기 버튼 활성화 조건으로 사용)
     private bool isZoomed = false;
+    // 단칸 방인지 여부
+    private bool isSingleRoom = false;
+
 
     // ★ 핵심: 플레이어의 확대 뷰 진입 기록을 담아둘 스택 (LIFO 구조)
     private Stack<int> _zoomHistory = new Stack<int>();
@@ -95,6 +98,8 @@ public class CCTVManager : MonoBehaviour
         isZoomed = false;
 
         _zoomHistory.Clear();
+        
+        SingleRoomCheck();
 
         // 시작할 때 첫 번째 화면만 켜고 나머지는 모두 끕니다.
         UpdateViews();
@@ -142,6 +147,12 @@ public class CCTVManager : MonoBehaviour
         GameEvent.EOnCCTVZoomOutView?.Invoke();
     }
 
+    private void SingleRoomCheck()
+    {
+        if (roomViews.Length == 1) isSingleRoom = true;
+        else isSingleRoom = false;
+    }
+
     // 실질적으로 화면을 켜고 끄는 로직
     private void UpdateViews()
     {
@@ -158,8 +169,8 @@ public class CCTVManager : MonoBehaviour
         }
 
         // 3. UI 버튼 토글
-        if (leftArrowButton != null) leftArrowButton.SetActive(!isZoomed);
-        if (rightArrowButton != null) rightArrowButton.SetActive(!isZoomed);
+        if (leftArrowButton != null) leftArrowButton.SetActive(!isZoomed && !isSingleRoom);
+        if (rightArrowButton != null) rightArrowButton.SetActive(!isZoomed && !isSingleRoom);
         if (backArrowButton != null) backArrowButton.SetActive(isZoomed);
     }
 }

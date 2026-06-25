@@ -4,7 +4,7 @@ using UnityEngine.Events;
 // ==========================================
 // 키 인식 오브젝트 클래스
 // ==========================================
-public class KeyReader : MonoBehaviour, IPickable, IConditionRequirable
+public class KeyReader : MonoBehaviour, IInteractive, IPickable, IConditionRequirable
 {
     [Header("잠금 설정")]
     [SerializeField] private string _requiredKeyID; // 예: "CardKey_Lv1"
@@ -40,6 +40,18 @@ public class KeyReader : MonoBehaviour, IPickable, IConditionRequirable
     {
         IsCard = _isCard;
     }
+
+    #region IInteractive 구현
+    public void Interact()
+    {
+        if (!IsLocked)
+            DevLog.Log("이미 잠금이 해제된 장치입니다.");
+
+        if (IsCard) GameEvent.ESFXPlay?.Invoke("Reader_Failed");
+        else GameEvent.ESFXPlay?.Invoke("Door_Locked");
+        DevLog.Log("잠겨있다.");
+    }
+    #endregion
 
     #region IConditionRequirable 구현
     // 외부의 다른 스위치나 퍼즐이 풀렸을 때 UnityEvent를 통해 호출될 함수입니다.
@@ -83,13 +95,12 @@ public class KeyReader : MonoBehaviour, IPickable, IConditionRequirable
             // 핵심: 내 판정이 성공했으니, 연결된 문에게 잠금을 풀라고 명령!
             _targetDoor.UnlockFromExternal();
             
-            // 장치 자체의 시각적 변화 (예: 빨간불 -> 초록불)
-            // GetComponent<SpriteRenderer>().sprite = unlockedSprite;
-            
             return true; // 성공했으니 아이템(카드키) 소모
         }
         else
         {
+            if (IsCard) GameEvent.ESFXPlay?.Invoke("Reader_Failed");
+            else GameEvent.ESFXPlay?.Invoke("Door_Locked");
             DevLog.Log("접근 권한이 없는 카드키입니다.");
             return false; // 실패
         }

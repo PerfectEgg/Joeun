@@ -104,6 +104,8 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
             return;
         }
 
+        OnInteractive?.Invoke(); // 문이 열릴 때 실행할 이벤트 호출
+
         if(IsExitDoor)
         {
             if (_isFirstStage)
@@ -133,8 +135,7 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
 
         /// TODO.현재 열고 닫는 이미지가 없기 때문에 임시로 비활성화 차후 스프라이트로 교체 예정
         gameObject.SetActive(false);
-        OnInteractive?.Invoke(); // 문이 열릴 때 실행할 이벤트 호출
-
+        
         DevLog.Log("끼이익- 문이 열립니다.");
         GameEvent.ESFXPlay?.Invoke("Door_Open");
     }
@@ -145,7 +146,6 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
         
         /// TODO.현재 열고 닫는 이미지가 없기 때문에 임시로 비활성화 차후 스프라이트로 교체 예정
         gameObject.SetActive(false);
-        OnInteractive?.Invoke(); // 문이 열릴 때 실행할 이벤트 호출
 
         DevLog.Log("끼이익- 문을 닫습니다.");
         GameEvent.ESFXPlay?.Invoke("Door_Close");
