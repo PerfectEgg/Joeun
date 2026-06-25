@@ -911,6 +911,7 @@ MonoBehaviour:
   _isRecyclable: 1
   _isExitDoor: 0
   _isOpen: 0
+  _isFirstStage: 0
   _setZLayer: 2
   OnUnlockSuccess:
     m_PersistentCalls:
@@ -2427,6 +2428,7 @@ MonoBehaviour:
   _isRecyclable: 1
   _isExitDoor: 1
   _isOpen: 1
+  _isFirstStage: 0
   _setZLayer: 1
   OnUnlockSuccess:
     m_PersistentCalls:
@@ -2777,7 +2779,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 4
+  m_SortingOrder: 6
   m_MaskInteraction: 0
   m_Sprite: {fileID: 5474043373190286886, guid: e8dc3b14a4a6e6745a74a7d7b4dce5af, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -5143,7 +5145,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 4
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: -9136979083957020793, guid: cccb0948b85c3d54885f451c0ad00797, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -9363,7 +9365,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
+  m_SortingOrder: 4
   m_MaskInteraction: 0
   m_Sprite: {fileID: -1952765719192449350, guid: c58ba7cdd75f5b64f963ca0bd70bce5f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -12982,7 +12984,7 @@ MonoBehaviour:
   waitForToothPhase: 1
   rotatingSlotVisual: {fileID: 1065049154}
   rotateSlotVisual: 1
-  selfRotateVisualWhenEmpty: 0
+  selfRotateVisualWhenEmpty: 1
 --- !u!212 &1065049156
 SpriteRenderer:
   serializedVersion: 2
@@ -13314,6 +13316,7 @@ MonoBehaviour:
   _isRecyclable: 1
   _isExitDoor: 0
   _isOpen: 0
+  _isFirstStage: 0
   _setZLayer: 1
   OnUnlockSuccess:
     m_PersistentCalls:
@@ -17012,7 +17015,7 @@ MonoBehaviour:
   waitForToothPhase: 1
   rotatingSlotVisual: {fileID: 1537005010}
   rotateSlotVisual: 1
-  selfRotateVisualWhenEmpty: 0
+  selfRotateVisualWhenEmpty: 1
 --- !u!212 &1537005012
 SpriteRenderer:
   serializedVersion: 2
@@ -17737,6 +17740,7 @@ MonoBehaviour:
   _isRecyclable: 1
   _isExitDoor: 0
   _isOpen: 1
+  _isFirstStage: 0
   _setZLayer: 1
   OnUnlockSuccess:
     m_PersistentCalls:
@@ -22695,6 +22699,7 @@ MonoBehaviour:
   _isRecyclable: 1
   _isExitDoor: 0
   _isOpen: 1
+  _isFirstStage: 0
   _setZLayer: 2
   OnUnlockSuccess:
     m_PersistentCalls:

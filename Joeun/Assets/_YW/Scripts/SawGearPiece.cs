@@ -69,6 +69,22 @@ public sealed class SawGearPiece : MonoBehaviour, IDraggable
             snapPoint = transform;
     }
 
+    private void OnDisable()
+    {
+        if (wrongFeedbackRoutine == null)
+            return;
+
+        StopCoroutine(wrongFeedbackRoutine);
+        wrongFeedbackRoutine = null;
+        RestoreOriginalRendererColors();
+
+        if (feedbackLocked)
+        {
+            feedbackLocked = false;
+            ReturnToDragStart();
+        }
+    }
+
     private void OnMouseDown()
     {
         OnDragStart();
@@ -351,17 +367,24 @@ public sealed class SawGearPiece : MonoBehaviour, IDraggable
 
         yield return new WaitForSeconds(Mathf.Max(0f, duration));
 
-        if (spriteRenderers != null && originalRendererColors != null)
-        {
-            for (int i = 0; i < spriteRenderers.Length; i++)
-            {
-                if (spriteRenderers[i] != null && i < originalRendererColors.Length)
-                    spriteRenderers[i].color = originalRendererColors[i];
-            }
-        }
+        RestoreOriginalRendererColors();
 
         ReturnToDragStart();
         feedbackLocked = false;
         wrongFeedbackRoutine = null;
+    }
+
+    private void RestoreOriginalRendererColors()
+    {
+        CacheRenderer();
+
+        if (spriteRenderers == null || originalRendererColors == null)
+            return;
+
+        for (int i = 0; i < spriteRenderers.Length; i++)
+        {
+            if (spriteRenderers[i] != null && i < originalRendererColors.Length)
+                spriteRenderers[i].color = originalRendererColors[i];
+        }
     }
 }

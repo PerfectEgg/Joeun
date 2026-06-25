@@ -122,6 +122,12 @@ public class RecognitionDecodeAreaController : MonoBehaviour, IDecodable, IPoint
         }
 
         isDecoding = false;
+
+        if (scanEffect != null)
+            scanEffect.Hide();
+
+        ApplyVisual();
+        ApplyDecodeAvailability();
     }
 
     public void MarkDecodeReady()

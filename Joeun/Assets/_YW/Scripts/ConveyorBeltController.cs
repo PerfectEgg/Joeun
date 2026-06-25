@@ -133,6 +133,8 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     bool hasInitialDriveFeedbackShakeTargetLocalPosition;
     bool hasInitialTransientState;
     bool runCompleted;
+    bool outputItemCollected;
+    bool outputItemDelivered;
 
     public bool SawPuzzleSolved => sawPuzzleSolved;
     public bool BlockingItemPresent => blockingItemPresent;
@@ -172,6 +174,10 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     void OnEnable()
     {
         SyncBlockingItemStateFromChildItem();
+        SyncOutputItemCollectedState();
+        if (outputItemCollected)
+            PrepareOutputItemForIdle();
+
         GameEvent.EOnItemCollected += HandleItemCollected;
     }
 
@@ -267,9 +273,17 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     void HandleItemCollected(ItemData itemData)
     {
         if (!IsBlockingItem(itemData))
+        {
+            if (IsOutputItem(itemData))
+                MarkOutputItemCollected();
+
             return;
+        }
 
         ClearBlockingItem();
+
+        if (IsOutputItem(itemData))
+            MarkOutputItemCollected();
     }
 
     void SyncBlockingItemStateFromChildItem()
@@ -300,6 +314,56 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
             return itemData == blockingItemData;
 
         return !string.IsNullOrEmpty(blockingItemId) && itemData.itemID == blockingItemId;
+    }
+
+    bool IsOutputItem(ItemData itemData)
+    {
+        if (beltOutputItem == null || itemData == null)
+            return false;
+
+        ToolItem[] outputItems = beltOutputItem.GetComponentsInChildren<ToolItem>(true);
+        foreach (ToolItem outputItem in outputItems)
+        {
+            if (outputItem == null || outputItem._itemData == null)
+                continue;
+
+            if (outputItem._itemData == itemData)
+                return true;
+
+            if (!string.IsNullOrEmpty(outputItem._itemData.itemID)
+                && outputItem._itemData.itemID == itemData.itemID)
+                return true;
+        }
+
+        return false;
+    }
+
+    void SyncOutputItemCollectedState()
+    {
+        if (beltOutputItem == null)
+            return;
+
+        ToolItem[] outputItems = beltOutputItem.GetComponentsInChildren<ToolItem>(true);
+        foreach (ToolItem outputItem in outputItems)
+        {
+            if (outputItem == null || !outputItem.IsAcquired)
+                continue;
+
+            MarkOutputItemCollected();
+            return;
+        }
+    }
+
+    void MarkOutputItemCollected()
+    {
+        outputItemCollected = true;
+        runCompleted = true;
+    }
+
+    void MarkOutputItemDelivered()
+    {
+        outputItemDelivered = true;
+        runCompleted = true;
     }
 
     IEnumerator SawPuzzleMissingRoutine()
@@ -368,10 +432,12 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
 
         yield return beltRoutine;
         yield return itemRoutine;
+
+        runCompleted = true;
+
         yield return MoveWindow(0f);
         yield return AnimateButtonRelease();
 
-        runCompleted = true;
         onRunFinished?.Invoke();
         SetBusy(false);
         activeRoutine = null;
@@ -602,7 +668,26 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         if (beltOutputItem == null)
             return;
 
+        if (outputItemCollected)
+        {
+            beltOutputItem.gameObject.SetActive(false);
+            SetOutputItemInteraction(false);
+            return;
+        }
+
         CacheOutputItemStartPosition();
+
+        if (outputItemDelivered)
+        {
+            beltOutputItem.position = itemEndPoint != null ? itemEndPoint.position : outputItemStartPosition;
+            beltOutputItem.gameObject.SetActive(true);
+
+            if (enableItemInteractionOnFinish)
+                SetOutputItemInteraction(true);
+
+            return;
+        }
+
         beltOutputItem.position = outputItemStartPosition;
 
         if (hideOutputItemUntilRun)
@@ -616,6 +701,13 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     {
         if (beltOutputItem == null || itemEndPoint == null)
             yield break;
+
+        if (outputItemCollected)
+        {
+            beltOutputItem.gameObject.SetActive(false);
+            SetOutputItemInteraction(false);
+            yield break;
+        }
 
         CacheOutputItemStartPosition();
 
@@ -639,6 +731,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         }
 
         beltOutputItem.position = target;
+        MarkOutputItemDelivered();
 
         if (enableItemInteractionOnFinish)
             SetOutputItemInteraction(true);
@@ -723,9 +816,6 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         StopAllCoroutines();
         activeRoutine = null;
         SetBusy(false);
-
-        if (runCompleted)
-            return;
 
         RestoreInterruptedVisuals();
     }

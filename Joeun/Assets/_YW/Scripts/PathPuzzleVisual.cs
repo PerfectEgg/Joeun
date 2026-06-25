@@ -114,8 +114,14 @@ public class PathPuzzleVisual : MonoBehaviour
         Apply();
         BindManagerEvents();
 
-        if (!IsSolvedState())
+        if (IsSolvedState())
+        {
+            ApplySolvedVisualState();
+        }
+        else
+        {
             ResetToInitialPuzzleState(true);
+        }
 
         ApplyStartButtonState();
     }
@@ -860,9 +866,19 @@ public class PathPuzzleVisual : MonoBehaviour
     {
         yield return new WaitForSeconds(successDelay);
 
+        ApplySolvedVisualState();
+        feedbackRoutine = null;
+    }
+
+    private void ApplySolvedVisualState()
+    {
+        isSolved = true;
         SetObjectsActive(showOnSuccess, true);
         SetObjectsActive(hideOnSuccess, false);
-
+        SetStartButtonsInteractable(false);
+        SetResetButtonsInteractable(false);
+        SetStartVisual(false);
+        SetResetVisual(false);
     }
 
     private IEnumerator FailFeedbackRoutine()
