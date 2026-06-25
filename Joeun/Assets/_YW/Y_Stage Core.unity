@@ -687,6 +687,21 @@ MonoBehaviour:
   rotateSprite: {fileID: -7903693751514739419, guid: 3c49be8fb92998946a7bfd229f7b7945, type: 3}
   assembleSprite: {fileID: -1445361887028311960, guid: 227ab47e74046914eaaaff49d7b32568, type: 3}
   decodeSprite: {fileID: -3572361154050069079, guid: f2d107402cc83194eb384c6a2d4c8952, type: 3}
+  rotateOnlySprites:
+    noneSprite: {fileID: -2048314504441107130, guid: 9e8a3c3e5fe70a74aa8c291ee5647378, type: 3}
+    rotateSprite: {fileID: -2354282450863503964, guid: dbe4864b8f115cb4fa81f83ad63047fc, type: 3}
+    assembleSprite: {fileID: 0}
+    decodeSprite: {fileID: 0}
+  rotateAssembleSprites:
+    noneSprite: {fileID: 2229489598860491813, guid: 34fd59480352ef543aec821167427a23, type: 3}
+    rotateSprite: {fileID: 5907876213643554702, guid: 25fde1c3f2c978f4e8a39e4301d60906, type: 3}
+    assembleSprite: {fileID: -1439876823704118585, guid: ef0279272bcc0ab4d84bd8fe10754293, type: 3}
+    decodeSprite: {fileID: 0}
+  rotateAssembleDecodeSprites:
+    noneSprite: {fileID: -9071031642085973722, guid: 7a74f85dd72d0e2448b58f54e62ef103, type: 3}
+    rotateSprite: {fileID: 557857693992874156, guid: 5c3dfde4943f72c47a3743752f67f33d, type: 3}
+    assembleSprite: {fileID: 8433601589583187170, guid: 7346e0e08534f8a49becd56ba8f7b705, type: 3}
+    decodeSprite: {fileID: 4404224780881725217, guid: 703faad7a642ee343b653fe0b44e0fe6, type: 3}
 --- !u!114 &477777452
 MonoBehaviour:
   m_ObjectHideFlags: 0

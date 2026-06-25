@@ -5,15 +5,45 @@ using System;
 [RequireComponent(typeof(Image))]
 public class SkillIconModeView : MonoBehaviour
 {
+    [Serializable]
+    private sealed class SkillPanelSpriteSet
+    {
+        public Sprite noneSprite;
+        public Sprite rotateSprite;
+        public Sprite assembleSprite;
+        public Sprite decodeSprite;
+
+        public Sprite GetSprite(SkillModeType mode)
+        {
+            switch (mode)
+            {
+                case SkillModeType.Rotate:
+                    return rotateSprite;
+                case SkillModeType.Assemble:
+                    return assembleSprite;
+                case SkillModeType.Decode:
+                    return decodeSprite;
+                default:
+                    return noneSprite;
+            }
+        }
+    }
+
     public static SkillModeType CurrentMode { get; private set; } = SkillModeType.None;
     public static event Action<SkillModeType> OnSkillModeChanged;
     private static SkillIconModeView activeView;
     private static bool waitForSkillKeysReleased;
 
+    [Header("Fallback")]
     [SerializeField] private Sprite emptySprite;
     [SerializeField] private Sprite rotateSprite;
     [SerializeField] private Sprite assembleSprite;
     [SerializeField] private Sprite decodeSprite;
+
+    [Header("Unlocked State Sprites")]
+    [SerializeField] private SkillPanelSpriteSet rotateOnlySprites;
+    [SerializeField] private SkillPanelSpriteSet rotateAssembleSprites;
+    [SerializeField] private SkillPanelSpriteSet rotateAssembleDecodeSprites;
 
     private Image targetImage;
     private PuzzleModeManager boundManager;
@@ -32,6 +62,7 @@ public class SkillIconModeView : MonoBehaviour
     {
         activeView = this;
         SkillInteractionLock.OnChanged += HandleInteractionLockChanged;
+        SkillModeStageRules.OnAvailabilityChanged += HandleAvailabilityChanged;
         BindIfNeeded();
         ApplyMode();
     }
@@ -39,6 +70,7 @@ public class SkillIconModeView : MonoBehaviour
     private void OnDisable()
     {
         SkillInteractionLock.OnChanged -= HandleInteractionLockChanged;
+        SkillModeStageRules.OnAvailabilityChanged -= HandleAvailabilityChanged;
 
         if (boundManager != null)
             boundManager.SetMode(PuzzleModeManager.Mode.None);
@@ -171,6 +203,14 @@ public class SkillIconModeView : MonoBehaviour
 
     private void ApplyMode()
     {
+        Sprite unlockedStateSprite = GetUnlockedStateSprite(CurrentMode);
+        if (unlockedStateSprite != null)
+        {
+            SetSprite(unlockedStateSprite);
+            ApplyModeToPuzzleManager();
+            return;
+        }
+
         switch (CurrentMode)
         {
             case SkillModeType.Rotate:
@@ -219,12 +259,36 @@ public class SkillIconModeView : MonoBehaviour
         return SkillModeStageRules.IsAllowed(mode) && PuzzleModeLock.IsAllowedByActiveLocks(mode);
     }
 
+    private void HandleAvailabilityChanged()
+    {
+        ApplyMode();
+    }
+
     private void HandleInteractionLockChanged(bool locked)
     {
         if (locked)
             SetMode(SkillModeType.None);
         else
             ApplyMode();
+    }
+
+    private Sprite GetUnlockedStateSprite(SkillModeType mode)
+    {
+        if (SkillModeStageRules.AllowDecode)
+            return GetSpriteFromSet(rotateAssembleDecodeSprites, mode);
+
+        if (SkillModeStageRules.AllowAssemble)
+            return GetSpriteFromSet(rotateAssembleSprites, mode);
+
+        if (SkillModeStageRules.AllowRotate)
+            return GetSpriteFromSet(rotateOnlySprites, mode);
+
+        return null;
+    }
+
+    private static Sprite GetSpriteFromSet(SkillPanelSpriteSet spriteSet, SkillModeType mode)
+    {
+        return spriteSet != null ? spriteSet.GetSprite(mode) : null;
     }
 
     private void SetSprite(Sprite sprite)
