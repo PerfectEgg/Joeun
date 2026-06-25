@@ -217,6 +217,8 @@ public class PathPuzzleVisual : MonoBehaviour
         if (feedbackRoutine != null)
             StopCoroutine(feedbackRoutine);
 
+        GameEvent.ESFXPlay?.Invoke("Pattern_Recognition_Play");
+        
         SetStartButtonsInteractable(false);
         SetResetButtonsInteractable(true);
         SetStartVisual(true);
@@ -228,6 +230,7 @@ public class PathPuzzleVisual : MonoBehaviour
         if (IsSolvedState())
             return;
 
+        GameEvent.ESFXPlay?.Invoke("Pattern_Recognition_Reset");
         StopActiveTrace();
         StopFeedback();
         ResetToInitialPuzzleState(true);
@@ -586,6 +589,7 @@ public class PathPuzzleVisual : MonoBehaviour
 
         if (success)
         {
+            GameEvent.ESFXPlay?.Invoke("Puzzle_Success");
             MarkSolved();
             manager.onSuccess?.Invoke();
         }
@@ -594,6 +598,7 @@ public class PathPuzzleVisual : MonoBehaviour
             if (string.IsNullOrEmpty(reason))
                 reason = count < manager.requiredCount ? "Not enough cells" : "Invalid trace";
 
+            GameEvent.ESFXPlay?.Invoke("Pattern_Recognition_Erorr");
             SetStartButtonsInteractable(true);
             SetResetButtonsInteractable(true);
             SetStartVisual(false);
@@ -745,6 +750,7 @@ public class PathPuzzleVisual : MonoBehaviour
         if (manager == null || manager.traceSlots == null)
             return;
 
+        GameEvent.ESFXPlay?.Invoke("Pattern_Recognition_Progress");
         int litCount = Mathf.Clamp(count, 0, manager.requiredCount);
         lastTraceCount = litCount;
 

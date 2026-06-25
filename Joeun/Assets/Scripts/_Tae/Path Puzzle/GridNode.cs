@@ -43,7 +43,7 @@ public class GridNode : MonoBehaviour, IPointerClickHandler
 
         if (PuzzleModeManager.Instance != null && PuzzleModeManager.Instance.IsRotate)
         {
-            GameEvent.ESFXPlay?.Invoke("Skill_Select");
+            GameEvent.ESFXPlay?.Invoke("Pattern_Recognition_Node");
             Rotate();
         }
     }

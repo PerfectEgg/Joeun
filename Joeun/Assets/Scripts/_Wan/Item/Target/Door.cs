@@ -16,7 +16,11 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
     public bool IsRecyclable { get; private set; } = true;
     public bool IsExitDoor { get; private set; } = false;
     public bool IsOpen { get; set; } = false;
+
+
+    [SerializeField] private bool _isFirstStage = false; // 1스테이지인지 체크
     
+
     [Header("Z 레이어 설정")]
     [SerializeField] private int _setZLayer = 1;
 
@@ -102,7 +106,14 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
 
         if(IsExitDoor)
         {
-            GameEvent.ESFXPlay?.Invoke("Exit_Door_Open");
+            if (_isFirstStage)
+            {
+                GameEvent.ESFXPlay?.Invoke("Stage1_Exit_Door_Open");
+            }
+            else
+            {
+                GameEvent.ESFXPlay?.Invoke("Exit_Door_Open");
+            }
 
             GameEvent.EStageClear?.Invoke();
 

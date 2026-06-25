@@ -53,17 +53,20 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 08aeb22467944d849b39501cc6385820, type: 3}
     volume: 0.7
   - soundID: Pattern_Recognition_Node
-    clip: {fileID: 8300000, guid: 08aeb22467944d849b39501cc6385820, type: 3}
+    clip: {fileID: 8300000, guid: f0800b12a9009ee4496b80e96b59aee8, type: 3}
     volume: 0.7
   - soundID: Pattern_Recognition_Slot
-    clip: {fileID: 8300000, guid: 08aeb22467944d849b39501cc6385820, type: 3}
+    clip: {fileID: 8300000, guid: e526046e690b8c54ebe471fd9fd3e7a2, type: 3}
     volume: 0.7
   - soundID: Pattern_Recognition_Play
-    clip: {fileID: 8300000, guid: 08aeb22467944d849b39501cc6385820, type: 3}
+    clip: {fileID: 8300000, guid: a22a59c7b3508494b8519a62c63fed0a, type: 3}
     volume: 0.7
   - soundID: Pattern_Recognition_Erorr
-    clip: {fileID: 8300000, guid: 08aeb22467944d849b39501cc6385820, type: 3}
-    volume: 0.7
+    clip: {fileID: 8300000, guid: 0b33042e70564314f8471b42f7c94329, type: 3}
+    volume: 0.4
   - soundID: Pattern_Recognition_Reset
-    clip: {fileID: 8300000, guid: 08aeb22467944d849b39501cc6385820, type: 3}
-    volume: 0.7
+    clip: {fileID: 8300000, guid: 4fed527bbfb106746b4c0bd65f747ed4, type: 3}
+    volume: 0.6
+  - soundID: Pattern_Recognition_Progress
+    clip: {fileID: 8300000, guid: d6eb3f35d98758c4199a61915bc12ae5, type: 3}
+    volume: 0.3

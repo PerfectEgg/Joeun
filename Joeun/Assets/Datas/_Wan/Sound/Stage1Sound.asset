@@ -12,4 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: Stage1Sound
   m_EditorClassIdentifier: Assembly-CSharp::StageSound
-  sfxList: []
+  sfxList:
+  - soundID: Stage1_Exit_Door_Open
+    clip: {fileID: 8300000, guid: 85ee19d552a359148b6e6abfc24d7030, type: 3}
+    volume: 0.7
