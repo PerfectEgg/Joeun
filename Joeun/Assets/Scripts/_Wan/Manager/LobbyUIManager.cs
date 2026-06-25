@@ -76,6 +76,6 @@ public class LobbyUIManager : MonoBehaviour
         _continueButton.interactable = false;
 
         // 코어 씬 로드 (Single 모드로 열어서 로비 씬을 메모리에서 해제)
-        SceneManager.LoadScene("Stage Core");
+        SceneManager.LoadScene("Y_Stage Core");
     }
 }

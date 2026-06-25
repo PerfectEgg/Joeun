@@ -10,6 +10,13 @@ public class InteractiveTarget : MonoBehaviour, IPickable, IInteractive, ICondit
     [SerializeField] private string _requiredKeyID; // 예: "CardKey_Lv1"
     [SerializeField] private bool _isLocked = true; // 잠겨있는 지에 대한 여부
 
+    [Header("카드/열쇠 여부")]
+    [Tooltip("여부에 따른 사운드 변화")]
+    [SerializeField] private bool _isPlaySound = false;
+    [SerializeField] private bool _isCard = true;
+
+    public bool IsCard { get; private set; } = true;
+
     [Header("Z 레이어 설정")]
     [Tooltip("열쇠의 물리 충돌을 위해 Z 레이어를 낮춰서 화면 앞으로 나타내는 설정값입니다.")]
     [SerializeField] private int _setZLayer = 1; // Z레이어를 낮춰서 플레이어 뒤에 숨기기 위한 설정값
@@ -32,6 +39,7 @@ public class InteractiveTarget : MonoBehaviour, IPickable, IInteractive, ICondit
     void Start()
     {
         IsLocked = _isLocked;
+        IsCard = _isCard;
     }
 
     #region IConditionRequirable 구현
@@ -65,8 +73,13 @@ public class InteractiveTarget : MonoBehaviour, IPickable, IInteractive, ICondit
         if (keyId == _requiredKeyID)
         {
             IsLocked = false;
-
             DevLog.Log("삐빅- 인증되었습니다.");
+
+            if(_isPlaySound)
+            {
+                if (IsCard) GameEvent.ESFXPlay?.Invoke("Reader_Failed");
+                else GameEvent.ESFXPlay?.Invoke("Door_Locked");
+            }
             
             OnInteractive?.Invoke(); // 상호작용 했을 때 실행할 이벤트 호출
             
@@ -74,6 +87,12 @@ public class InteractiveTarget : MonoBehaviour, IPickable, IInteractive, ICondit
         }
         else
         {
+            if(_isPlaySound)
+            {
+                if (IsCard) GameEvent.ESFXPlay?.Invoke("Reader_Failed");
+                else GameEvent.ESFXPlay?.Invoke("Door_Locked");
+            }
+
             DevLog.Log("올바른 상호작용이 아닙니다.");
             return false; // 실패
         }
@@ -85,13 +104,19 @@ public class InteractiveTarget : MonoBehaviour, IPickable, IInteractive, ICondit
     #region IInteractive 구현
     public void Interact()
     {
-        // 1. 문이 잠겨있을 때 클릭하면
-        if (IsLocked)
+        if (!IsLocked)
         {
-            DevLog.Log("상호작용이 가능해보인다.");
-            // TODO: 덜컹거리는 소리 재생 또는 문이 흔들리는 애니메이션 실행
+            DevLog.Log("이미 잠금이 해제된 장치입니다.");
             return;
         }
+
+        if(_isPlaySound)
+        {
+            if (IsCard) GameEvent.ESFXPlay?.Invoke("Reader_Failed");
+            else GameEvent.ESFXPlay?.Invoke("Door_Locked");
+        }
+
+        DevLog.Log("잠겨있다.");
     }
     #endregion
 }

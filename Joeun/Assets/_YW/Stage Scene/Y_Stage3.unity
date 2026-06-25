@@ -2150,6 +2150,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractiveTarget
   _requiredKeyID: Hand_Puzzle_Parts
   _isLocked: 1
+  _isPlaySound: 0
+  _isCard: 1
   _setZLayer: 2
   _conditionCount: 0
   OnInteractive:
@@ -4395,6 +4397,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractiveTarget
   _requiredKeyID: Sawtooth
   _isLocked: 1
+  _isPlaySound: 0
+  _isCard: 1
   _setZLayer: 1
   _conditionCount: 0
   OnInteractive:
@@ -6354,6 +6358,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractiveTarget
   _requiredKeyID: Screwdriver
   _isLocked: 1
+  _isPlaySound: 0
+  _isCard: 1
   _setZLayer: 1
   _conditionCount: 0
   OnInteractive:
@@ -7576,6 +7582,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractiveTarget
   _requiredKeyID: Hand_Model
   _isLocked: 1
+  _isPlaySound: 1
+  _isCard: 1
   _setZLayer: 1
   _conditionCount: 0
   OnInteractive:
@@ -8550,6 +8558,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractiveTarget
   _requiredKeyID: Skeleton_Frame_Parts
   _isLocked: 1
+  _isPlaySound: 0
+  _isCard: 1
   _setZLayer: 1
   _conditionCount: 0
   OnInteractive:
@@ -10345,6 +10355,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractiveTarget
   _requiredKeyID: Nipper
   _isLocked: 1
+  _isPlaySound: 0
+  _isCard: 1
   _setZLayer: 1
   _conditionCount: 0
   OnInteractive:
@@ -14045,6 +14057,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractiveTarget
   _requiredKeyID: Skin_Flake
   _isLocked: 1
+  _isPlaySound: 0
+  _isCard: 1
   _setZLayer: 2
   _conditionCount: 0
   OnInteractive:

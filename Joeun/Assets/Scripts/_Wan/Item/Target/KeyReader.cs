@@ -17,6 +17,8 @@ public class KeyReader : MonoBehaviour, IInteractive, IPickable, IConditionRequi
     [Tooltip("여부에 따른 사운드 변화")]
     [SerializeField] private bool _isCard = true;
 
+    public bool IsCard { get; private set; } = true;
+
     [Header("Z 레이어 설정")]
     [Tooltip("열쇠의 물리 충돌을 위해 Z 레이어를 낮춰서 화면 앞으로 나타내는 설정값입니다.")]
     [SerializeField] private int _setZLayer = 1; // Z레이어를 낮춰서 플레이어 뒤에 숨기기 위한 설정값
@@ -29,7 +31,6 @@ public class KeyReader : MonoBehaviour, IInteractive, IPickable, IConditionRequi
     [SerializeField] private int _conditionCount = 0;
 
     public bool IsLocked { get; private set; } = true;
-    public bool IsCard { get; private set; } = true;
 
     void Awake()
     {
@@ -45,7 +46,10 @@ public class KeyReader : MonoBehaviour, IInteractive, IPickable, IConditionRequi
     public void Interact()
     {
         if (!IsLocked)
+        {
             DevLog.Log("이미 잠금이 해제된 장치입니다.");
+            return;
+        }
 
         if (IsCard) GameEvent.ESFXPlay?.Invoke("Reader_Failed");
         else GameEvent.ESFXPlay?.Invoke("Door_Locked");
