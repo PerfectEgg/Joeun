@@ -104,6 +104,7 @@ public sealed class SawGearPuzzleController : MonoBehaviour, IPickable
         if (solved || !AreSlotsSolved())
             return;
 
+        GameEvent.ESFXPlay?.Invoke("Puzzle_Success");
         solved = true;
         started = true;
         ApplyStateObjects();

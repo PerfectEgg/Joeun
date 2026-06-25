@@ -166,6 +166,7 @@ public sealed class SawGearPiece : MonoBehaviour, IDraggable
                 return;
             }
 
+            GameEvent.ESFXPlay?.Invoke("Sawtooth_Input"); 
             SnapTo(slot);
             controller.NotifyPieceSnapped(this);
             return;
@@ -246,6 +247,7 @@ public sealed class SawGearPiece : MonoBehaviour, IDraggable
         if (wrongFeedbackRoutine != null)
             StopCoroutine(wrongFeedbackRoutine);
 
+        GameEvent.ESFXPlay?.Invoke("Puzzle_Erorr");
         wrongFeedbackRoutine = StartCoroutine(WrongFeedbackRoutine(color, duration));
     }
 

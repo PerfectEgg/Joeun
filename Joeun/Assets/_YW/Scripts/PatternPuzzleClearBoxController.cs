@@ -119,6 +119,7 @@ public class PatternPuzzleClearBoxController : MonoBehaviour, IInteractive, IPoi
         if (slidingRoot == null || slideAnchor == null)
             return;
 
+        GameEvent.ESFXPlay?.Invoke("Pattern_Recognition_Open");
         SetColliderEnabled(clearButtonCollider, false);
         slideRoutine = StartCoroutine(SlideRoutine());
     }

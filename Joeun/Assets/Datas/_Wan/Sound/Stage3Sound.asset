@@ -37,3 +37,9 @@ MonoBehaviour:
   - soundID: Container_Working
     clip: {fileID: 8300000, guid: e629dce454f14d24e8584fcb6f43a200, type: 3}
     volume: 1
+  - soundID: Sawtooth_Input
+    clip: {fileID: 8300000, guid: fa6522206e03915439ecbe2f5d8493c8, type: 3}
+    volume: 0.7
+  - soundID: Hand_Input
+    clip: {fileID: 8300000, guid: 164812f7877b0dd47a788e26873f7f56, type: 3}
+    volume: 0.7

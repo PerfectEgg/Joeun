@@ -31,6 +31,9 @@ MonoBehaviour:
   - soundID: Puzzle_Success
     clip: {fileID: 8300000, guid: 20a816cd23e67f543ac7232e363d4209, type: 3}
     volume: 0.6
+  - soundID: Puzzle_Erorr
+    clip: {fileID: 8300000, guid: 0b33042e70564314f8471b42f7c94329, type: 3}
+    volume: 0.4
   - soundID: Reader_Success
     clip: {fileID: 8300000, guid: 84a31ba240313064c8e55599f99d1a47, type: 3}
     volume: 0.7
@@ -61,12 +64,12 @@ MonoBehaviour:
   - soundID: Pattern_Recognition_Play
     clip: {fileID: 8300000, guid: a22a59c7b3508494b8519a62c63fed0a, type: 3}
     volume: 0.7
-  - soundID: Pattern_Recognition_Erorr
-    clip: {fileID: 8300000, guid: 0b33042e70564314f8471b42f7c94329, type: 3}
-    volume: 0.4
   - soundID: Pattern_Recognition_Reset
     clip: {fileID: 8300000, guid: 4fed527bbfb106746b4c0bd65f747ed4, type: 3}
     volume: 0.6
   - soundID: Pattern_Recognition_Progress
     clip: {fileID: 8300000, guid: d6eb3f35d98758c4199a61915bc12ae5, type: 3}
     volume: 0.3
+  - soundID: Pattern_Recognition_Open
+    clip: {fileID: 8300000, guid: a1a3a33ff40342e4cad2b228f1ec44b0, type: 3}
+    volume: 0.7

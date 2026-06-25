@@ -604,7 +604,7 @@ public class PathPuzzleVisual : MonoBehaviour
             if (string.IsNullOrEmpty(reason))
                 reason = count < manager.requiredCount ? "Not enough cells" : "Invalid trace";
 
-            GameEvent.ESFXPlay?.Invoke("Pattern_Recognition_Erorr");
+            GameEvent.ESFXPlay?.Invoke("Puzzle_Erorr");
             SetStartButtonsInteractable(true);
             SetResetButtonsInteractable(true);
             SetStartVisual(false);

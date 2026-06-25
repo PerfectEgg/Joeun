@@ -118,6 +118,7 @@ public sealed class HandPuzzleController : MonoBehaviour, IPuzzleable
         if (solved)
             return;
 
+        GameEvent.ESFXPlay?.Invoke("Puzzle_Success");
         solved = true;
         RefreshAssembleReady();
         ClearConnections();
@@ -161,6 +162,8 @@ public sealed class HandPuzzleController : MonoBehaviour, IPuzzleable
     {
         if (piece == null || piece.CurrentSlot == null)
             return;
+
+        GameEvent.ESFXPlay?.Invoke("Hand_Input");
 
         if (replaceOccupiedSlots)
             ClearReplacedOccupant(piece.CurrentSlot, piece);
@@ -342,6 +345,7 @@ public sealed class HandPuzzleController : MonoBehaviour, IPuzzleable
         if (slots == null)
             return;
 
+        GameEvent.ESFXPlay?.Invoke("Puzzle_Erorr"); 
         foreach (HandPuzzleSlot slot in slots)
             ClearWrongFeedback(slot);
     }
