@@ -33,6 +33,9 @@ public class RecognitionDecodePathPuzzleConnector : MonoBehaviour
         {
             pathPuzzle.onSuccess.RemoveListener(HandlePathPuzzleSuccess);
             pathPuzzle.onSuccess.AddListener(HandlePathPuzzleSuccess);
+
+            if (pathPuzzle.IsSolved)
+                HandlePathPuzzleSuccess();
         }
     }
 

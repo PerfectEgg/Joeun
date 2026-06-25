@@ -59,6 +59,8 @@ public class PathPuzzleManager : MonoBehaviour
 
     void OnDisable()
     {
+        StopAllCoroutines();
+        isRunning = false;
         ReleaseInteractionLock();
     }
 

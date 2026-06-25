@@ -28,6 +28,8 @@ public class PatternPuzzleClearBoxController : MonoBehaviour, IInteractive, IPoi
     private Coroutine slideRoutine;
     private bool isCleared;
     private bool isOpen;
+    private bool hasClosedPosition;
+    private Vector2 closedPosition;
 
     private void Reset()
     {
@@ -42,6 +44,7 @@ public class PatternPuzzleClearBoxController : MonoBehaviour, IInteractive, IPoi
     private void Awake()
     {
         AutoWireSelf();
+        CacheClosedPosition();
 
         if (initializeOnAwake)
             ApplyUnclearedState();
@@ -65,6 +68,12 @@ public class PatternPuzzleClearBoxController : MonoBehaviour, IInteractive, IPoi
         {
             StopCoroutine(slideRoutine);
             slideRoutine = null;
+
+            if (!isOpen)
+            {
+                RestoreClosedPosition();
+                SetColliderEnabled(clearButtonCollider, isCleared || !requireClearBeforeSlide);
+            }
         }
     }
 
@@ -144,6 +153,7 @@ public class PatternPuzzleClearBoxController : MonoBehaviour, IInteractive, IPoi
     {
         isCleared = false;
         isOpen = false;
+        RestoreClosedPosition();
 
         if (unclearBox != null)
             unclearBox.SetActive(true);
@@ -153,6 +163,8 @@ public class PatternPuzzleClearBoxController : MonoBehaviour, IInteractive, IPoi
 
         SetColliderEnabled(clearButtonCollider, false);
         SetCollidersEnabled(enableCollidersAfterSlide, false);
+        SetObjectsActive(activateObjectsAfterSlide, false);
+        SetObjectsActive(deactivateObjectsAfterSlide, true);
     }
 
     private bool IsClearButtonEnabled()
@@ -167,6 +179,23 @@ public class PatternPuzzleClearBoxController : MonoBehaviour, IInteractive, IPoi
 
         if (clearButtonCollider == null)
             clearButtonCollider = GetComponent<Collider2D>();
+    }
+
+    private void CacheClosedPosition()
+    {
+        if (hasClosedPosition || slidingRoot == null)
+            return;
+
+        closedPosition = slidingRoot.anchoredPosition;
+        hasClosedPosition = true;
+    }
+
+    private void RestoreClosedPosition()
+    {
+        CacheClosedPosition();
+
+        if (hasClosedPosition && slidingRoot != null)
+            slidingRoot.anchoredPosition = closedPosition;
     }
 
     private Camera GetEventCamera()

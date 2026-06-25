@@ -119,9 +119,19 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     Vector3 windowClosedLocalPosition;
     Vector3 windowBaseLocalScale;
     Vector3 outputItemStartPosition;
+    Vector3 initialShakeTargetLocalPosition;
+    Vector3 initialDriveFeedbackShakeTargetLocalPosition;
+    RendererState initialBeltRendererState;
+    RendererState initialDriveFeedbackRendererState;
+    RendererState initialMissingDriveWarningState;
+    RendererState initialJamWarningState;
+    RendererState initialJamTargetHighlightState;
     bool hasWindowClosedPosition;
     bool hasWindowBaseScale;
     bool hasOutputItemStartPosition;
+    bool hasInitialShakeTargetLocalPosition;
+    bool hasInitialDriveFeedbackShakeTargetLocalPosition;
+    bool hasInitialTransientState;
     bool runCompleted;
 
     public bool SawPuzzleSolved => sawPuzzleSolved;
@@ -149,6 +159,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         CacheInitialPositions();
         CacheWindowScale();
         CacheOutputItemStartPosition();
+        CacheInitialTransientState();
         SyncBlockingItemStateFromChildItem();
 
         if (windowVisualMode != WindowVisualMode.MoveOnly)
@@ -167,6 +178,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
     void OnDisable()
     {
         GameEvent.EOnItemCollected -= HandleItemCollected;
+        ResetInterruptedRoutine();
     }
 
     public void Interact()
@@ -559,6 +571,32 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         hasOutputItemStartPosition = true;
     }
 
+    void CacheInitialTransientState()
+    {
+        if (hasInitialTransientState)
+            return;
+
+        initialBeltRendererState = Capture(beltRenderer);
+        initialDriveFeedbackRendererState = Capture(driveFeedbackRenderer);
+        initialMissingDriveWarningState = Capture(missingDriveWarning);
+        initialJamWarningState = Capture(jamWarning);
+        initialJamTargetHighlightState = Capture(jamTargetHighlight);
+
+        if (shakeTarget != null)
+        {
+            initialShakeTargetLocalPosition = shakeTarget.localPosition;
+            hasInitialShakeTargetLocalPosition = true;
+        }
+
+        if (driveFeedbackShakeTarget != null)
+        {
+            initialDriveFeedbackShakeTargetLocalPosition = driveFeedbackShakeTarget.localPosition;
+            hasInitialDriveFeedbackShakeTargetLocalPosition = true;
+        }
+
+        hasInitialTransientState = true;
+    }
+
     void PrepareOutputItemForIdle()
     {
         if (beltOutputItem == null)
@@ -677,6 +715,50 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         SetBehavioursEnabled(disableBehavioursWhileBusy, !busy);
     }
 
+    void ResetInterruptedRoutine()
+    {
+        if (activeRoutine == null)
+            return;
+
+        StopAllCoroutines();
+        activeRoutine = null;
+        SetBusy(false);
+
+        if (runCompleted)
+            return;
+
+        RestoreInterruptedVisuals();
+    }
+
+    void RestoreInterruptedVisuals()
+    {
+        CacheInitialPositions();
+        CacheWindowScale();
+        CacheOutputItemStartPosition();
+        CacheInitialTransientState();
+
+        if (safetyWindow != null && hasWindowClosedPosition)
+            safetyWindow.localPosition = windowClosedLocalPosition;
+
+        if (windowVisualMode != WindowVisualMode.MoveOnly)
+            SetWindowVisualAmount(0f);
+
+        if (hasInitialShakeTargetLocalPosition && shakeTarget != null)
+            shakeTarget.localPosition = initialShakeTargetLocalPosition;
+
+        if (hasInitialDriveFeedbackShakeTargetLocalPosition && driveFeedbackShakeTarget != null)
+            driveFeedbackShakeTarget.localPosition = initialDriveFeedbackShakeTargetLocalPosition;
+
+        Restore(beltRenderer, initialBeltRendererState);
+        Restore(driveFeedbackRenderer, initialDriveFeedbackRendererState);
+        Restore(missingDriveWarning, initialMissingDriveWarningState);
+        Restore(jamWarning, initialJamWarningState);
+        Restore(jamTargetHighlight, initialJamTargetHighlightState);
+
+        SetButtonFrame(0);
+        PrepareOutputItemForIdle();
+    }
+
     int FrameCount => beltFrames != null && beltFrames.Length > 0 ? beltFrames.Length : 1;
 
     bool CanAnimateButton => buttonStateObjects != null && buttonStateObjects.Length > 0;
@@ -792,7 +874,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         if (renderer == null)
             return default;
 
-        return new RendererState(renderer.gameObject.activeSelf, renderer.enabled, renderer.color);
+        return new RendererState(renderer.gameObject.activeSelf, renderer.enabled, renderer.color, renderer.sprite);
     }
 
     static void ApplyFlash(SpriteRenderer renderer, Color color, bool on)
@@ -812,6 +894,7 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
             return;
 
         renderer.color = state.color;
+        renderer.sprite = state.sprite;
         renderer.enabled = state.enabled;
         renderer.gameObject.SetActive(state.activeSelf);
     }
@@ -821,12 +904,14 @@ public class ConveyorBeltController : MonoBehaviour, IInteractive
         public readonly bool activeSelf;
         public readonly bool enabled;
         public readonly Color color;
+        public readonly Sprite sprite;
 
-        public RendererState(bool activeSelf, bool enabled, Color color)
+        public RendererState(bool activeSelf, bool enabled, Color color, Sprite sprite)
         {
             this.activeSelf = activeSelf;
             this.enabled = enabled;
             this.color = color;
+            this.sprite = sprite;
         }
     }
 }

@@ -46,6 +46,7 @@ public class ShowCompletedAssembly : MonoBehaviour
     private bool isCompletedVisualShown;
     private bool managerEventsBound;
     private bool inputQuietAfterReady;
+    private bool assembledEventInvoked;
     private int readyFrame;
     private AssembleCompositeOutlineTarget outlineTarget;
     private AssemblyScanLineEffect scanLineEffect;
@@ -70,10 +71,26 @@ public class ShowCompletedAssembly : MonoBehaviour
         ResolveOutlineTarget();
         ResolveScanLineEffect();
         BindPuzzleManagerEvents();
+
+        if (isCompletedVisualShown)
+            ApplyCompletedVisualImmediate(!assembledEventInvoked);
+        else if (puzzleManager != null && puzzleManager.IsSolved)
+            MarkReady();
     }
 
     private void OnDisable()
     {
+        StopReadyRoutine();
+
+        if (showRoutine != null)
+        {
+            StopCoroutine(showRoutine);
+            showRoutine = null;
+        }
+
+        if (scanLineEffect != null)
+            scanLineEffect.Hide();
+
         ActiveAssemblies.Remove(this);
         UnbindPuzzleManagerEvents();
     }
@@ -157,6 +174,7 @@ public class ShowCompletedAssembly : MonoBehaviour
 
         isReadyForAssemble = false;
         isCompletedVisualShown = true;
+        assembledEventInvoked = false;
         showRoutine = StartCoroutine(ShowRoutine());
     }
 
@@ -176,14 +194,8 @@ public class ShowCompletedAssembly : MonoBehaviour
 
         isReadyForAssemble = false;
         isCompletedVisualShown = true;
-        PrepareCompletedVisualObjects();
-        ApplyCompletedVisualAlignment();
-        SetImagesEnabled(hideImages, false);
-        SetBehavioursEnabled(disableBehaviours, false);
-        SetObjectsActive(hideObjects, false);
-        SetObjectsActive(showObjects, true);
-        SetShowObjectsAlpha(1f);
-        onAssembled?.Invoke();
+        assembledEventInvoked = false;
+        ApplyCompletedVisualImmediate(true);
     }
 
     public void ResetState()
@@ -202,11 +214,39 @@ public class ShowCompletedAssembly : MonoBehaviour
 
         isReadyForAssemble = false;
         isCompletedVisualShown = false;
+        assembledEventInvoked = false;
         SetImagesEnabled(hideImages, true);
         SetBehavioursEnabled(disableBehaviours, true);
         SetObjectsActive(hideObjects, true);
         SetObjectsActive(showObjects, false);
         SetShowObjectsAlpha(1f);
+    }
+
+    private void ApplyCompletedVisualImmediate(bool invokeEvent)
+    {
+        ResolveScanLineEffect();
+        if (scanLineEffect != null)
+            scanLineEffect.Hide();
+
+        PrepareCompletedVisualObjects();
+        ApplyCompletedVisualAlignment();
+        SetImagesEnabled(hideImages, false);
+        SetBehavioursEnabled(disableBehaviours, false);
+        SetObjectsActive(hideObjects, false);
+        SetObjectsActive(showObjects, true);
+        SetShowObjectsAlpha(1f);
+
+        if (invokeEvent)
+            InvokeAssembledOnce();
+    }
+
+    private void InvokeAssembledOnce()
+    {
+        if (assembledEventInvoked)
+            return;
+
+        assembledEventInvoked = true;
+        onAssembled?.Invoke();
     }
 
     private void StopReadyRoutine()
@@ -249,7 +289,7 @@ public class ShowCompletedAssembly : MonoBehaviour
             yield return StartCoroutine(scanLineEffect.Play());
 
         showRoutine = null;
-        onAssembled?.Invoke();
+        InvokeAssembledOnce();
     }
 
     private void ResolvePuzzleManager()

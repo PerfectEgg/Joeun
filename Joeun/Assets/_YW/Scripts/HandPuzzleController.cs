@@ -79,6 +79,7 @@ public sealed class HandPuzzleController : MonoBehaviour, IPuzzleable
     {
         ResolveAssembleOutlineTarget();
         SkillIconModeView.OnSkillModeChanged += HandleSkillModeChanged;
+        RefreshAssembleReady();
     }
 
     private void Update()
@@ -95,6 +96,7 @@ public sealed class HandPuzzleController : MonoBehaviour, IPuzzleable
     private void OnDisable()
     {
         SkillIconModeView.OnSkillModeChanged -= HandleSkillModeChanged;
+        StopSubmitRoutine();
 
         if (activeDraggedPiece == null)
             return;

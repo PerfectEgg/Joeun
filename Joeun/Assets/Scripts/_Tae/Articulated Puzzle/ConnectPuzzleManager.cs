@@ -32,6 +32,8 @@ public class ConnectPuzzleManager : MonoBehaviour
     // ── 내부 상태 ───────────────────────────────────────────────────
     bool isSolved = false;
 
+    public bool IsSolved => isSolved;
+
     // ── 외부 호출 API ───────────────────────────────────────────────
 
     /// <summary>파츠가 드래그/회전되어 연결이 끊길 때 PuzzlePart가 호출</summary>

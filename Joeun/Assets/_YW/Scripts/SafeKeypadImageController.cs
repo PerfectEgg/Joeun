@@ -37,6 +37,7 @@ public class SafeKeypadImageController : MonoBehaviour
     private Coroutine validationRoutine;
     private bool isBusy;
     private bool isUnlocked;
+    private bool safeUnlockedApplied;
 
     private void Awake()
     {
@@ -57,6 +58,28 @@ public class SafeKeypadImageController : MonoBehaviour
         lastKeyRevealDelay = Mathf.Max(0f, lastKeyRevealDelay);
         failFeedbackDuration = Mathf.Max(0f, failFeedbackDuration);
         successFeedbackDuration = Mathf.Max(0f, successFeedbackDuration);
+    }
+
+    private void OnDisable()
+    {
+        if (validationRoutine == null)
+            return;
+
+        StopCoroutine(validationRoutine);
+        validationRoutine = null;
+        SetFeedbackActive(failFeedbackObject, false);
+        SetFeedbackActive(successFeedbackObject, false);
+
+        if (isUnlocked)
+        {
+            isBusy = false;
+            UnlockSafe();
+            return;
+        }
+
+        isBusy = false;
+        currentInput = "";
+        ClearDisplaySlots();
     }
 
     public void PressKey(string key)
@@ -154,6 +177,11 @@ public class SafeKeypadImageController : MonoBehaviour
 
     private void UnlockSafe()
     {
+        if (safeUnlockedApplied)
+            return;
+
+        safeUnlockedApplied = true;
+
         if (safeOpenObject != null)
             safeOpenObject.SetActive(true);
 
