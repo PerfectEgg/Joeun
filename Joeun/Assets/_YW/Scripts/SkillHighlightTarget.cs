@@ -54,8 +54,13 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
         highlightOnAssemble = assemble;
         highlightOnDecode = decode;
 
-        if (rect != null)
+        if (rect != null && rect != highlightRect)
+        {
+            ForceClear();
+            frameGraphic = null;
+            frameRect = null;
             highlightRect = rect;
+        }
 
         if (isActiveAndEnabled)
         {
@@ -83,7 +88,7 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
     public void ForceClear()
     {
         StopFrameFade();
-        Clear();
+        Clear(true);
 
         if (frameGraphic != null)
             frameGraphic.enabled = false;
@@ -119,7 +124,7 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
         SkillIconModeView.OnSkillModeChanged -= HandleSkillModeChanged;
         SkillInteractionLock.OnChanged -= HandleInteractionLockChanged;
         StopFrameFade();
-        Clear();
+        ForceClear();
     }
 
     private void LateUpdate()
@@ -127,7 +132,16 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
         if (frameGraphic == null)
             return;
 
-        if (!stableFrame && Matches(SkillIconModeView.CurrentMode))
+        bool matchesCurrentMode = Matches(SkillIconModeView.CurrentMode);
+        if (!matchesCurrentMode)
+        {
+            if (frameGraphic.enabled)
+                ForceClear();
+
+            return;
+        }
+
+        if (!stableFrame)
             Apply(SkillIconModeView.CurrentMode);
     }
 
@@ -157,7 +171,7 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (!Matches(mode))
         {
-            Clear();
+            ForceClear();
             return;
         }
 
@@ -205,8 +219,18 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
 
     private void Clear()
     {
+        Clear(false);
+    }
+
+    private void Clear(bool immediate)
+    {
         if (frameGraphic != null)
-            HideFrame();
+        {
+            if (immediate)
+                frameGraphic.enabled = false;
+            else
+                HideFrame();
+        }
 
         if (frameRect != null)
             frameRect.localScale = Vector3.one;
@@ -287,7 +311,7 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
         switch (mode)
         {
             case SkillModeType.Rotate:
-                return highlightOnRotate;
+                return highlightOnRotate && CanHighlightRotateTarget();
             case SkillModeType.Assemble:
                 if (!highlightOnAssemble)
                     return false;
@@ -302,6 +326,24 @@ public class SkillHighlightTarget : MonoBehaviour, IPointerEnterHandler, IPointe
             default:
                 return false;
         }
+    }
+
+    private bool CanHighlightRotateTarget()
+    {
+        if (GetComponent<GridNode>() != null)
+            return true;
+
+        GridSlot slot = GetComponent<GridSlot>();
+        if (slot == null)
+            slot = GetComponentInParent<GridSlot>();
+
+        if (slot == null)
+            return true;
+
+        if (slot.currentNode != null)
+            return true;
+
+        return slot.GetComponentInChildren<GridNode>(true) != null;
     }
 
     private bool IsBlockedByPathPuzzleState()
