@@ -26,6 +26,7 @@ public class PuzzlePartRenderOrderController : MonoBehaviour,
     [Tooltip("Back-to-front order. Empty uses the default arm order: Arm3, Arm4, Arm2, Arm1.")]
     [SerializeField] PuzzlePart[] visualOrderBackToFront;
     bool useDefaultArmVisualOrder = true;
+    bool suppressRotateModeOnPuzzlePartInput = true;
 
     PuzzlePart puzzlePart;
     PuzzlePartRenderOrderController installerController;
@@ -160,6 +161,7 @@ public class PuzzlePartRenderOrderController : MonoBehaviour,
         if (ShowCompletedAssembly.IsReadyAssemblyClick(eventData.position))
             return;
 
+        SuppressRotateModeIfNeeded();
         pressedPart = this;
         RefreshOrder();
     }
@@ -181,6 +183,7 @@ public class PuzzlePartRenderOrderController : MonoBehaviour,
         if (ShowCompletedAssembly.IsReadyAssemblyClick(eventData.position))
             return;
 
+        SuppressRotateModeIfNeeded();
         pressedPart = this;
         RefreshOrder();
     }
@@ -195,6 +198,20 @@ public class PuzzlePartRenderOrderController : MonoBehaviour,
     }
 
     bool IsPartController => puzzlePart != null;
+
+    void SuppressRotateModeIfNeeded()
+    {
+        PuzzlePartRenderOrderController source = installerController != null ? installerController : this;
+        if (!source.suppressRotateModeOnPuzzlePartInput)
+            return;
+
+        if (SkillIconModeView.CurrentMode == SkillModeType.Rotate)
+            SkillIconModeView.ClearMode();
+
+        PuzzleModeManager modeManager = PuzzleModeManager.Instance;
+        if (modeManager != null && modeManager.IsRotate)
+            modeManager.SetMode(PuzzleModeManager.Mode.None);
+    }
 
     void InstallChildControllers()
     {

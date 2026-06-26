@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public sealed class CoolantPuzzleViewBinder : MonoBehaviour
@@ -8,6 +10,7 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
     [SerializeField] private bool hideUiOnAwake = true;
     [SerializeField] private bool resetPuzzleOnOpen;
     [SerializeField] private bool resetPuzzleOnClose;
+    [SerializeField] private bool makeNonInteractiveGraphicsPassThrough = true;
 
     private void Reset()
     {
@@ -75,5 +78,72 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
     {
         if (puzzleUiRoot != null && puzzleUiRoot.activeSelf != active)
             puzzleUiRoot.SetActive(active);
+
+        if (active && makeNonInteractiveGraphicsPassThrough)
+            ConfigurePuzzleUiRaycasts();
+    }
+
+    private void ConfigurePuzzleUiRaycasts()
+    {
+        if (puzzleUiRoot == null)
+            return;
+
+        Graphic[] graphics = puzzleUiRoot.GetComponentsInChildren<Graphic>(true);
+        foreach (Graphic graphic in graphics)
+        {
+            if (graphic == null)
+                continue;
+
+            graphic.raycastTarget = HasInteractiveHandlerInParents(graphic.transform);
+        }
+    }
+
+    private bool HasInteractiveHandlerInParents(Transform start)
+    {
+        Transform root = puzzleUiRoot != null ? puzzleUiRoot.transform : null;
+        Transform current = start;
+
+        while (current != null)
+        {
+            if (HasInteractiveHandler(current))
+                return true;
+
+            if (current == root)
+                break;
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
+    private static bool HasInteractiveHandler(Transform target)
+    {
+        if (target == null)
+            return false;
+
+        if (target.GetComponent<Selectable>() != null)
+            return true;
+
+        if (target.GetComponent<EventTrigger>() != null)
+            return true;
+
+        MonoBehaviour[] behaviours = target.GetComponents<MonoBehaviour>();
+        foreach (MonoBehaviour behaviour in behaviours)
+        {
+            if (behaviour is IPointerClickHandler
+                || behaviour is IPointerDownHandler
+                || behaviour is IPointerUpHandler
+                || behaviour is IBeginDragHandler
+                || behaviour is IDragHandler
+                || behaviour is IEndDragHandler
+                || behaviour is IPointerEnterHandler
+                || behaviour is IPointerExitHandler)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
