@@ -70,6 +70,8 @@ public class StageLoadManager : MonoBehaviour
         {
             _currentStageIndex++; // 다음 번호로 이동
             string nextStageName = _stageList[_currentStageIndex];
+
+            GameEvent.EBGMStopWithFade?.Invoke(0.75f);
             
             // ★ [연동 2] 저장 시점 동기화
             // 씬이 실제로 바뀌기 전에 SaveManager의 메모리 데이터를 최신 인덱스로 갱신합니다.
@@ -77,7 +79,7 @@ public class StageLoadManager : MonoBehaviour
             {
                 SaveManager.Instance.CurrentStageIndex = _currentStageIndex;
             }
-
+           
             StartCoroutine(TransitionRoutine(nextStageName));
         }
         else
@@ -94,7 +96,7 @@ public class StageLoadManager : MonoBehaviour
         _isTransitioning = true;
 
         // 1. 화면 페이드 아웃 (암전 처리)
-        StartCoroutine(GameUIManager.Instance.FadeOutRoutine(0.75f));
+        StartCoroutine(GameUIManager.Instance.FadeOutRoutine(1.25f));
         yield return new WaitForSeconds(0.75f); // 페이드 아웃 애니메이션 시간 대기
 
         if (SaveManager.Instance != null)

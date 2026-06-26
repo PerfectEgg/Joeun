@@ -35,7 +35,12 @@ public class GameEvent
     #endregion
 
     #region 📣 사운드 관련 이벤트
-    public static Action<string> EBGMPlay;   // 배경 음악 재생 시
+    public static Action<string, float> EBGMPlayWithFade;   // 배경 음악 재생 시
+    public static Action<float> EBGMStopWithFade;   // 배경 음악 정지 시
+    public static Action<string> EBGMPlayInstantly;   // 배경 음악 재생 시
+    public static Action EBGMStopInstantly;   // 배경 음악 정지 시
+
+
     public static Action<string> ESFXPlay;   // 효과음 재생 시
     #endregion
 
