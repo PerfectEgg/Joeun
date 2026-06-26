@@ -15,9 +15,9 @@ public class SkillModeStageRules : MonoBehaviour
 
     public static event Action OnAvailabilityChanged;
 
-    public static bool AllowRotate => activeRules != null && (activeRules.allowRotate || runtimeRotateGranted);
-    public static bool AllowAssemble => activeRules != null && (activeRules.allowAssemble || runtimeAssembleGranted);
-    public static bool AllowDecode => activeRules != null && (activeRules.allowDecode || runtimeDecodeGranted);
+    public static bool AllowRotate => runtimeRotateGranted || (activeRules != null && activeRules.allowRotate);
+    public static bool AllowAssemble => runtimeAssembleGranted || (activeRules != null && activeRules.allowAssemble);
+    public static bool AllowDecode => runtimeDecodeGranted || (activeRules != null && activeRules.allowDecode);
 
     public static bool IsAllowed(SkillModeType mode)
     {

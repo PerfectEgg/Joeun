@@ -129,10 +129,10 @@ TextureImporter:
       name: controller_0
       rect:
         serializedVersion: 2
-        x: 296
+        x: 284
         y: 333
         width: 433
-        height: 334
+        height: 333
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

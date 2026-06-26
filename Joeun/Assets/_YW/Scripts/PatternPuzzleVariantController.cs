@@ -35,6 +35,9 @@ public sealed class PatternPuzzleVariantController : MonoBehaviour
 
     private SkillModeType openedSkillMode = SkillModeType.None;
     private bool openedWithSkillMode;
+    private SkillModeType pendingOpenSkillMode = SkillModeType.None;
+    private int pendingOpenSkillFrames;
+    private const int OpenSkillApplyFrames = 60;
 
     private void Reset()
     {
@@ -56,11 +59,21 @@ public sealed class PatternPuzzleVariantController : MonoBehaviour
 
     private void OnDisable()
     {
+        pendingOpenSkillMode = SkillModeType.None;
+
         if (clearModeOnClose && openedWithSkillMode && SkillIconModeView.CurrentMode == openedSkillMode)
             SkillIconModeView.ClearMode();
 
         openedWithSkillMode = false;
         openedSkillMode = SkillModeType.None;
+    }
+
+    private void LateUpdate()
+    {
+        if (pendingOpenSkillMode == SkillModeType.None)
+            return;
+
+        TryApplyPendingOpenSkill();
     }
 
     [ContextMenu("Apply Pattern Puzzle Variant")]
@@ -196,7 +209,39 @@ public sealed class PatternPuzzleVariantController : MonoBehaviour
         openedWithSkillMode = true;
 
         if (selectSkillOnOpen)
-            SkillIconModeView.SelectMode(mode);
+        {
+            pendingOpenSkillMode = mode;
+            pendingOpenSkillFrames = OpenSkillApplyFrames;
+            TryApplyPendingOpenSkill();
+        }
+    }
+
+    private void TryApplyPendingOpenSkill()
+    {
+        if (pendingOpenSkillMode == SkillModeType.None)
+            return;
+
+        GrantUnlockedSkills();
+        SkillIconModeView.SelectMode(pendingOpenSkillMode);
+
+        if (SkillIconModeView.CurrentMode == pendingOpenSkillMode)
+        {
+            pendingOpenSkillMode = SkillModeType.None;
+            return;
+        }
+
+        pendingOpenSkillFrames--;
+        if (pendingOpenSkillFrames > 0)
+            return;
+
+        Debug.LogWarning(
+            $"[PatternPuzzleVariant] Failed to auto-select {pendingOpenSkillMode}. " +
+            $"current={SkillIconModeView.CurrentMode}, " +
+            $"stageAllowed={SkillModeStageRules.IsAllowed(pendingOpenSkillMode)}, " +
+            $"lockAllowed={PuzzleModeLock.IsAllowedByActiveLocks(pendingOpenSkillMode)}, " +
+            $"interactionLocked={SkillInteractionLock.IsLocked}",
+            this);
+        pendingOpenSkillMode = SkillModeType.None;
     }
 
     private void GrantUnlockedSkills()

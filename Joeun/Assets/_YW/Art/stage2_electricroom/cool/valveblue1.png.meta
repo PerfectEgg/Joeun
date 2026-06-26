@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5d69917a086f9a44a97af3d883702dfb
+guid: 3710155fbcec27047ad9150b0ba5f274
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5501163307756866091
-    second: controllergauge_0
+      213: -1040886062844690147
+    second: valveblue1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: controllergauge_0
+      name: valveblue1_0
       rect:
         serializedVersion: 2
-        x: 398
-        y: 455
-        width: 249
-        height: 169
+        x: 295
+        y: 274
+        width: 409
+        height: 409
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b2ac24ac1ee085c40800000000000000
-      internalID: 5501163307756866091
+      spriteID: d11cc7404a70e81f0800000000000000
+      internalID: -1040886062844690147
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      controllergauge_0: 5501163307756866091
+      valveblue1_0: -1040886062844690147
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
