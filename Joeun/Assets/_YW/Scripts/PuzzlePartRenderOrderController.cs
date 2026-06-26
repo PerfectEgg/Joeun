@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -34,6 +35,8 @@ public class PuzzlePartRenderOrderController : MonoBehaviour,
     Canvas partCanvas;
     GraphicRaycaster partRaycaster;
     bool refreshedCanvasAfterStart;
+    bool rotateModeSuspendedForInput;
+    Coroutine restoreRotateModeRoutine;
 
     public static void InstallUnder(Transform root)
     {
@@ -135,6 +138,18 @@ public class PuzzlePartRenderOrderController : MonoBehaviour,
 
     void OnDisable()
     {
+        if (restoreRotateModeRoutine != null)
+        {
+            StopCoroutine(restoreRotateModeRoutine);
+            restoreRotateModeRoutine = null;
+        }
+
+        if (rotateModeSuspendedForInput)
+        {
+            rotateModeSuspendedForInput = false;
+            RestoreRotateModeIfStillSelected();
+        }
+
         if (pressedPart == this)
             pressedPart = null;
 
@@ -161,7 +176,7 @@ public class PuzzlePartRenderOrderController : MonoBehaviour,
         if (ShowCompletedAssembly.IsReadyAssemblyClick(eventData.position))
             return;
 
-        SuppressRotateModeIfNeeded();
+        SuspendRotateModeForInput();
         pressedPart = this;
         RefreshOrder();
     }
@@ -173,6 +188,8 @@ public class PuzzlePartRenderOrderController : MonoBehaviour,
             pressedPart = null;
             NormalizeSiblingSorting(transform.parent);
         }
+
+        ScheduleRotateModeRestore();
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -183,7 +200,7 @@ public class PuzzlePartRenderOrderController : MonoBehaviour,
         if (ShowCompletedAssembly.IsReadyAssemblyClick(eventData.position))
             return;
 
-        SuppressRotateModeIfNeeded();
+        SuspendRotateModeForInput();
         pressedPart = this;
         RefreshOrder();
     }
@@ -195,22 +212,69 @@ public class PuzzlePartRenderOrderController : MonoBehaviour,
             pressedPart = null;
             NormalizeSiblingSorting(transform.parent);
         }
+
+        ScheduleRotateModeRestore();
     }
 
     bool IsPartController => puzzlePart != null;
 
-    void SuppressRotateModeIfNeeded()
+    void SuspendRotateModeForInput()
     {
         PuzzlePartRenderOrderController source = installerController != null ? installerController : this;
         if (!source.suppressRotateModeOnPuzzlePartInput)
             return;
 
-        if (SkillIconModeView.CurrentMode == SkillModeType.Rotate)
-            SkillIconModeView.ClearMode();
+        if (SkillIconModeView.CurrentMode != SkillModeType.Rotate)
+            return;
+
+        if (restoreRotateModeRoutine != null)
+        {
+            StopCoroutine(restoreRotateModeRoutine);
+            restoreRotateModeRoutine = null;
+        }
 
         PuzzleModeManager modeManager = PuzzleModeManager.Instance;
         if (modeManager != null && modeManager.IsRotate)
+        {
             modeManager.SetMode(PuzzleModeManager.Mode.None);
+            rotateModeSuspendedForInput = true;
+        }
+    }
+
+    void ScheduleRotateModeRestore()
+    {
+        if (!rotateModeSuspendedForInput)
+            return;
+
+        rotateModeSuspendedForInput = false;
+
+        if (restoreRotateModeRoutine != null)
+            StopCoroutine(restoreRotateModeRoutine);
+
+        restoreRotateModeRoutine = StartCoroutine(RestoreRotateModeAfterClick());
+    }
+
+    IEnumerator RestoreRotateModeAfterClick()
+    {
+        yield return null;
+        restoreRotateModeRoutine = null;
+        RestoreRotateModeIfStillSelected();
+    }
+
+    static void RestoreRotateModeIfStillSelected()
+    {
+        if (SkillIconModeView.CurrentMode != SkillModeType.Rotate)
+            return;
+
+        if (!SkillModeStageRules.IsAllowed(SkillModeType.Rotate)
+            || !PuzzleModeLock.IsAllowedByActiveLocks(SkillModeType.Rotate))
+        {
+            return;
+        }
+
+        PuzzleModeManager modeManager = PuzzleModeManager.Instance;
+        if (modeManager != null && !modeManager.IsRotate)
+            modeManager.SetMode(PuzzleModeManager.Mode.Rotate);
     }
 
     void InstallChildControllers()
