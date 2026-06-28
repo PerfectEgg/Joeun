@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -13,9 +14,12 @@ public class LobbyUIManager : MonoBehaviour
     [SerializeField] private Button _newGameButton;
     [SerializeField] private Button _continueButton;
 
+    [Header("연출 설정")]
+    [SerializeField] private LobbyGlitchManager _lobbyGlitchManager;
+
     private string _saveFilePath;
 
-    private void Start()
+    void Start()
     {
         // 세이브 파일이 저장되는 정확한 경로 (SaveManager와 동일한 경로)
         _saveFilePath = Path.Combine(Application.persistentDataPath, "SaveData.json");
@@ -51,8 +55,11 @@ public class LobbyUIManager : MonoBehaviour
             DevLog.Log("[Lobby] 새 게임 시작: 기존 세이브 데이터를 초기화했습니다.");
         }
 
-        // 2. 코어 씬으로 진입 (SaveManager는 데이터가 없으니 알아서 0번 스테이지를 준비합니다)
-        LoadCoreScene();
+        _lobbyGlitchManager.PlayExitSequence(() => 
+        {
+            // 2. 코어 씬으로 진입 (SaveManager는 데이터가 없으니 알아서 0번 스테이지를 준비합니다)
+            LoadCoreScene();
+        });
     }
 
     /// <summary>
@@ -63,7 +70,11 @@ public class LobbyUIManager : MonoBehaviour
         DevLog.Log("[Lobby] 이어하기: 저장된 데이터로 코어 씬에 진입합니다.");
         
         // 데이터 삭제 없이 바로 코어 씬으로 진입
-        LoadCoreScene();
+        _lobbyGlitchManager.PlayExitSequence(() => 
+        {
+            // 2. 코어 씬으로 진입 (SaveManager는 데이터가 없으니 알아서 0번 스테이지를 준비합니다)
+            LoadCoreScene();
+        });
     }
 
     // ==========================================

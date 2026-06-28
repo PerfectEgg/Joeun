@@ -1,21 +1,20 @@
 using UnityEngine;
 using UnityEngine.UI; // Image 컴포넌트 제어용
 using System.Collections;
+using Unity.VisualScripting;
 
 // ==========================================
 // 게임 UI 매니저 클래스
 // 설명: 스테이지 전환 시 Fade-in과 Fade-out을 담당합니다.
 // ==========================================
-public class GameUIManager : SingletonCore<GameUIManager>
+public class GameUIManager : MonoBehaviour
 {
     [Header("페이드 연출 설정")]
     [Tooltip("화면 전체를 가릴 검은색 Image 패널을 연결하세요.")]
     [SerializeField] private Image _fadePanel;
     
-    protected override void Awake()
+    void Awake()
     {
-        base.Awake();
-
         // 게임 시작 시 패널이 켜져 있다면, 첫 스테이지가 보일 수 있도록 투명하게 초기화
         if (_fadePanel != null)
         {
@@ -24,6 +23,27 @@ public class GameUIManager : SingletonCore<GameUIManager>
             c.a = 0f;
             _fadePanel.color = c;
         }
+    }
+
+    void OnEnable()
+    {
+        GameEvent.EFadeOut += PlayFadeOutRoutine;
+        GameEvent.EFadeIn += PlayFadeInRoutine;
+    }
+    void OnDisable()
+    {
+        GameEvent.EFadeOut -= PlayFadeOutRoutine;
+        GameEvent.EFadeIn -= PlayFadeInRoutine;
+    }
+
+    private void PlayFadeOutRoutine(float duration)
+    {
+        StartCoroutine(FadeOutRoutine(duration));
+    }
+
+    private void PlayFadeInRoutine(float duration)
+    {
+        StartCoroutine(FadeInRoutine(duration));
     }
 
     // 화면을 점진적으로 어둡게 만듭니다 (투명 -> 검은색)

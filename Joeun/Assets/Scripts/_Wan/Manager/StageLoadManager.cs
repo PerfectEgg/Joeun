@@ -96,7 +96,7 @@ public class StageLoadManager : MonoBehaviour
         _isTransitioning = true;
 
         // 1. 화면 페이드 아웃 (암전 처리)
-        StartCoroutine(GameUIManager.Instance.FadeOutRoutine(1.25f));
+        GameEvent.EFadeOut?.Invoke(0.75f);
         yield return new WaitForSeconds(0.75f); // 페이드 아웃 애니메이션 시간 대기
 
         if (SaveManager.Instance != null)
@@ -119,7 +119,7 @@ public class StageLoadManager : MonoBehaviour
         yield return StartCoroutine(LoadStageRoutine(nextStageName));
 
         // 4. 화면 페이드 인 (새 화면 보여주기)
-        StartCoroutine(GameUIManager.Instance.FadeInRoutine(0.75f));
+        GameEvent.EFadeIn?.Invoke(0.75f);
         _isTransitioning = false;
     }
 

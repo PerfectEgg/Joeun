@@ -17664,6 +17664,7 @@ MonoBehaviour:
   hideUiOnAwake: 1
   resetPuzzleOnOpen: 0
   resetPuzzleOnClose: 0
+  makeNonInteractiveGraphicsPassThrough: 1
 --- !u!1 &2100884263
 GameObject:
   m_ObjectHideFlags: 0
