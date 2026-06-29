@@ -146,7 +146,10 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
         RenderAngle(currentAngle);
 
         if (!Mathf.Approximately(previousValue, value))
+        {
+            GameEvent.ESFXPlay?.Invoke("Dial");
             NotifyValueChanged();
+        }
     }
 
     private float SnapValue(float rawValue)
@@ -189,6 +192,7 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
     private void NotifyValueChanged()
     {
         RefreshDisplay();
+
         ValueChanged?.Invoke(this, value);
     }
 

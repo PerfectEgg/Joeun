@@ -76,6 +76,13 @@ public class CoolantPuzzleManager : MonoBehaviour
     {
         bool allSupply = supplyValves.All(v => v.IsOn);
         bool allReturn = returnValves.All(v => v.IsOn);
+        int rnd = Random.Range(1, 3);
+
+        if (rnd == 1)
+            GameEvent.ESFXPlay?.Invoke("Turn_Valve1");
+        else
+            GameEvent.ESFXPlay?.Invoke("Turn_Valve2"); 
+        
 
         // 1단계: SUPPLY 전부 ON → 물 흐름 + RETURN 가동
         if (!stage1 && allSupply)
@@ -85,6 +92,7 @@ public class CoolantPuzzleManager : MonoBehaviour
             foreach (var r in returnValves) r.SetPowered(true);
             Debug.Log("[Coolant] 1단계 통과 — SUPPLY 전부 ON, 물 흐름 시작 / RETURN 전원 ON");
             UpdateLights();
+            GameEvent.ESFXPlay?.Invoke("Coolant_Effect");
             onStage1Cleared?.Invoke();
         }
 
@@ -94,6 +102,8 @@ public class CoolantPuzzleManager : MonoBehaviour
             stage2 = true;
             Debug.Log("[Coolant] ★ 2단계 통과 — 냉각수 시스템 정상 작동!");
             UpdateLights();
+            GameEvent.ESFXPlay?.Invoke("Steam_Effect");
+            GameEvent.ESFXPlay?.Invoke("Puzzle_Success");
             onStage2Cleared?.Invoke();
         }
 

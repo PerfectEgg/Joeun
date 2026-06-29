@@ -1194,7 +1194,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &697009933
 Transform:
   m_ObjectHideFlags: 0
@@ -1830,7 +1830,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1954b740b96fa64a90eac4f73f51760, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BGMSoundManager
-  _titleBGMSound: {fileID: 11400000, guid: ddf5c7701b7d4ed4eb7b6057c59bea7b, type: 2}
+  _mainBGMSound: {fileID: 11400000, guid: ddf5c7701b7d4ed4eb7b6057c59bea7b, type: 2}
   _stageBGMSound: {fileID: 11400000, guid: 04277fc0d7b25fa41a9666750c72dd9a, type: 2}
   _bgmSource: {fileID: 982460885}
 --- !u!1001 &1058202426
@@ -2381,9 +2381,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f99b780f3fdd7634a827ddfa9e14fa46, type: 2}
   - {fileID: 11400000, guid: 8eed78b24ea174644b798810eca45ad8, type: 2}
   - {fileID: 11400000, guid: 397507332ffe3cb4092048f145d00a39, type: 2}
-  - {fileID: 11400000, guid: 9d96aa0107212de4fb4235e06dc84145, type: 2}
   _sfxSource: {fileID: 1420713841}
-  _selectStageIndex: -2
+  _selectStageIndex: -1
 --- !u!1 &1494845510
 GameObject:
   m_ObjectHideFlags: 0
@@ -2476,7 +2475,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1536486332
 MonoBehaviour:
   m_ObjectHideFlags: 0

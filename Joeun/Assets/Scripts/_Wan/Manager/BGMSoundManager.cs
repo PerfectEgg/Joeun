@@ -8,8 +8,8 @@ using System.Collections;
 public class BGMSoundManager : SingletonCore<BGMSoundManager>
 {
     [Header("사운드 뱅크 설정")]
-    [Tooltip("타이틀 배경 음악")]
-    [SerializeField] private StageSound _titleBGMSound;
+    [Tooltip("메인 배경 음악")]
+    [SerializeField] private StageSound _mainBGMSound;
 
     [Tooltip("스테이지별 배경 음악 모음 (0번 인덱스 = 1스테이지)")]
     [SerializeField] private StageSound _stageBGMSound;
@@ -164,7 +164,7 @@ public class BGMSoundManager : SingletonCore<BGMSoundManager>
     private SoundData FindBGMData(string soundID)
     {
         SoundData targetData = null;
-        if (_titleBGMSound != null) targetData = _titleBGMSound.GetSoundData(soundID);
+        if (_mainBGMSound != null) targetData = _mainBGMSound.GetSoundData(soundID);
         if (targetData == null && _stageBGMSound != null) targetData = _stageBGMSound.GetSoundData(soundID);
         return targetData;
     }

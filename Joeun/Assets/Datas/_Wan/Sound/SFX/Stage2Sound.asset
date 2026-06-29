@@ -13,9 +13,24 @@ MonoBehaviour:
   m_Name: Stage2Sound
   m_EditorClassIdentifier: Assembly-CSharp::StageSound
   sfxList:
-  - soundID: Dial
-    clip: {fileID: 8300000, guid: bc9880898793e93438b98469316256bf, type: 3}
+  - soundID: Turn_Valve1
+    clip: {fileID: 8300000, guid: 202ad177218b58840ab886bb672b717c, type: 3}
     volume: 0.7
-  - soundID: Turn_Valve
-    clip: {fileID: 8300000, guid: 12a0c8e84ccc1e346ba766fe08a2cff8, type: 3}
+  - soundID: Turn_Valve2
+    clip: {fileID: 8300000, guid: bda66fa5916cdf646a1069262d225574, type: 3}
+    volume: 0.7
+  - soundID: Coolant_Effect
+    clip: {fileID: 8300000, guid: b859ff7eed0a5154b9cc5d4503f763dd, type: 3}
+    volume: 0.6
+  - soundID: Steam_Effect
+    clip: {fileID: 8300000, guid: ba199cc1900f3314f9d0be7aa6f8edfc, type: 3}
+    volume: 0.6
+  - soundID: Dial
+    clip: {fileID: 8300000, guid: 83bc7a2eddbbb9c4cbcf275adf38a5fc, type: 3}
+    volume: 0.45
+  - soundID: Item_Installation
+    clip: {fileID: 8300000, guid: 89cc2a3d60ca91842ae687797fafc41f, type: 3}
+    volume: 0.6
+  - soundID: Item_Release
+    clip: {fileID: 8300000, guid: 72c33fe699651034c931d24cf23069d4, type: 3}
     volume: 0.6

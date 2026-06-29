@@ -79,13 +79,16 @@ public class StageLoadManager : MonoBehaviour
             {
                 SaveManager.Instance.CurrentStageIndex = _currentStageIndex;
             }
+
+            GameEvent.ECurrentStage?.Invoke(_currentStageIndex);
            
             StartCoroutine(TransitionRoutine(nextStageName));
         }
         else
         {
-            DevLog.Log("모든 스테이지를 클리어했습니다! 엔딩 씬으로 이동하거나 UI를 띄웁니다.");
-            StartCoroutine(GameOverRoutine());
+            DevLog.Log("모든 스테이지를 클리어했습니다! 엔딩 씬으로 이동합니다.");
+            
+            StartCoroutine(TransitionClosing());
         }
     }
 
@@ -122,22 +125,6 @@ public class StageLoadManager : MonoBehaviour
         _isTransitioning = false;
     }
 
-    // 게임 종료 코루틴
-    private IEnumerator GameOverRoutine()
-    {
-        _isTransitioning = true;
-
-        // 1. 화면 페이드 아웃 (암전 처리)
-        GameEvent.EFadeOut?.Invoke(1.5f);
-        yield return new WaitForSeconds(1.5f); // 페이드 아웃 애니메이션 시간 대기
-
-        #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-        #else
-        Application.Quit(); // 빌드된 앱 종료
-        #endif
-    }
-
     // 순수하게 씬을 부르고 활성화하는 서브 코루틴
     private IEnumerator LoadStageRoutine(string stageName)
     {
@@ -152,5 +139,15 @@ public class StageLoadManager : MonoBehaviour
         // 로드된 스테이지 씬을 'Active Scene'으로 설정 (새로 생성되는 오브젝트들이 이 씬으로 들어가도록 설정)
         Scene newlyLoadedScene = SceneManager.GetSceneByName(stageName);
         SceneManager.SetActiveScene(newlyLoadedScene);
+    }
+
+    // 씬 교체 연출 및 연산을 처리하는 핵심 코루틴
+    private IEnumerator TransitionClosing()
+    {
+        // 1. 화면 페이드 아웃 (암전 처리)
+        GameEvent.EFadeOut?.Invoke(1.25f);
+        yield return new WaitForSeconds(1.25f); // 페이드 아웃 애니메이션 시간 대기
+
+        SceneManager.LoadScene("Closing");
     }
 }

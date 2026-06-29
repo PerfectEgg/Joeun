@@ -132,6 +132,7 @@ public sealed class TransformerDialPuzzleController : MonoBehaviour
             }
         }
 
+        GameEvent.ESFXPlay?.Invoke("Puzzle_Success");
         solved = true;
         onSolved?.Invoke();
     }

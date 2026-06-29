@@ -25,11 +25,13 @@ public class SFXSoundManager : MonoBehaviour
     void OnEnable()
     {
         GameEvent.ESFXPlay += PlaySFX;
+        GameEvent.ECurrentStage += SetCurrentStageIndex;
     }
 
     void OnDisable()
     {
         GameEvent.ESFXPlay -= PlaySFX;
+        GameEvent.ECurrentStage -= SetCurrentStageIndex;
     }
 
     void Start()

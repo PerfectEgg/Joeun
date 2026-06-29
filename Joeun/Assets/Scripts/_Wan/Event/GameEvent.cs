@@ -32,6 +32,7 @@ public class GameEvent
 
     #region 🎬 스테이지 및 씬 전환 관련 이벤트
     public static Action EStageClear;   // 스테이지 클리어 시 (전달값 없음)
+    public static Action<int> ECurrentStage;   // 현재 스테이지 인덱스 전달
     public static Action<float> EFadeOut;      // 페이드 아웃
     public static Action<float> EFadeIn;       // 페이드 인
     #endregion
