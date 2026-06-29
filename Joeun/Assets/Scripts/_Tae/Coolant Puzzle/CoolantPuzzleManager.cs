@@ -43,6 +43,9 @@ public class CoolantPuzzleManager : MonoBehaviour
     bool stage1 = false;   // latch
     bool stage2 = false;   // latch
 
+    public bool IsSolved => stage2;
+    public bool CanOperate => !stage2;
+
     void Start()
     {
         // 밸브 초기화
@@ -59,7 +62,7 @@ public class CoolantPuzzleManager : MonoBehaviour
     /// <summary>노브 N(1~4) 조작. CoolantKnob.OnPointerClick에서 호출.</summary>
     public void OperateKnob(int n)
     {
-        if (stage2) return;   // 완성 후 입력 무시 (원하면 제거)
+        if (!CanOperate) return;   // 완성 후 입력 무시 (원하면 제거)
 
         // SUPPLY: 1..N 누적
         for (int i = 0; i < n && i < supplyValves.Count; i++)

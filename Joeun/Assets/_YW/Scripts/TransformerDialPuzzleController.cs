@@ -35,6 +35,8 @@ public sealed class TransformerDialPuzzleController : MonoBehaviour
 
         if (checkOnValueChanged)
             CheckSolved(false);
+
+        SetDialsLocked(solved);
     }
 
     private void OnDisable()
@@ -50,6 +52,7 @@ public sealed class TransformerDialPuzzleController : MonoBehaviour
     public void ResetSolved()
     {
         solved = false;
+        SetDialsLocked(false);
     }
 
     public void RefreshDialsFromChildren()
@@ -57,6 +60,7 @@ public sealed class TransformerDialPuzzleController : MonoBehaviour
         Unsubscribe();
         dials = GetComponentsInChildren<TransformerDialControl2D>(true);
         Subscribe();
+        SetDialsLocked(solved);
     }
 
     private void EnsureDials()
@@ -134,6 +138,7 @@ public sealed class TransformerDialPuzzleController : MonoBehaviour
 
         GameEvent.ESFXPlay?.Invoke("Puzzle_Success");
         solved = true;
+        SetDialsLocked(true);
         onSolved?.Invoke();
     }
 
@@ -143,5 +148,17 @@ public sealed class TransformerDialPuzzleController : MonoBehaviour
             && answerValues != null
             && dials.Length > 0
             && dials.Length == answerValues.Length;
+    }
+
+    private void SetDialsLocked(bool locked)
+    {
+        if (dials == null)
+            return;
+
+        foreach (TransformerDialControl2D dial in dials)
+        {
+            if (dial != null)
+                dial.SetLocked(locked);
+        }
     }
 }

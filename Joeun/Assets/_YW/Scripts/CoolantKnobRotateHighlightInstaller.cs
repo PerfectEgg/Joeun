@@ -74,9 +74,12 @@ public sealed class CoolantKnobRotateGate : MonoBehaviour
 {
     [SerializeField] private CoolantKnob knob;
 
+    private CoolantPuzzleManager puzzleManager;
+
     private void Awake()
     {
         ResolveKnob();
+        ResolvePuzzleManager();
         Apply();
     }
 
@@ -112,6 +115,12 @@ public sealed class CoolantKnobRotateGate : MonoBehaviour
             knob = GetComponent<CoolantKnob>();
     }
 
+    private void ResolvePuzzleManager()
+    {
+        if (puzzleManager == null)
+            puzzleManager = GetComponentInParent<CoolantPuzzleManager>();
+    }
+
     private void HandleSkillModeChanged(SkillModeType mode)
     {
         Apply();
@@ -130,14 +139,18 @@ public sealed class CoolantKnobRotateGate : MonoBehaviour
     private void Apply()
     {
         ResolveKnob();
+        ResolvePuzzleManager();
         if (knob == null)
             return;
 
         knob.enabled = IsRotateUsable();
     }
 
-    private static bool IsRotateUsable()
+    private bool IsRotateUsable()
     {
+        if (puzzleManager != null && puzzleManager.IsSolved)
+            return false;
+
         return SkillIconModeView.CurrentMode == SkillModeType.Rotate
             && !SkillInteractionLock.IsLocked
             && SkillModeStageRules.IsAllowed(SkillModeType.Rotate)
@@ -154,11 +167,13 @@ public sealed class CoolantKnobRotateHighlight : MonoBehaviour, IPointerEnterHan
     [SerializeField, Range(0.5f, 1.2f)] private float circleScale = 0.86f;
 
     private CoolantKnobRotateRingGraphic ringGraphic;
+    private CoolantPuzzleManager puzzleManager;
     private bool hovering;
 
     private void Awake()
     {
         ResolveTargetRect();
+        ResolvePuzzleManager();
         EnsureRing();
     }
 
@@ -211,6 +226,12 @@ public sealed class CoolantKnobRotateHighlight : MonoBehaviour, IPointerEnterHan
             targetRect = transform as RectTransform;
     }
 
+    private void ResolvePuzzleManager()
+    {
+        if (puzzleManager == null)
+            puzzleManager = GetComponentInParent<CoolantPuzzleManager>();
+    }
+
     private void HandleSkillModeChanged(SkillModeType mode)
     {
         Apply();
@@ -229,6 +250,7 @@ public sealed class CoolantKnobRotateHighlight : MonoBehaviour, IPointerEnterHan
     private void Apply()
     {
         EnsureRing();
+        ResolvePuzzleManager();
         if (ringGraphic == null)
             return;
 
@@ -278,8 +300,11 @@ public sealed class CoolantKnobRotateHighlight : MonoBehaviour, IPointerEnterHan
         return ringObject;
     }
 
-    private static bool IsRotateUsable()
+    private bool IsRotateUsable()
     {
+        if (puzzleManager != null && puzzleManager.IsSolved)
+            return false;
+
         return SkillIconModeView.CurrentMode == SkillModeType.Rotate
             && !SkillInteractionLock.IsLocked
             && SkillModeStageRules.IsAllowed(SkillModeType.Rotate)

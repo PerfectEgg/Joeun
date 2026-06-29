@@ -28,6 +28,9 @@ public class CoolantKnob : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData ev)
     {
+        if (manager != null && !manager.CanOperate)
+            return;
+
         manager?.OperateKnob(number);
         SpinFeedback();
     }

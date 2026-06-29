@@ -27,6 +27,7 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
     private float dragAngle;
     private float lastPointerAngle;
     private bool dragging;
+    private bool locked;
 
     public event Action<TransformerDialControl2D, float> ValueChanged;
 
@@ -34,6 +35,7 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
     public float Value => value;
     public int IntValue => Mathf.RoundToInt(value);
     public int DisplayValue => GetDisplayValue(Mathf.Max(1, digitSlots.Count));
+    public bool IsLocked => locked;
 
     public bool MatchesAnswer(int answerValue)
     {
@@ -62,6 +64,14 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
     public void Refresh()
     {
         SyncAngleFromValue();
+    }
+
+    public void SetLocked(bool value)
+    {
+        locked = value;
+
+        if (locked)
+            dragging = false;
     }
 
     public void OnDragStart()
@@ -96,6 +106,9 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
 
     private void BeginDrag(Vector2 mouseWorldPosition)
     {
+        if (locked)
+            return;
+
         if (dragging)
             return;
 
@@ -106,6 +119,12 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
 
     private void DragTo(Vector2 mouseWorldPosition)
     {
+        if (locked)
+        {
+            dragging = false;
+            return;
+        }
+
         if (!dragging)
             return;
 

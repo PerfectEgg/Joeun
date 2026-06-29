@@ -60,6 +60,16 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (IsPuzzleSolved())
+        {
+            pendingRotateSelect = false;
+
+            if (SkillIconModeView.CurrentMode == SkillModeType.Rotate)
+                SkillIconModeView.ClearMode();
+
+            return;
+        }
+
         if (!pendingRotateSelect)
             return;
 
@@ -113,6 +123,17 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
         if (!selectRotateOnOpen)
             return;
 
+        if (IsPuzzleSolved())
+        {
+            pendingRotateSelect = false;
+            openedWithRotate = false;
+
+            if (SkillIconModeView.CurrentMode == SkillModeType.Rotate)
+                SkillIconModeView.ClearMode();
+
+            return;
+        }
+
         openedWithRotate = true;
         pendingRotateSelect = true;
         pendingRotateSelectFrames = SelectRetryFrames;
@@ -131,6 +152,16 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
 
     private void TrySelectRotateMode()
     {
+        if (IsPuzzleSolved())
+        {
+            pendingRotateSelect = false;
+
+            if (SkillIconModeView.CurrentMode == SkillModeType.Rotate)
+                SkillIconModeView.ClearMode();
+
+            return;
+        }
+
         SkillModeStageRules.Grant(SkillModeType.Rotate);
         SkillIconModeView.SelectMode(SkillModeType.Rotate);
 
@@ -153,6 +184,12 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
             $"interactionLocked={SkillInteractionLock.IsLocked}",
             this);
         pendingRotateSelect = false;
+    }
+
+    private bool IsPuzzleSolved()
+    {
+        AutoWire();
+        return puzzleManager != null && puzzleManager.IsSolved;
     }
 
     private void PlayOpenSkillSfxOnce()
