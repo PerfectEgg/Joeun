@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable
+public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable, IConditionRequirable
 {
     [Header("Feedback")]
     [SerializeField, Min(1f)] private float hoverScaleMultiplier = 1.12f;
@@ -11,6 +11,10 @@ public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable
     [SerializeField] private float removeRotation = -18f;
     [SerializeField, Min(0f)] private float liftHeight = 0.06f;
     [SerializeField] private string removeSfxId = "";
+
+    [Header("조건 설정")]
+    [Tooltip("잠금 해제 조건이 필요한지 여부 (예: 선행 오브젝트 처리)")]
+    [SerializeField] private int _conditionCount = 0;
 
     [Header("Events")]
     [SerializeField] private UnityEvent onRemoved;
@@ -63,6 +67,12 @@ public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable
 
     public void Interact()
     {
+        if (_conditionCount > 0)
+        {
+            DevLog.Log("조건이 더 필요합니다.");
+            return;
+        }
+
         if (isRemoving || isRemoved)
             return;
 
@@ -83,7 +93,7 @@ public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable
 
     public void OnHoverEnter()
     {
-        if (isRemoving || suppressHoverUntilPointerExit)
+        if (_conditionCount > 0 || isRemoving || suppressHoverUntilPointerExit)
             return;
 
         transform.localScale = originLocalScale * hoverScaleMultiplier;
@@ -96,6 +106,15 @@ public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable
 
         suppressHoverUntilPointerExit = false;
         transform.localScale = originLocalScale;
+    }
+
+    public void ResolveCondition()
+    {
+        _conditionCount--;
+        if (_conditionCount <= 0)
+        {
+            DevLog.Log($"{gameObject.name}의 선행 조건이 달성되었습니다! 이제 아이템을 사용할 수 있습니다.");
+        }
     }
 
     private IEnumerator RemoveRoutine()

@@ -4,11 +4,11 @@ using UnityEngine.Events;
 [DisallowMultipleComponent]
 public sealed class TransformerDialPuzzleController : MonoBehaviour
 {
+    [SerializeField] private bool autoFindDials = true;
     [SerializeField] private TransformerDialControl2D[] dials;
     [SerializeField] private int[] answerValues;
     [SerializeField] private bool checkOnValueChanged = true;
     [SerializeField] private bool solveOnlyOnce = true;
-    [SerializeField, Min(0f)] private float tolerance = 0.01f;
 
     [Header("Events")]
     [SerializeField] private UnityEvent onSolved;
@@ -18,6 +18,11 @@ public sealed class TransformerDialPuzzleController : MonoBehaviour
 
     public bool IsSolved => solved;
 
+    private void Awake()
+    {
+        EnsureDials();
+    }
+
     private void Reset()
     {
         dials = GetComponentsInChildren<TransformerDialControl2D>(true);
@@ -25,6 +30,7 @@ public sealed class TransformerDialPuzzleController : MonoBehaviour
 
     private void OnEnable()
     {
+        EnsureDials();
         Subscribe();
 
         if (checkOnValueChanged)
@@ -51,6 +57,17 @@ public sealed class TransformerDialPuzzleController : MonoBehaviour
         Unsubscribe();
         dials = GetComponentsInChildren<TransformerDialControl2D>(true);
         Subscribe();
+    }
+
+    private void EnsureDials()
+    {
+        if (!autoFindDials)
+            return;
+
+        if (dials != null && dials.Length > 0)
+            return;
+
+        dials = GetComponentsInChildren<TransformerDialControl2D>(true);
     }
 
     private void Subscribe()
@@ -106,7 +123,7 @@ public sealed class TransformerDialPuzzleController : MonoBehaviour
                 return;
             }
 
-            if (Mathf.Abs(dials[i].Value - answerValues[i]) > tolerance)
+            if (!dials[i].MatchesAnswer(answerValues[i]))
             {
                 if (invokeFailed)
                     onFailed?.Invoke();

@@ -838,7 +838,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 3
   m_MaskInteraction: 0
   m_Sprite: {fileID: -8548267943667287206, guid: 55d5c3e84f1a081429187711a0f7bb0e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -2498,8 +2498,6 @@ GameObject:
   - component: {fileID: 335355254}
   - component: {fileID: 335355258}
   - component: {fileID: 335355257}
-  - component: {fileID: 335355256}
-  - component: {fileID: 335355255}
   m_Layer: 0
   m_Name: Charged
   m_TagString: Untagged
@@ -2526,73 +2524,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0.605, y: 0.029999971}
   m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &335355255
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 335355253}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd92d3789f565f64c9381e73c184696e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RemoveOnlyItem
-  hoverScaleMultiplier: 1.12
-  removeDuration: 0.28
-  removeLocalOffset: {x: 0.12, y: -0.35}
-  removeRotation: -18
-  liftHeight: 0.06
-  removeSfxId: 
-  onRemoved:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!61 &335355256
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 335355253}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 3.37, y: 8.84}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 0.94, y: 1.76}
-  m_EdgeRadius: 0
 --- !u!222 &335355257
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3329,7 +3260,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &455186717
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3594,8 +3525,8 @@ Transform:
   m_GameObject: {fileID: 471778937}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.679, y: -0.49100006, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -4.641, y: -0.503, z: 0}
+  m_LocalScale: {x: 0.9, y: 0.9, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 455186717}
@@ -3918,10 +3849,10 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 960967876}
+        m_TargetAssemblyTypeName: RemoveOnlyItem, Assembly-CSharp
+        m_MethodName: ResolveCondition
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -4747,6 +4678,7 @@ MonoBehaviour:
   removeRotation: -18
   liftHeight: 0.06
   removeSfxId: 
+  _conditionCount: 0
   onRemoved:
     m_PersistentCalls:
       m_Calls:
@@ -5010,15 +4942,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TransformerDialControl2D
   minValue: 0
   maxValue: 9
-  value: 4
+  value: 9
   step: 1
   angleMin: -135
   angleMax: 135
   visualRoot: {fileID: 586784032}
   center: {fileID: 0}
-  onValueChanged:
-    m_PersistentCalls:
-      m_Calls: []
+  digitSprites:
+  - {fileID: 21300000, guid: c6fa470a9fc63e5448ff043bcd218e3c, type: 3}
+  - {fileID: 21300000, guid: 83dd6ca36a9e7a74289ab52353a8f160, type: 3}
+  - {fileID: 21300000, guid: 1819729c5e583294bbe2089bf9471ad1, type: 3}
+  - {fileID: 21300000, guid: 791f9b33cd9f04542a20f0ad1cb52580, type: 3}
+  - {fileID: 21300000, guid: cd0c9c7a3f82f5246981d164d03e6f56, type: 3}
+  - {fileID: 21300000, guid: 4223e997ac10fcc4d94bde53d44b18a9, type: 3}
+  - {fileID: 21300000, guid: d29c574afe1fb164380fae50d6a17968, type: 3}
+  - {fileID: 21300000, guid: bca7ed3a7825e404195f6cca76ae008f, type: 3}
+  - {fileID: 21300000, guid: 944f70c75907469468381a7e4852b5fc, type: 3}
+  - {fileID: 21300000, guid: 7dcefb07fb43192439285773f58634e1, type: 3}
+  blankSprite: {fileID: 0}
+  digitSlots:
+  - {fileID: 731691436}
+  padWithZeros: 1
 --- !u!1 &588179995
 GameObject:
   m_ObjectHideFlags: 0
@@ -5392,7 +5336,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 655476367}
-  - component: {fileID: 655476368}
   m_Layer: 5
   m_Name: d2
   m_TagString: Untagged
@@ -5421,22 +5364,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0.43, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &655476368
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 655476366}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 457a29663c776924ea6f19f6deba27bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DialPanel
-  pairs:
-  - dial: {fileID: 0}
-    display: {fileID: 1752718553}
-  logChanges: 0
 --- !u!1 &676110966
 GameObject:
   m_ObjectHideFlags: 0
@@ -5903,7 +5830,6 @@ GameObject:
   m_Component:
   - component: {fileID: 731691434}
   - component: {fileID: 731691436}
-  - component: {fileID: 731691435}
   m_Layer: 5
   m_Name: 0
   m_TagString: Untagged
@@ -5930,32 +5856,6 @@ RectTransform:
   m_AnchoredPosition: {x: -3.7969997, y: -2.623}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &731691435
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 731691433}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f141432c1891b7b41903dcd28ea0e8a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SegmentDisplay
-  digitSprites:
-  - {fileID: 21300000, guid: c6fa470a9fc63e5448ff043bcd218e3c, type: 3}
-  - {fileID: 21300000, guid: 83dd6ca36a9e7a74289ab52353a8f160, type: 3}
-  - {fileID: 21300000, guid: 1819729c5e583294bbe2089bf9471ad1, type: 3}
-  - {fileID: 21300000, guid: 791f9b33cd9f04542a20f0ad1cb52580, type: 3}
-  - {fileID: 21300000, guid: cd0c9c7a3f82f5246981d164d03e6f56, type: 3}
-  - {fileID: 21300000, guid: 4223e997ac10fcc4d94bde53d44b18a9, type: 3}
-  - {fileID: 21300000, guid: d29c574afe1fb164380fae50d6a17968, type: 3}
-  - {fileID: 21300000, guid: bca7ed3a7825e404195f6cca76ae008f, type: 3}
-  - {fileID: 21300000, guid: 944f70c75907469468381a7e4852b5fc, type: 3}
-  - {fileID: 21300000, guid: 7dcefb07fb43192439285773f58634e1, type: 3}
-  blankSprite: {fileID: 0}
-  digitSlots: []
-  padWithZeros: 1
 --- !u!212 &731691436
 SpriteRenderer:
   serializedVersion: 2
@@ -7326,6 +7226,7 @@ MonoBehaviour:
   removeRotation: -18
   liftHeight: 0.06
   removeSfxId: 
+  _conditionCount: 1
   onRemoved:
     m_PersistentCalls:
       m_Calls: []
@@ -7867,14 +7768,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c487bcf7ab928fe4f9722b16f94b2ca9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TransformerDialPuzzleController
+  autoFindDials: 1
   dials:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  answerValues: 
+  - {fileID: 1677372375}
+  - {fileID: 1122441410}
+  - {fileID: 586784036}
+  answerValues: bc0200001400000004000000
   checkOnValueChanged: 1
   solveOnlyOnce: 1
-  tolerance: 0.01
   onSolved:
     m_PersistentCalls:
       m_Calls:
@@ -8454,15 +8355,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TransformerDialControl2D
   minValue: 0
   maxValue: 90
-  value: 20
+  value: 90
   step: 10
   angleMin: -135
   angleMax: 135
   visualRoot: {fileID: 1122441406}
   center: {fileID: 0}
-  onValueChanged:
-    m_PersistentCalls:
-      m_Calls: []
+  digitSprites:
+  - {fileID: 21300000, guid: c6fa470a9fc63e5448ff043bcd218e3c, type: 3}
+  - {fileID: 21300000, guid: 83dd6ca36a9e7a74289ab52353a8f160, type: 3}
+  - {fileID: 21300000, guid: 1819729c5e583294bbe2089bf9471ad1, type: 3}
+  - {fileID: 21300000, guid: 791f9b33cd9f04542a20f0ad1cb52580, type: 3}
+  - {fileID: 21300000, guid: cd0c9c7a3f82f5246981d164d03e6f56, type: 3}
+  - {fileID: 21300000, guid: 4223e997ac10fcc4d94bde53d44b18a9, type: 3}
+  - {fileID: 21300000, guid: d29c574afe1fb164380fae50d6a17968, type: 3}
+  - {fileID: 21300000, guid: bca7ed3a7825e404195f6cca76ae008f, type: 3}
+  - {fileID: 21300000, guid: 944f70c75907469468381a7e4852b5fc, type: 3}
+  - {fileID: 21300000, guid: 7dcefb07fb43192439285773f58634e1, type: 3}
+  blankSprite: {fileID: 0}
+  digitSlots:
+  - {fileID: 1752718554}
+  padWithZeros: 1
 --- !u!1 &1123054418
 GameObject:
   m_ObjectHideFlags: 0
@@ -8472,7 +8385,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1123054419}
-  - component: {fileID: 1123054420}
   m_Layer: 5
   m_Name: d3
   m_TagString: Untagged
@@ -8500,22 +8412,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1123054420
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1123054418}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 457a29663c776924ea6f19f6deba27bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DialPanel
-  pairs:
-  - dial: {fileID: 0}
-    display: {fileID: 731691435}
-  logChanges: 0
 --- !u!1 &1132388099
 GameObject:
   m_ObjectHideFlags: 0
@@ -8690,7 +8586,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1151646501}
   - component: {fileID: 1151646503}
-  - component: {fileID: 1151646502}
   m_Layer: 5
   m_Name: 000
   m_TagString: Untagged
@@ -8717,32 +8612,6 @@ RectTransform:
   m_AnchoredPosition: {x: -5.713, y: 2.684}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1151646502
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1151646500}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f141432c1891b7b41903dcd28ea0e8a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SegmentDisplay
-  digitSprites:
-  - {fileID: 21300000, guid: c6fa470a9fc63e5448ff043bcd218e3c, type: 3}
-  - {fileID: 21300000, guid: 83dd6ca36a9e7a74289ab52353a8f160, type: 3}
-  - {fileID: 21300000, guid: 1819729c5e583294bbe2089bf9471ad1, type: 3}
-  - {fileID: 21300000, guid: 791f9b33cd9f04542a20f0ad1cb52580, type: 3}
-  - {fileID: 21300000, guid: cd0c9c7a3f82f5246981d164d03e6f56, type: 3}
-  - {fileID: 21300000, guid: 4223e997ac10fcc4d94bde53d44b18a9, type: 3}
-  - {fileID: 21300000, guid: d29c574afe1fb164380fae50d6a17968, type: 3}
-  - {fileID: 21300000, guid: bca7ed3a7825e404195f6cca76ae008f, type: 3}
-  - {fileID: 21300000, guid: 944f70c75907469468381a7e4852b5fc, type: 3}
-  - {fileID: 21300000, guid: 7dcefb07fb43192439285773f58634e1, type: 3}
-  blankSprite: {fileID: 0}
-  digitSlots: []
-  padWithZeros: 1
 --- !u!212 &1151646503
 SpriteRenderer:
   serializedVersion: 2
@@ -8936,8 +8805,8 @@ Transform:
   m_GameObject: {fileID: 1214811807}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.67, y: -0.69, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -4.632, y: -0.70199996, z: 0}
+  m_LocalScale: {x: 0.9, y: 0.9, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 455186717}
@@ -10496,7 +10365,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 4287150057834144869, guid: fa9b88b37fd2e4347899731623fdcace, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -12031,7 +11900,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1598197815
 Transform:
   m_ObjectHideFlags: 0
@@ -12096,7 +11965,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 3183014421882561596, guid: a384bf93c7fb5b444bc1f1902f2a15f3, type: 3}
+  m_Sprite: {fileID: -4957968087278658048, guid: 81dc94390dbb06d4093a3381496bd9bf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -12358,15 +12227,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TransformerDialControl2D
   minValue: 0
   maxValue: 900
-  value: 700
+  value: 900
   step: 100
   angleMin: -135
   angleMax: 135
   visualRoot: {fileID: 1677372371}
   center: {fileID: 0}
-  onValueChanged:
-    m_PersistentCalls:
-      m_Calls: []
+  digitSprites:
+  - {fileID: 21300000, guid: c6fa470a9fc63e5448ff043bcd218e3c, type: 3}
+  - {fileID: 21300000, guid: 83dd6ca36a9e7a74289ab52353a8f160, type: 3}
+  - {fileID: 21300000, guid: 1819729c5e583294bbe2089bf9471ad1, type: 3}
+  - {fileID: 21300000, guid: 791f9b33cd9f04542a20f0ad1cb52580, type: 3}
+  - {fileID: 21300000, guid: cd0c9c7a3f82f5246981d164d03e6f56, type: 3}
+  - {fileID: 21300000, guid: 4223e997ac10fcc4d94bde53d44b18a9, type: 3}
+  - {fileID: 21300000, guid: d29c574afe1fb164380fae50d6a17968, type: 3}
+  - {fileID: 21300000, guid: bca7ed3a7825e404195f6cca76ae008f, type: 3}
+  - {fileID: 21300000, guid: 944f70c75907469468381a7e4852b5fc, type: 3}
+  - {fileID: 21300000, guid: 7dcefb07fb43192439285773f58634e1, type: 3}
+  blankSprite: {fileID: 0}
+  digitSlots:
+  - {fileID: 1151646503}
+  padWithZeros: 1
 --- !u!1 &1683607409
 GameObject:
   m_ObjectHideFlags: 0
@@ -12832,7 +12713,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1752718552}
   - component: {fileID: 1752718554}
-  - component: {fileID: 1752718553}
   m_Layer: 5
   m_Name: 00
   m_TagString: Untagged
@@ -12859,32 +12739,6 @@ RectTransform:
   m_AnchoredPosition: {x: -5.203, y: 0.033}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1752718553
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1752718551}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f141432c1891b7b41903dcd28ea0e8a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SegmentDisplay
-  digitSprites:
-  - {fileID: 21300000, guid: c6fa470a9fc63e5448ff043bcd218e3c, type: 3}
-  - {fileID: 21300000, guid: 83dd6ca36a9e7a74289ab52353a8f160, type: 3}
-  - {fileID: 21300000, guid: 1819729c5e583294bbe2089bf9471ad1, type: 3}
-  - {fileID: 21300000, guid: 791f9b33cd9f04542a20f0ad1cb52580, type: 3}
-  - {fileID: 21300000, guid: cd0c9c7a3f82f5246981d164d03e6f56, type: 3}
-  - {fileID: 21300000, guid: 4223e997ac10fcc4d94bde53d44b18a9, type: 3}
-  - {fileID: 21300000, guid: d29c574afe1fb164380fae50d6a17968, type: 3}
-  - {fileID: 21300000, guid: bca7ed3a7825e404195f6cca76ae008f, type: 3}
-  - {fileID: 21300000, guid: 944f70c75907469468381a7e4852b5fc, type: 3}
-  - {fileID: 21300000, guid: 7dcefb07fb43192439285773f58634e1, type: 3}
-  blankSprite: {fileID: 0}
-  digitSlots: []
-  padWithZeros: 1
 --- !u!212 &1752718554
 SpriteRenderer:
   serializedVersion: 2
@@ -13046,7 +12900,7 @@ MonoBehaviour:
   _isPlaySound: 0
   _isCard: 1
   _setZLayer: 1
-  _conditionCount: 1
+  _conditionCount: 0
   OnInteractive:
     m_PersistentCalls:
       m_Calls:
@@ -14344,7 +14198,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1881552060
 Transform:
   m_ObjectHideFlags: 0
@@ -14409,7 +14263,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -5197409324631642998, guid: f84f376352556f54bb21313fd295d67f, type: 3}
+  m_Sprite: {fileID: -503637624706131216, guid: 89925bd37b56fae46aef69a39c10b676, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -15063,6 +14917,7 @@ GameObject:
   - component: {fileID: 1954482767}
   - component: {fileID: 1954482766}
   - component: {fileID: 1954482765}
+  - component: {fileID: 1954482769}
   m_Layer: 0
   m_Name: KeyReader (Lock)
   m_TagString: Untagged
@@ -15126,7 +14981,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.34120965, y: 0.10320878}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -15136,7 +14991,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 3.02, y: 5.46}
+  m_Size: {x: 2.3375807, y: 3.2926211}
   m_EdgeRadius: 0
 --- !u!114 &1954482766
 MonoBehaviour:
@@ -15155,14 +15010,14 @@ MonoBehaviour:
   _isPlaySound: 0
   _isCard: 1
   _setZLayer: 1
-  _conditionCount: 1
+  _conditionCount: 0
   OnInteractive:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1954482763}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 1954482769}
+        m_TargetAssemblyTypeName: KeyReaderLockChargeSequence, Assembly-CSharp
+        m_MethodName: Play
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -15170,18 +15025,6 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1764246569}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
         m_CallState: 2
 --- !u!222 &1954482767
 CanvasRenderer:
@@ -15250,6 +15093,30 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1954482769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954482763}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58f373c90ed12614580fc2aafff7f5db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KeyReaderLockChargeSequence
+  charged: {fileID: 335355253}
+  chargedTarget: {fileID: 1431873000}
+  keyReaderLock: {fileID: 1954482763}
+  keyReader: {fileID: 1764246569}
+  moveDuration: 0.45
+  settleDelay: 0.1
+  clickSfxId: Door_Unlocked
+  hideChargedOnAwake: 1
+  disableLockCollidersWhilePlaying: 1
+  onCompleted:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1974153432
 GameObject:
   m_ObjectHideFlags: 0
@@ -15574,7 +15441,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1994922163}
-  - component: {fileID: 1994922164}
   m_Layer: 5
   m_Name: d1
   m_TagString: Untagged
@@ -15604,22 +15470,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1994922164
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1994922162}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 457a29663c776924ea6f19f6deba27bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DialPanel
-  pairs:
-  - dial: {fileID: 0}
-    display: {fileID: 1151646502}
-  logChanges: 0
 --- !u!1 &1995745545
 GameObject:
   m_ObjectHideFlags: 0

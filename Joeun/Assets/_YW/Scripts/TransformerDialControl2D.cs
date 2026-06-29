@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 [DisallowMultipleComponent]
 public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
@@ -17,8 +17,11 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
     [SerializeField] private Transform visualRoot;
     [SerializeField] private Transform center;
 
-    [Header("Events")]
-    [SerializeField] private UnityEvent<float> onValueChanged;
+    [Header("Display")]
+    [SerializeField] private Sprite[] digitSprites = new Sprite[10];
+    [SerializeField] private Sprite blankSprite;
+    [SerializeField] private List<SpriteRenderer> digitSlots = new List<SpriteRenderer>();
+    [SerializeField] private bool padWithZeros = true;
 
     private float currentAngle;
     private float dragAngle;
@@ -29,6 +32,13 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
 
     public Vector2 OriginPosition => transform.position;
     public float Value => value;
+    public int IntValue => Mathf.RoundToInt(value);
+    public int DisplayValue => GetDisplayValue(Mathf.Max(1, digitSlots.Count));
+
+    public bool MatchesAnswer(int answerValue)
+    {
+        return IntValue == answerValue || DisplayValue == answerValue;
+    }
 
     private Transform VisualRoot => visualRoot != null ? visualRoot : transform;
     private Transform Center => center != null ? center : VisualRoot;
@@ -46,6 +56,11 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
     public void SetValue(float newValue)
     {
         value = newValue;
+        SyncAngleFromValue();
+    }
+
+    public void Refresh()
+    {
         SyncAngleFromValue();
     }
 
@@ -118,6 +133,7 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
     {
         value = SnapValue(value);
         currentAngle = AngleFromValue(value);
+        dragAngle = currentAngle;
         RenderAngle(currentAngle);
         NotifyValueChanged();
     }
@@ -148,7 +164,7 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
         if (Mathf.Approximately(angleMin, angleMax))
             return minValue;
 
-        float ratio = Mathf.InverseLerp(angleMin, angleMax, angle);
+        float ratio = 1f - Mathf.InverseLerp(angleMin, angleMax, angle);
         return Mathf.Lerp(minValue, maxValue, ratio);
     }
 
@@ -157,7 +173,7 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
         if (Mathf.Approximately(minValue, maxValue))
             return angleMin;
 
-        float ratio = Mathf.InverseLerp(minValue, maxValue, targetValue);
+        float ratio = 1f - Mathf.InverseLerp(minValue, maxValue, targetValue);
         return Mathf.Lerp(angleMin, angleMax, ratio);
     }
 
@@ -172,8 +188,57 @@ public sealed class TransformerDialControl2D : MonoBehaviour, IDraggable
 
     private void NotifyValueChanged()
     {
-        onValueChanged?.Invoke(value);
+        RefreshDisplay();
         ValueChanged?.Invoke(this, value);
+    }
+
+    private void RefreshDisplay()
+    {
+        int slotCount = digitSlots.Count;
+        if (slotCount == 0)
+            return;
+
+        int displayValue = GetDisplayValue(slotCount);
+        string text = displayValue.ToString();
+
+        if (text.Length > slotCount)
+            text = text.Substring(text.Length - slotCount);
+
+        int pad = slotCount - text.Length;
+
+        for (int i = 0; i < slotCount; i++)
+        {
+            SpriteRenderer slot = digitSlots[i];
+            if (slot == null)
+                continue;
+
+            if (i < pad)
+            {
+                slot.sprite = padWithZeros ? GetDigit(0) : blankSprite;
+                slot.enabled = slot.sprite != null;
+                continue;
+            }
+
+            int digit = text[i - pad] - '0';
+            slot.sprite = GetDigit(digit);
+            slot.enabled = slot.sprite != null;
+        }
+    }
+
+    private Sprite GetDigit(int digit)
+    {
+        if (digit >= 0 && digit < digitSprites.Length)
+            return digitSprites[digit];
+
+        return null;
+    }
+
+    private int GetDisplayValue(int slotCount)
+    {
+        if (slotCount == 1 && step > 1f)
+            return Mathf.Max(0, Mathf.RoundToInt(value / step));
+
+        return Mathf.Max(0, Mathf.RoundToInt(value));
     }
 
     private static Vector2 GetMouseWorldPosition()
