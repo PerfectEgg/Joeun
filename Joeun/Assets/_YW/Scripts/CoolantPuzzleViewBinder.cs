@@ -5,12 +5,25 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public sealed class CoolantPuzzleViewBinder : MonoBehaviour
 {
+    private const int SelectRetryFrames = 30;
+    private const string OpenSkillSfxId = "Skill_Select";
+
     [SerializeField] private GameObject puzzleUiRoot;
     [SerializeField] private CoolantPuzzleManager puzzleManager;
     [SerializeField] private bool hideUiOnAwake = true;
     [SerializeField] private bool resetPuzzleOnOpen;
     [SerializeField] private bool resetPuzzleOnClose;
     [SerializeField] private bool makeNonInteractiveGraphicsPassThrough = true;
+
+    [Header("Skill Mode")]
+    [SerializeField] private bool selectRotateOnOpen = true;
+    [SerializeField] private bool clearRotateOnClose = true;
+    [SerializeField] private bool playOpenSkillSfxOnce = true;
+
+    private bool openedWithRotate;
+    private bool pendingRotateSelect;
+    private bool playedOpenSkillSfx;
+    private int pendingRotateSelectFrames;
 
     private void Reset()
     {
@@ -33,6 +46,7 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
             puzzleManager.ResetPuzzle();
 
         SetPuzzleUiActive(true);
+        OpenRotateMode();
     }
 
     private void OnDisable()
@@ -40,7 +54,16 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
         if (resetPuzzleOnClose && puzzleManager != null)
             puzzleManager.ResetPuzzle();
 
+        CloseRotateMode();
         SetPuzzleUiActive(false);
+    }
+
+    private void LateUpdate()
+    {
+        if (!pendingRotateSelect)
+            return;
+
+        TrySelectRotateMode();
     }
 
     public void SetPuzzleUiRoot(GameObject root)
@@ -55,6 +78,7 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
             puzzleManager.ResetPuzzle();
 
         SetPuzzleUiActive(true);
+        OpenRotateMode();
     }
 
     public void ClosePuzzleUi()
@@ -62,6 +86,7 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
         if (resetPuzzleOnClose && puzzleManager != null)
             puzzleManager.ResetPuzzle();
 
+        CloseRotateMode();
         SetPuzzleUiActive(false);
     }
 
@@ -81,6 +106,62 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
 
         if (active && makeNonInteractiveGraphicsPassThrough)
             ConfigurePuzzleUiRaycasts();
+    }
+
+    private void OpenRotateMode()
+    {
+        if (!selectRotateOnOpen)
+            return;
+
+        openedWithRotate = true;
+        pendingRotateSelect = true;
+        pendingRotateSelectFrames = SelectRetryFrames;
+        TrySelectRotateMode();
+    }
+
+    private void CloseRotateMode()
+    {
+        pendingRotateSelect = false;
+
+        if (clearRotateOnClose && openedWithRotate && SkillIconModeView.CurrentMode == SkillModeType.Rotate)
+            SkillIconModeView.ClearMode();
+
+        openedWithRotate = false;
+    }
+
+    private void TrySelectRotateMode()
+    {
+        SkillModeStageRules.Grant(SkillModeType.Rotate);
+        SkillIconModeView.SelectMode(SkillModeType.Rotate);
+
+        if (SkillIconModeView.CurrentMode == SkillModeType.Rotate)
+        {
+            PlayOpenSkillSfxOnce();
+            pendingRotateSelect = false;
+            return;
+        }
+
+        pendingRotateSelectFrames--;
+        if (pendingRotateSelectFrames > 0)
+            return;
+
+        Debug.LogWarning(
+            $"[CoolantPuzzle] Failed to auto-select Rotate. " +
+            $"current={SkillIconModeView.CurrentMode}, " +
+            $"stageAllowed={SkillModeStageRules.IsAllowed(SkillModeType.Rotate)}, " +
+            $"lockAllowed={PuzzleModeLock.IsAllowedByActiveLocks(SkillModeType.Rotate)}, " +
+            $"interactionLocked={SkillInteractionLock.IsLocked}",
+            this);
+        pendingRotateSelect = false;
+    }
+
+    private void PlayOpenSkillSfxOnce()
+    {
+        if (!playOpenSkillSfxOnce || playedOpenSkillSfx)
+            return;
+
+        playedOpenSkillSfx = true;
+        GameEvent.ESFXPlay?.Invoke(OpenSkillSfxId);
     }
 
     private void ConfigurePuzzleUiRaycasts()

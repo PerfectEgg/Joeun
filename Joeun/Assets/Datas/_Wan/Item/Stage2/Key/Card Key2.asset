@@ -15,4 +15,6 @@ MonoBehaviour:
   itemID: Card_Key2
   itemName: "\uCE74\uB4DC \uD0A4"
   description: "\uCD9C\uAD6C\uB97C \uC5F4\uAE30 \uC704\uD55C \uCE74\uB4DC \uD0A4"
-  itemIcon: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  itemIcon: {fileID: 3794067461675202816, guid: f2c68a5090ae35740ab5e61bd5c0f4d0, type: 3}
+  inventoryHoverScaleMultiplier: 1.2
+  inventoryDragScaleMultiplier: 1.35

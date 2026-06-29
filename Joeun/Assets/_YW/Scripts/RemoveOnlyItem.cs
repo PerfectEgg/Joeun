@@ -21,7 +21,10 @@ public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable
     private Vector3 originLocalScale;
     private Quaternion originLocalRotation;
     private Color originColor = Color.white;
+    private Coroutine removeRoutine;
     private bool isRemoving;
+    private bool isRemoved;
+    private bool removedEventInvoked;
     private bool suppressHoverUntilPointerExit;
     private bool cached;
 
@@ -33,16 +36,49 @@ public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable
     private void OnEnable()
     {
         CacheInitialState();
+
+        if (isRemoved)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         RestoreInitialState();
         suppressHoverUntilPointerExit = IsPointerAlreadyOverItem();
     }
 
-    public void Interact()
+    private void OnDisable()
     {
-        if (isRemoving)
+        if (!isRemoved)
             return;
 
-        StartCoroutine(RemoveRoutine());
+        if (removeRoutine != null)
+        {
+            StopCoroutine(removeRoutine);
+            removeRoutine = null;
+        }
+
+        SetCollidersEnabled(false);
+    }
+
+    public void Interact()
+    {
+        if (isRemoving || isRemoved)
+            return;
+
+        isRemoved = true;
+        isRemoving = true;
+        SetCollidersEnabled(false);
+
+        if (!string.IsNullOrWhiteSpace(removeSfxId))
+            GameEvent.ESFXPlay?.Invoke(removeSfxId);
+
+        InvokeRemovedEvent();
+
+        if (!isActiveAndEnabled || !gameObject.activeInHierarchy)
+            return;
+
+        removeRoutine = StartCoroutine(RemoveRoutine());
     }
 
     public void OnHoverEnter()
@@ -64,12 +100,6 @@ public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable
 
     private IEnumerator RemoveRoutine()
     {
-        isRemoving = true;
-        SetCollidersEnabled(false);
-
-        if (!string.IsNullOrWhiteSpace(removeSfxId))
-            GameEvent.ESFXPlay?.Invoke(removeSfxId);
-
         Vector3 startPosition = transform.localPosition;
         Vector3 endPosition = originLocalPosition + (Vector3)removeLocalOffset;
         Vector3 startScale = transform.localScale;
@@ -102,7 +132,7 @@ public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable
             yield return null;
         }
 
-        onRemoved?.Invoke();
+        removeRoutine = null;
         gameObject.SetActive(false);
     }
 
@@ -137,6 +167,15 @@ public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable
             spriteRenderer.color = originColor;
 
         SetCollidersEnabled(true);
+    }
+
+    private void InvokeRemovedEvent()
+    {
+        if (removedEventInvoked)
+            return;
+
+        removedEventInvoked = true;
+        onRemoved?.Invoke();
     }
 
     private void SetCollidersEnabled(bool enabled)

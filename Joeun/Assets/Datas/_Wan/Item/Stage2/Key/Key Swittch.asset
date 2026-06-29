@@ -15,4 +15,6 @@ MonoBehaviour:
   itemID: Key_Swittch
   itemName: "\uD0A4 \uC2A4\uC704\uCE58"
   description: "\uC804\uC6D0\uC744 \uAC00\uB3D9\uD558\uAE30 \uC704\uD55C \uD0A4 \uC2A4\uC704\uCE58"
-  itemIcon: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  itemIcon: {fileID: 897913092341676167, guid: 72881530a9a27e84a9074cddb4b0cf64, type: 3}
+  inventoryHoverScaleMultiplier: 1.2
+  inventoryDragScaleMultiplier: 1.35
