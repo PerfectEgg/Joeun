@@ -16,7 +16,10 @@ public sealed class CoolantValveStateSpriteView : MonoBehaviour
         [SerializeField] private GameObject onObject;
 
         private bool hasState;
-        private bool lastIsOn;
+        private bool displayedIsOn;
+        private bool hasPendingState;
+        private bool pendingIsOn;
+        private float switchAtTime;
 
         public void Apply(bool force, bool syncTargetRotation)
         {
@@ -24,18 +27,49 @@ public sealed class CoolantValveStateSpriteView : MonoBehaviour
                 return;
 
             bool isOn = valve.IsOn;
-            if (!force && hasState && lastIsOn == isOn)
+            ApplyRotation(syncTargetRotation);
+
+            if (force || !hasState)
             {
-                ApplyRotation(syncTargetRotation);
+                ApplyStateImmediate(isOn);
                 return;
             }
 
+            if (hasPendingState)
+            {
+                if (pendingIsOn != isOn)
+                {
+                    pendingIsOn = isOn;
+                    switchAtTime = Time.time + GetSwitchDelay();
+                }
+
+                if (Time.time >= switchAtTime)
+                    ApplyStateImmediate(pendingIsOn);
+
+                return;
+            }
+
+            if (displayedIsOn == isOn)
+                return;
+
+            pendingIsOn = isOn;
+            hasPendingState = true;
+            switchAtTime = Time.time + GetSwitchDelay();
+        }
+
+        private void ApplyStateImmediate(bool isOn)
+        {
             hasState = true;
-            lastIsOn = isOn;
+            hasPendingState = false;
+            displayedIsOn = isOn;
 
             SetActive(offObject, !isOn);
             SetActive(onObject, isOn);
-            ApplyRotation(syncTargetRotation);
+        }
+
+        private float GetSwitchDelay()
+        {
+            return valve != null ? Mathf.Max(0f, valve.rotateAnimDuration) : 0f;
         }
 
         private static void SetActive(GameObject target, bool active)
