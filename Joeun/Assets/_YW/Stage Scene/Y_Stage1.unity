@@ -878,7 +878,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc915d55e98d54b419fbf6c763216959, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageBGMStarter
-  _stageBGM_ID: Stage1_BGM
+  _stageBGM_ID: Stage_BGM
 --- !u!1 &801931716
 GameObject:
   m_ObjectHideFlags: 0

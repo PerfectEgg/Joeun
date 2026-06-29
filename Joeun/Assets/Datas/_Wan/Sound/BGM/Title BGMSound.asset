@@ -15,4 +15,7 @@ MonoBehaviour:
   sfxList:
   - soundID: Tiltle_BGM
     clip: {fileID: 8300000, guid: 78c804a3f1b81a44b9b6fe1fc7976d6e, type: 3}
-    volume: 0.75
+    volume: 0.4
+  - soundID: Tiltle_8Bit_BGM
+    clip: {fileID: 8300000, guid: e3ff704024a490543b55e40742ff579c, type: 3}
+    volume: 0.35

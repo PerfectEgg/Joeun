@@ -12,7 +12,8 @@ public class LobbyUIManager : MonoBehaviour
 {
     [Header("UI 버튼 연결")]
     [SerializeField] private Button _newGameButton;
-    [SerializeField] private Button _continueButton;
+    //[SerializeField] private Button _continueButton;
+    [SerializeField] private Button _exitButton;
 
     [Header("연출 설정")]
     [SerializeField] private LobbyGlitchManager _lobbyGlitchManager;
@@ -28,13 +29,13 @@ public class LobbyUIManager : MonoBehaviour
         if (File.Exists(_saveFilePath))
         {
             // 세이브 파일이 있다면 '이어하기' 버튼 활성화
-            _continueButton.interactable = true;
+            //_continueButton.interactable = true;
             DevLog.Log("[Lobby] 기존 세이브 파일 발견. 이어하기가 활성화됩니다.");
         }
         else
         {
             // 세이브 파일이 없다면 '이어하기' 버튼 비활성화 (클릭 불가)
-            _continueButton.interactable = false;
+            //_continueButton.interactable = false;
             DevLog.Log("[Lobby] 세이브 파일 없음. 새 게임만 가능합니다.");
         }
     }
@@ -77,6 +78,18 @@ public class LobbyUIManager : MonoBehaviour
         });
     }
 
+    //// <summary>
+    /// [종료하기] 버튼을 눌렀을 때 실행됩니다.
+    /// </summary>
+    public void OnClickExit()
+    {
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #else
+        Application.Quit(); // 빌드된 앱 종료
+        #endif
+    }
+
     // ==========================================
     // 내부 씬 전환 메서드
     // ==========================================
@@ -84,9 +97,11 @@ public class LobbyUIManager : MonoBehaviour
     {
         // 버튼을 연타하는 것을 방지하기 위해 버튼 비활성화
         _newGameButton.interactable = false;
-        _continueButton.interactable = false;
+        //_continueButton.interactable = false;
+        _exitButton.interactable = false;
 
         // 코어 씬 로드 (Single 모드로 열어서 로비 씬을 메모리에서 해제)
         SceneManager.LoadScene("Y_Stage Core");
     }
+    
 }

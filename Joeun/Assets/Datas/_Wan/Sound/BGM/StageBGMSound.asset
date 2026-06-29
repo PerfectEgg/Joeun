@@ -13,12 +13,6 @@ MonoBehaviour:
   m_Name: StageBGMSound
   m_EditorClassIdentifier: Assembly-CSharp::StageSound
   sfxList:
-  - soundID: Stage1_BGM
-    clip: {fileID: 8300000, guid: 9aa9868ace532c4468f3c426d77af180, type: 3}
-    volume: 0.5
-  - soundID: Stage2_BGM
-    clip: {fileID: 8300000, guid: 8cc37ad3f7e6258498ca9f70e0131684, type: 3}
-    volume: 0.5
-  - soundID: Stage3_BGM
-    clip: {fileID: 8300000, guid: e9c6270327726b640a94e8534926dfde, type: 3}
+  - soundID: Stage_BGM
+    clip: {fileID: 8300000, guid: c26b68dbdab1ab44e982173c30169ddf, type: 3}
     volume: 0.5
