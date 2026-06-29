@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29ad14eb0abd9794dbe3c90886c48c08, type: 3}
+  m_Name: StageBGMSound
+  m_EditorClassIdentifier: Assembly-CSharp::StageSound
+  sfxList:
+  - soundID: Stage_BGM
+    clip: {fileID: 8300000, guid: c26b68dbdab1ab44e982173c30169ddf, type: 3}
+    volume: 0.5

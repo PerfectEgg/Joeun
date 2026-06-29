@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29ad14eb0abd9794dbe3c90886c48c08, type: 3}
+  m_Name: Stage2Sound
+  m_EditorClassIdentifier: Assembly-CSharp::StageSound
+  sfxList:
+  - soundID: Turn_Valve1
+    clip: {fileID: 8300000, guid: 202ad177218b58840ab886bb672b717c, type: 3}
+    volume: 0.7
+  - soundID: Turn_Valve2
+    clip: {fileID: 8300000, guid: bda66fa5916cdf646a1069262d225574, type: 3}
+    volume: 0.7
+  - soundID: Coolant_Effect
+    clip: {fileID: 8300000, guid: b859ff7eed0a5154b9cc5d4503f763dd, type: 3}
+    volume: 0.6
+  - soundID: Steam_Effect
+    clip: {fileID: 8300000, guid: ba199cc1900f3314f9d0be7aa6f8edfc, type: 3}
+    volume: 0.6
+  - soundID: Dial
+    clip: {fileID: 8300000, guid: 83bc7a2eddbbb9c4cbcf275adf38a5fc, type: 3}
+    volume: 0.45
+  - soundID: Item_Installation
+    clip: {fileID: 8300000, guid: 89cc2a3d60ca91842ae687797fafc41f, type: 3}
+    volume: 0.6
+  - soundID: Item_Release
+    clip: {fileID: 8300000, guid: 72c33fe699651034c931d24cf23069d4, type: 3}
+    volume: 0.6

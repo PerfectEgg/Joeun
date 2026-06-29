@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea50909682acb47479335d2f03db9f73, type: 3}
+  m_Name: Memory Cartridge 4
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemID: Memory_Cartridge4
+  itemName: "\uBA54\uBAA8\uB9AC \uCE74\uD2B8\uB9AC\uC9C0 4"
+  description: "\uBA54\uBAA8\uB9AC\uB97C \uB2F4\uACE0 \uC788\uB294 \uCE74\uD2B8\uB9AC\uC9C0"
+  itemIcon: {fileID: 7482667652216324306, guid: 0d7243144ec65c84c9a4c18f31b958e6, type: 3}

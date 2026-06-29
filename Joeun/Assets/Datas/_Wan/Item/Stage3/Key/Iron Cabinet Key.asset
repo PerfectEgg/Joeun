@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea50909682acb47479335d2f03db9f73, type: 3}
+  m_Name: Iron Cabinet Key
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemID: Iron_Cabinet_Key
+  itemName: "\uCCA0\uC81C \uCE90\uBE44\uB137 \uC5F4\uC1E0"
+  description: "\uCCA0\uC81C \uCE90\uBE44\uB137\uB97C \uC7A0\uAE08 \uD574\uC81C\uD558\uAE30
+    \uC704\uD55C \uC5F4\uC1E0"
+  itemIcon: {fileID: 5506960105116933537, guid: d288ab10a223009408bce19a96a2f1d9, type: 3}
+  inventoryHoverScaleMultiplier: 1.2
+  inventoryDragScaleMultiplier: 1.35

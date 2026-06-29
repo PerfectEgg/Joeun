@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29ad14eb0abd9794dbe3c90886c48c08, type: 3}
+  m_Name: CommonSound
+  m_EditorClassIdentifier: Assembly-CSharp::StageSound
+  sfxList:
+  - soundID: Door_Unlocked
+    clip: {fileID: 8300000, guid: 56e6a0abe7e1cb14aae098ba7c287856, type: 3}
+    volume: 0.7
+  - soundID: Door_Locked
+    clip: {fileID: 8300000, guid: fb6fe9b463505ed40a7e4e94601c45d5, type: 3}
+    volume: 0.7
+  - soundID: Exit_Door_Open
+    clip: {fileID: 8300000, guid: 7d22fe66f1909e744abf2ffdd502bfa9, type: 3}
+    volume: 0.6
+  - soundID: Door_Open
+    clip: {fileID: 8300000, guid: e6b84afc12c9af54194bcd09e30a8b33, type: 3}
+    volume: 0.7
+  - soundID: Door_Close
+    clip: {fileID: 8300000, guid: 56d4f5b3fbf9cc640ba68fdd551bb2ac, type: 3}
+    volume: 0.7
+  - soundID: Interaction_Success
+    clip: {fileID: 8300000, guid: fed1bb6f4bea31142821db5c3e07d877, type: 3}
+    volume: 0.7
+  - soundID: Puzzle_Success
+    clip: {fileID: 8300000, guid: 20a816cd23e67f543ac7232e363d4209, type: 3}
+    volume: 0.6
+  - soundID: Puzzle_Erorr
+    clip: {fileID: 8300000, guid: 0b33042e70564314f8471b42f7c94329, type: 3}
+    volume: 0.4
+  - soundID: Reader_Success
+    clip: {fileID: 8300000, guid: 84a31ba240313064c8e55599f99d1a47, type: 3}
+    volume: 0.7
+  - soundID: Reader_Failed
+    clip: {fileID: 8300000, guid: d1f50356a0b759c46b69acf7e9ce9ed9, type: 3}
+    volume: 0.7
+  - soundID: Acquired_Item
+    clip: {fileID: 8300000, guid: d33874b07f6634847a094d5997f36a69, type: 3}
+    volume: 0.7
+  - soundID: Zoom_In
+    clip: {fileID: 8300000, guid: 329505a3806bb36409f1ebc7980c72e6, type: 3}
+    volume: 0.7
+  - soundID: Zoom_Out
+    clip: {fileID: 8300000, guid: e871dc7fad38f214cb101dffe765d9ac, type: 3}
+    volume: 0.7
+  - soundID: Change_View
+    clip: {fileID: 8300000, guid: 37109ac001516c340a815baebc356bb4, type: 3}
+    volume: 0.7
+  - soundID: Skill_Select
+    clip: {fileID: 8300000, guid: ce77d988ec37b4548815580ce4b67350, type: 3}
+    volume: 0.7
+  - soundID: Skill_Acquisition
+    clip: {fileID: 8300000, guid: 08aeb22467944d849b39501cc6385820, type: 3}
+    volume: 0.7
+  - soundID: Pattern_Recognition_Node
+    clip: {fileID: 8300000, guid: f0800b12a9009ee4496b80e96b59aee8, type: 3}
+    volume: 0.7
+  - soundID: Pattern_Recognition_Slot
+    clip: {fileID: 8300000, guid: e526046e690b8c54ebe471fd9fd3e7a2, type: 3}
+    volume: 0.7
+  - soundID: Pattern_Recognition_Play
+    clip: {fileID: 8300000, guid: a22a59c7b3508494b8519a62c63fed0a, type: 3}
+    volume: 0.7
+  - soundID: Pattern_Recognition_Reset
+    clip: {fileID: 8300000, guid: 4fed527bbfb106746b4c0bd65f747ed4, type: 3}
+    volume: 0.6
+  - soundID: Pattern_Recognition_Progress
+    clip: {fileID: 8300000, guid: d6eb3f35d98758c4199a61915bc12ae5, type: 3}
+    volume: 0.3
+  - soundID: Pattern_Recognition_Open
+    clip: {fileID: 8300000, guid: a1a3a33ff40342e4cad2b228f1ec44b0, type: 3}
+    volume: 0.7

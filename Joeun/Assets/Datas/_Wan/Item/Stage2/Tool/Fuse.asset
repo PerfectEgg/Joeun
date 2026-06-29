@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea50909682acb47479335d2f03db9f73, type: 3}
+  m_Name: Fuse
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemID: Fuse
+  itemName: "\uD4E8\uC988"
+  description: "\uACFC\uBD80\uD558\uB97C \uBC29\uC9C0\uD558\uAE30 \uC704\uD55C \uC548\uC804
+    \uC7A5\uCE58 "
+  itemIcon: {fileID: -156947836637120879, guid: 75853116c90bc7f498ccb4dd1812dc9b, type: 3}
+  inventoryHoverScaleMultiplier: 1.2
+  inventoryDragScaleMultiplier: 1.35
