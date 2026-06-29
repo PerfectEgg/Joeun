@@ -16,4 +16,6 @@ MonoBehaviour:
   itemName: "\uD4E8\uC988"
   description: "\uACFC\uBD80\uD558\uB97C \uBC29\uC9C0\uD558\uAE30 \uC704\uD55C \uC548\uC804
     \uC7A5\uCE58 "
-  itemIcon: {fileID: 7482667652216324306, guid: 0d7243144ec65c84c9a4c18f31b958e6, type: 3}
+  itemIcon: {fileID: -156947836637120879, guid: 75853116c90bc7f498ccb4dd1812dc9b, type: 3}
+  inventoryHoverScaleMultiplier: 1.2
+  inventoryDragScaleMultiplier: 1.35

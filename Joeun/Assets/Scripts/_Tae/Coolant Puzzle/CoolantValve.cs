@@ -92,8 +92,8 @@ public class CoolantValve : MonoBehaviour
     public void SetPowered(bool powered)
     {
         var cg = GetComponent<CanvasGroup>();
-        if (cg == null) cg = gameObject.AddComponent<CanvasGroup>();
-        cg.alpha = powered ? 1f : 0.32f;
+        if (cg != null)
+            cg.alpha = 1f;
     }
 
     static float Norm(float a) => ((a % 360f) + 360f) % 360f;

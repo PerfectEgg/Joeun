@@ -17,6 +17,7 @@ public sealed class PatternPuzzleVariantController : MonoBehaviour
     [SerializeField] private PatternPuzzleVariant variant = PatternPuzzleVariant.Decode;
     [SerializeField] private bool selectSkillOnOpen = true;
     [SerializeField] private bool clearModeOnClose = true;
+    [SerializeField, Min(0f)] private float openHighlightDelay = 0.28f;
 
     [Header("References")]
     [SerializeField] private PathPuzzleManager pathPuzzle;
@@ -37,7 +38,10 @@ public sealed class PatternPuzzleVariantController : MonoBehaviour
     private bool openedWithSkillMode;
     private SkillModeType pendingOpenSkillMode = SkillModeType.None;
     private int pendingOpenSkillFrames;
+    private bool playedOpenSkillSfx;
+    private bool delayedOpenHighlight;
     private const int OpenSkillApplyFrames = 60;
+    private const string OpenSkillSfxId = "Skill_Select";
 
     private void Reset()
     {
@@ -226,6 +230,8 @@ public sealed class PatternPuzzleVariantController : MonoBehaviour
 
         if (SkillIconModeView.CurrentMode == pendingOpenSkillMode)
         {
+            PlayOpenSkillSfxOnce();
+            ApplyOpenHighlightDelayOnce(pendingOpenSkillMode);
             pendingOpenSkillMode = SkillModeType.None;
             return;
         }
@@ -242,6 +248,33 @@ public sealed class PatternPuzzleVariantController : MonoBehaviour
             $"interactionLocked={SkillInteractionLock.IsLocked}",
             this);
         pendingOpenSkillMode = SkillModeType.None;
+    }
+
+    private void PlayOpenSkillSfxOnce()
+    {
+        if (playedOpenSkillSfx)
+            return;
+
+        playedOpenSkillSfx = true;
+        GameEvent.ESFXPlay?.Invoke(OpenSkillSfxId);
+    }
+
+    private void ApplyOpenHighlightDelayOnce(SkillModeType mode)
+    {
+        if (delayedOpenHighlight)
+            return;
+
+        if (openHighlightDelay <= 0f)
+            return;
+
+        delayedOpenHighlight = true;
+
+        SkillHighlightTarget[] highlights = GetComponentsInChildren<SkillHighlightTarget>(true);
+        foreach (SkillHighlightTarget highlight in highlights)
+        {
+            if (highlight != null)
+                highlight.DelayHighlight(mode, openHighlightDelay);
+        }
     }
 
     private void GrantUnlockedSkills()
