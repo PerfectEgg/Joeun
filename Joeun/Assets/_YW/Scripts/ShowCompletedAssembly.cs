@@ -12,6 +12,7 @@ public class ShowCompletedAssembly : MonoBehaviour
 {
     private static readonly List<ShowCompletedAssembly> ActiveAssemblies = new List<ShowCompletedAssembly>();
     private const float ReadyActivationDelay = 0.16f;
+    private const int AssembleAutoSelectFrames = 60;
 
     [Header("Puzzle Events")]
     [SerializeField] private ConnectPuzzleManager puzzleManager;
@@ -47,6 +48,8 @@ public class ShowCompletedAssembly : MonoBehaviour
     private bool managerEventsBound;
     private bool inputQuietAfterReady;
     private bool assembledEventInvoked;
+    private bool autoSelectedAssembleForReady;
+    private int pendingAssembleAutoSelectFrames;
     private int readyFrame;
     private AssembleCompositeOutlineTarget outlineTarget;
     private AssemblyScanLineEffect scanLineEffect;
@@ -81,6 +84,7 @@ public class ShowCompletedAssembly : MonoBehaviour
     private void OnDisable()
     {
         StopReadyRoutine();
+        ClearPendingAssembleAutoSelect();
 
         if (showRoutine != null)
         {
@@ -97,6 +101,7 @@ public class ShowCompletedAssembly : MonoBehaviour
 
     private void Update()
     {
+        TryApplyPendingAssembleAutoSelect();
         UpdateAssemblyClickArming();
 
         if (!showOnAssembleClick
@@ -150,6 +155,8 @@ public class ShowCompletedAssembly : MonoBehaviour
 
         isReadyForAssemble = true;
         inputQuietAfterReady = false;
+        autoSelectedAssembleForReady = false;
+        pendingAssembleAutoSelectFrames = AssembleAutoSelectFrames;
         readyFrame = Time.frameCount;
         onAssembleReady?.Invoke();
     }
@@ -175,6 +182,7 @@ public class ShowCompletedAssembly : MonoBehaviour
         isReadyForAssemble = false;
         isCompletedVisualShown = true;
         assembledEventInvoked = false;
+        ClearPendingAssembleAutoSelect();
         showRoutine = StartCoroutine(ShowRoutine());
     }
 
@@ -195,6 +203,7 @@ public class ShowCompletedAssembly : MonoBehaviour
         isReadyForAssemble = false;
         isCompletedVisualShown = true;
         assembledEventInvoked = false;
+        ClearPendingAssembleAutoSelect();
         ApplyCompletedVisualImmediate(true);
     }
 
@@ -215,6 +224,7 @@ public class ShowCompletedAssembly : MonoBehaviour
         isReadyForAssemble = false;
         isCompletedVisualShown = false;
         assembledEventInvoked = false;
+        ClearPendingAssembleAutoSelect();
         SetImagesEnabled(hideImages, true);
         SetBehavioursEnabled(disableBehaviours, true);
         SetObjectsActive(hideObjects, true);
@@ -256,6 +266,43 @@ public class ShowCompletedAssembly : MonoBehaviour
 
         StopCoroutine(readyRoutine);
         readyRoutine = null;
+    }
+
+    private void TryApplyPendingAssembleAutoSelect()
+    {
+        if (!IsReadyForAssemble || autoSelectedAssembleForReady)
+            return;
+
+        if (pendingAssembleAutoSelectFrames <= 0)
+            return;
+
+        SkillModeStageRules.Grant(SkillModeType.Assemble);
+        SkillIconModeView.SelectMode(SkillModeType.Assemble);
+
+        if (IsAssembleMode())
+        {
+            autoSelectedAssembleForReady = true;
+            pendingAssembleAutoSelectFrames = 0;
+            return;
+        }
+
+        pendingAssembleAutoSelectFrames--;
+        if (pendingAssembleAutoSelectFrames > 0)
+            return;
+
+        Debug.LogWarning(
+            $"[{nameof(ShowCompletedAssembly)}] Failed to auto-select Assemble. " +
+            $"current={SkillIconModeView.CurrentMode}, " +
+            $"stageAllowed={SkillModeStageRules.IsAllowed(SkillModeType.Assemble)}, " +
+            $"lockAllowed={PuzzleModeLock.IsAllowedByActiveLocks(SkillModeType.Assemble)}, " +
+            $"interactionLocked={SkillInteractionLock.IsLocked}",
+            this);
+    }
+
+    private void ClearPendingAssembleAutoSelect()
+    {
+        autoSelectedAssembleForReady = false;
+        pendingAssembleAutoSelectFrames = 0;
     }
 
     private IEnumerator ShowRoutine()
