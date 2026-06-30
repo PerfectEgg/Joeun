@@ -50,6 +50,7 @@ public class ConnectPuzzleManager : MonoBehaviour
     {
         Debug.Log($"[ConnectPuzzle] 연결: {movedPart.partId}({myPt.side}) ↔ " +
                   $"{target.ownerPart.partId}({target.side})");
+        GameEvent.ESFXPlay?.Invoke("Arm_Assembly");
         ValidateChain();
     }
 
@@ -101,6 +102,7 @@ public class ConnectPuzzleManager : MonoBehaviour
 
         if (chainOk && !isSolved)
         {
+            GameEvent.ESFXPlay?.Invoke("Puzzle_Success");
             isSolved = true;
             onPuzzleSolved?.Invoke();
         }

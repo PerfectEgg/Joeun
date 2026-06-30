@@ -263,6 +263,8 @@ public class ShowCompletedAssembly : MonoBehaviour
         if (switchDelay > 0f)
             yield return new WaitForSeconds(switchDelay);
 
+        GameEvent.ESFXPlay?.Invoke("Skill_Acquisition");
+
         PrepareCompletedVisualObjects();
         ApplyCompletedVisualAlignment();
         SetShowObjectsAlpha(showFadeDuration > 0f ? 0f : 1f);

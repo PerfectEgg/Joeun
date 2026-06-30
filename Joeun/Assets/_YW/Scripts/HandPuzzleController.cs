@@ -118,7 +118,6 @@ public sealed class HandPuzzleController : MonoBehaviour, IPuzzleable
         if (solved)
             return;
 
-        GameEvent.ESFXPlay?.Invoke("Puzzle_Success");
         solved = true;
         RefreshAssembleReady();
         ClearConnections();
@@ -127,6 +126,7 @@ public sealed class HandPuzzleController : MonoBehaviour, IPuzzleable
         if (disablePieceCollidersOnSolved)
             SetPieceCollidersEnabled(false);
 
+        GameEvent.ESFXPlay?.Invoke("Puzzle_Success");
         onSolved?.Invoke();
     }
 
@@ -327,6 +327,8 @@ public sealed class HandPuzzleController : MonoBehaviour, IPuzzleable
             }
         }
 
+        GameEvent.ESFXPlay?.Invoke("Puzzle_Erorr");
+
         isSubmitting = false;
         submitRoutine = null;
         RefreshConnections();
@@ -345,7 +347,6 @@ public sealed class HandPuzzleController : MonoBehaviour, IPuzzleable
         if (slots == null)
             return;
 
-        GameEvent.ESFXPlay?.Invoke("Puzzle_Erorr"); 
         foreach (HandPuzzleSlot slot in slots)
             ClearWrongFeedback(slot);
     }

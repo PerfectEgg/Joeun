@@ -43,3 +43,9 @@ MonoBehaviour:
   - soundID: Hand_Input
     clip: {fileID: 8300000, guid: 164812f7877b0dd47a788e26873f7f56, type: 3}
     volume: 0.7
+  - soundID: Item_Installation
+    clip: {fileID: 8300000, guid: dcde4d17b3e94f745bcb80dc0c02fa5e, type: 3}
+    volume: 0.7
+  - soundID: Arm_Assembly
+    clip: {fileID: 8300000, guid: 4d5a5b0389835f74a8a3b743bec1046f, type: 3}
+    volume: 0.7
