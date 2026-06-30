@@ -83,10 +83,11 @@ public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable, IConditio
         if (!string.IsNullOrWhiteSpace(removeSfxId))
             GameEvent.ESFXPlay?.Invoke(removeSfxId);
 
-        InvokeRemovedEvent();
-
         if (!isActiveAndEnabled || !gameObject.activeInHierarchy)
+        {
+            InvokeRemovedEvent();
             return;
+        }
 
         removeRoutine = StartCoroutine(RemoveRoutine());
     }
@@ -151,6 +152,7 @@ public class RemoveOnlyItem : MonoBehaviour, IInteractive, IHoverable, IConditio
             yield return null;
         }
 
+        InvokeRemovedEvent();
         removeRoutine = null;
         gameObject.SetActive(false);
     }
