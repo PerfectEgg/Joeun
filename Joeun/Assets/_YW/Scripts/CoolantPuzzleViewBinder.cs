@@ -64,9 +64,6 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
         {
             pendingRotateSelect = false;
 
-            if (SkillIconModeView.CurrentMode == SkillModeType.Rotate)
-                SkillIconModeView.ClearMode();
-
             return;
         }
 
@@ -128,9 +125,6 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
             pendingRotateSelect = false;
             openedWithRotate = false;
 
-            if (SkillIconModeView.CurrentMode == SkillModeType.Rotate)
-                SkillIconModeView.ClearMode();
-
             return;
         }
 
@@ -155,9 +149,6 @@ public sealed class CoolantPuzzleViewBinder : MonoBehaviour
         if (IsPuzzleSolved())
         {
             pendingRotateSelect = false;
-
-            if (SkillIconModeView.CurrentMode == SkillModeType.Rotate)
-                SkillIconModeView.ClearMode();
 
             return;
         }

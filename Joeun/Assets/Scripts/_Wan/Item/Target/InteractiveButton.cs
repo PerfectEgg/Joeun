@@ -12,6 +12,7 @@ public class InteractiveButton : MonoBehaviour, IInteractive, IConditionRequirab
 
     // 한 번 눌렸는지 추적하는 변수
     private bool _hasBeenPressed = false;
+    private Collider2D[] _colliders;
 
     [Header("Z 레이어 설정")]
     [Tooltip("열쇠의 물리 충돌을 위해 Z 레이어를 낮춰서 화면 앞으로 나타내는 설정값입니다.")]
@@ -27,6 +28,7 @@ public class InteractiveButton : MonoBehaviour, IInteractive, IConditionRequirab
     void Awake()
     {
         transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - _setZLayer);
+        _colliders = GetComponents<Collider2D>();
     }
 
     #region IConditionRequirable 구현
@@ -60,9 +62,22 @@ public class InteractiveButton : MonoBehaviour, IInteractive, IConditionRequirab
 
         // 3. 버튼 작동!
         _hasBeenPressed = true;
+        if (_isOneShot)
+            SetCollidersEnabled(false);
         DevLog.Log($"딸깍- {gameObject.name} 작동!");
         
         OnPressed?.Invoke();
     }
     #endregion
+    private void SetCollidersEnabled(bool enabled)
+    {
+        if (_colliders == null)
+            return;
+
+        foreach (Collider2D itemCollider in _colliders)
+        {
+            if (itemCollider != null)
+                itemCollider.enabled = enabled;
+        }
+    }
 }

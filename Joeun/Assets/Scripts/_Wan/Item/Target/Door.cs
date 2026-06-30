@@ -34,11 +34,15 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
     [Tooltip("잠금 해제 조건이 필요한지 여부 (예: 선행 오브젝트 처리)")]
     [SerializeField] private int _conditionCount = 0;
 
+    private bool _exitTriggered;
+    private Collider2D[] _colliders;
+
     public bool IsConditionRequired { get; set; } = false; // 실제 조건이 충족되었는지 내부적으로 추적하는 변수
 
     void Awake()
     {
         transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - _setZLayer);
+        _colliders = GetComponents<Collider2D>();
     }
 
     void Start()
@@ -108,6 +112,12 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
 
         if(IsExitDoor)
         {
+            if (_exitTriggered)
+                return;
+
+            _exitTriggered = true;
+            SetCollidersEnabled(false);
+
             if (_isFirstStage)
             {
                 GameEvent.ESFXPlay?.Invoke("Stage1_Exit_Door_Open");
@@ -151,4 +161,16 @@ public class Door : MonoBehaviour, IInteractive, IOpenable, IConditionRequirable
         GameEvent.ESFXPlay?.Invoke("Door_Close");
     }
     #endregion
+
+    private void SetCollidersEnabled(bool enabled)
+    {
+        if (_colliders == null)
+            return;
+
+        foreach (Collider2D itemCollider in _colliders)
+        {
+            if (itemCollider != null)
+                itemCollider.enabled = enabled;
+        }
+    }
 }

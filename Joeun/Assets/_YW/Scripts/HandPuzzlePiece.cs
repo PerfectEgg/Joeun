@@ -23,6 +23,7 @@ public sealed class HandPuzzlePiece : MonoBehaviour, IDraggable
     bool initialized;
     bool isDragging;
     HandPuzzleSlot currentSlot;
+    Collider2D resolvedDragBounds;
 
     public Vector2 OriginPosition => initialPosition;
     public string PieceId => pieceId;
@@ -102,10 +103,12 @@ public sealed class HandPuzzlePiece : MonoBehaviour, IDraggable
         if (!isDragging)
             return;
 
-        transform.position = new Vector3(
+        Vector3 targetPosition = new Vector3(
             currentMousePosition.x + dragOffset.x,
             currentMousePosition.y + dragOffset.y,
             transform.position.z);
+
+        transform.position = ClampToDragBounds(targetPosition);
     }
 
     public void OnDragEnd()
@@ -274,5 +277,41 @@ public sealed class HandPuzzlePiece : MonoBehaviour, IDraggable
     private bool ShouldReturnToStartOnMiss()
     {
         return controller == null ? returnToStartOnMiss : controller.ShouldReturnPieceToStartOnMiss(this);
+    }
+
+    private Vector3 ClampToDragBounds(Vector3 targetPosition)
+    {
+        Collider2D bounds = ResolveDragBounds();
+        if (bounds == null || !bounds.enabled || !bounds.gameObject.activeInHierarchy)
+            return targetPosition;
+
+        Vector2 clamped = bounds.ClosestPoint(targetPosition);
+        targetPosition.x = clamped.x;
+        targetPosition.y = clamped.y;
+        return targetPosition;
+    }
+
+    private Collider2D ResolveDragBounds()
+    {
+        if (resolvedDragBounds != null)
+            return resolvedDragBounds;
+
+        Transform current = transform;
+        while (current != null)
+        {
+            Collider2D[] boundsCandidates = current.GetComponentsInChildren<Collider2D>(true);
+            foreach (Collider2D candidate in boundsCandidates)
+            {
+                if (candidate != null && candidate.name == "HandDragBounds")
+                {
+                    resolvedDragBounds = candidate;
+                    return resolvedDragBounds;
+                }
+            }
+
+            current = current.parent;
+        }
+
+        return null;
     }
 }

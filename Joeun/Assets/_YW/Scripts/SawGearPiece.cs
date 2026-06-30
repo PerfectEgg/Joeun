@@ -34,6 +34,7 @@ public sealed class SawGearPiece : MonoBehaviour, IDraggable
     Vector3 rotationFollowBasePosition;
     Quaternion rotationFollowBaseRotation;
     Coroutine wrongFeedbackRoutine;
+    Collider2D resolvedDragBounds;
 
     public Vector2 OriginPosition => initialPosition;
     public string PieceId => pieceId;
@@ -144,10 +145,12 @@ public sealed class SawGearPiece : MonoBehaviour, IDraggable
         if (!isDragging)
             return;
 
-        transform.position = new Vector3(
+        Vector3 targetPosition = new Vector3(
             currentMousePosition.x + dragOffset.x,
             currentMousePosition.y + dragOffset.y,
             transform.position.z);
+
+        transform.position = ClampToDragBounds(targetPosition);
     }
 
     public void OnDragEnd()
@@ -339,6 +342,42 @@ public sealed class SawGearPiece : MonoBehaviour, IDraggable
     }
 
     private Transform RotationRoot => rotatingVisualRoot != null ? rotatingVisualRoot : transform;
+
+    private Vector3 ClampToDragBounds(Vector3 targetPosition)
+    {
+        Collider2D bounds = ResolveDragBounds();
+        if (bounds == null || !bounds.enabled || !bounds.gameObject.activeInHierarchy)
+            return targetPosition;
+
+        Vector2 clamped = bounds.ClosestPoint(targetPosition);
+        targetPosition.x = clamped.x;
+        targetPosition.y = clamped.y;
+        return targetPosition;
+    }
+
+    private Collider2D ResolveDragBounds()
+    {
+        if (resolvedDragBounds != null)
+            return resolvedDragBounds;
+
+        Transform current = transform;
+        while (current != null)
+        {
+            Collider2D[] boundsCandidates = current.GetComponentsInChildren<Collider2D>(true);
+            foreach (Collider2D candidate in boundsCandidates)
+            {
+                if (candidate != null && candidate.name == "SawBounds")
+                {
+                    resolvedDragBounds = candidate;
+                    return resolvedDragBounds;
+                }
+            }
+
+            current = current.parent;
+        }
+
+        return null;
+    }
 
     private void BeginRotationFollow(float degrees, Vector3 pivotPosition)
     {

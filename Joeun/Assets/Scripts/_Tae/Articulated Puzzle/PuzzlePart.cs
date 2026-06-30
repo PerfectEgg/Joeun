@@ -30,6 +30,8 @@ public class PuzzlePart : MonoBehaviour,
     ConnectorPoint  previewTarget;
     Coroutine       snapCoroutine;
     Coroutine       rotateCoroutine;
+    RectTransform   dragBoundsRoot;
+    readonly Vector3[] worldCorners = new Vector3[4];
 
     void Awake()
     {
@@ -90,7 +92,7 @@ public class PuzzlePart : MonoBehaviour,
         if (!isDragging) return;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             rt.parent as RectTransform, ev.position, ev.pressEventCamera, out Vector2 localPos);
-        rt.anchoredPosition = localPos + dragOffset;
+        rt.anchoredPosition = ClampToParentRect(localPos + dragOffset);
         UpdateSnapPreview();
     }
 
@@ -176,5 +178,79 @@ public class PuzzlePart : MonoBehaviour,
             yield return null;
         }
         rt.anchoredPosition = targetPos;
+    }
+
+    Vector2 ClampToParentRect(Vector2 targetPosition)
+    {
+        RectTransform parentRect = rt.parent as RectTransform;
+        if (parentRect == null)
+            return targetPosition;
+
+        RectTransform boundsRoot = ResolveDragBoundsRoot();
+        if (boundsRoot == null || boundsRoot == parentRect)
+        {
+            Rect parent = parentRect.rect;
+            targetPosition.x = Mathf.Clamp(targetPosition.x, parent.xMin, parent.xMax);
+            targetPosition.y = Mathf.Clamp(targetPosition.y, parent.yMin, parent.yMax);
+            return targetPosition;
+        }
+
+        boundsRoot.GetWorldCorners(worldCorners);
+
+        float minX = float.MaxValue;
+        float maxX = float.MinValue;
+        float minY = float.MaxValue;
+        float maxY = float.MinValue;
+        for (int i = 0; i < worldCorners.Length; i++)
+        {
+            Vector3 local = parentRect.InverseTransformPoint(worldCorners[i]);
+            minX = Mathf.Min(minX, local.x);
+            maxX = Mathf.Max(maxX, local.x);
+            minY = Mathf.Min(minY, local.y);
+            maxY = Mathf.Max(maxY, local.y);
+        }
+
+        targetPosition.x = Mathf.Clamp(targetPosition.x, minX, maxX);
+        targetPosition.y = Mathf.Clamp(targetPosition.y, minY, maxY);
+        return targetPosition;
+    }
+
+    RectTransform ResolveDragBoundsRoot()
+    {
+        if (dragBoundsRoot != null)
+            return dragBoundsRoot;
+
+        Transform current = rt.parent;
+        while (current != null)
+        {
+            RectTransform found = FindRectTransformByName(current, "DragBounds");
+            if (found != null && found != rt)
+            {
+                dragBoundsRoot = found;
+                return dragBoundsRoot;
+            }
+
+            current = current.parent;
+        }
+
+        return rt.parent as RectTransform;
+    }
+
+    RectTransform FindRectTransformByName(Transform root, string targetName)
+    {
+        if (root == null)
+            return null;
+
+        if (root.name == targetName && root.TryGetComponent(out RectTransform rootRect))
+            return rootRect;
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            RectTransform found = FindRectTransformByName(root.GetChild(i), targetName);
+            if (found != null)
+                return found;
+        }
+
+        return null;
     }
 }
